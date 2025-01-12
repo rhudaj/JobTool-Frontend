@@ -74,14 +74,13 @@ const unwrapTrackable = (obj: any): any => {
 };
 
 /*
-    const TEST = (obj: any) => {
-        // If working correctly,
-        const wrap = wrapTrackable(obj);
-        const unwrap = unwrapTrackable(wrap);
-        const failed = JSON.stringify(obj) !== JSON.stringify(unwrap);
-        console.log(`TEST ${failed ? "FAILED" : "PASSED"}`);
-    }
+const TEST = (obj: any) => {
+    // If working correctly,
+    const wrap = wrapTrackable(obj);
+    const unwrap = unwrapTrackable(wrap);
+    const failed = JSON.stringify(obj) !== JSON.stringify(unwrap);
+    console.log(`TEST ${failed ? "FAILED" : "PASSED"}`);
+}
 */
-
 
 export { TrackVal, wrapTrackable, unwrapTrackable };

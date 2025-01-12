@@ -13,10 +13,10 @@ function CustomTable(props: {
 
     useEffect(()=>{
         if( ! Array.isArray(props.data) ) {
-            log("WARNING: CustomTable data prop is not an array. Putting data into an array (may not be what you want)");
+            // log("WARNING: CustomTable data prop is not an array. Putting data into an array (may not be what you want)");
             setData([props.data]);
         } else {
-            log('new props.data for table');
+            // log('new props.data for table');
             setData(props.data);
         }
     }, [props.data]);
@@ -25,7 +25,7 @@ function CustomTable(props: {
 
     const removeRow = (rowNum: number) => {
         // remove entry from the data
-        log("Removing row # ", rowNum);
+        // log("Removing row # ", rowNum);
         const newArr = data;
         newArr.splice(rowNum, 1); // in-place
         props.changeData(newArr);
@@ -33,7 +33,7 @@ function CustomTable(props: {
 
     const addRow = () => {
         // add entry to the data
-        log("Adding row");
+        // log("Adding row");
         const newArr = data;
         const numCols = Array.isArray(data[0]) ? data[0].length : 1;
         newArr.push(new Array(numCols).fill(""));

@@ -192,7 +192,6 @@ const CVEditor = forwardRef((
 	useEffect(()=>{
 		if(!CV) return;
 		setSectionOrder(Object.keys(CV.sections))
-		console.log("section order = ", sectionOrder)
 	}, [CV])
 
 	// give parent access to CV

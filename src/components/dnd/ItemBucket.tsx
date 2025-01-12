@@ -105,7 +105,6 @@ function ItemBucket(props: {
 	const [hoveredGap, setHoveredGap] = React.useState<number|undefined>(undefined);
 
 	React.useEffect(() => {
-		log("NEW props.values:", props.values);
 		setItems(
 			!props.values ? [] :
 			props.values.map(v => ({
@@ -150,10 +149,7 @@ function ItemBucket(props: {
 			drop: (dropItem: Item, monitor: DropTargetMonitor<Item, unknown>) => {
 				// An item was dropped on the bucket (or a nested drop target).
 
-				log("item drop:", dropItem);
-
 				if (items.length === 0) {
-					log("Adding item:", dropItem);
 					return addItem(dropItem, hoveredGap);
 				}
 
@@ -166,18 +162,15 @@ function ItemBucket(props: {
 
 				if( nestedDropTarget?.id !== undefined ) {
 					// => nested item handled the drop
-					log(`Changing item ${nestedDropTarget.id}'s value:`, dropItem.value);
 					changeItemValue(nestedDropTarget.id, dropItem.value);
 				} else if (notInBucket) {
 					// Not in the bucket yet, so add it.
-					log("Adding item:", dropItem);
 					addItem(dropItem, hoveredGap);
 				} else if (moveItem) {
 					// Its in the bucket already, and we've dropped it somewhere else inside
 					// that's not over another item. So re-order.
 					// CLAMP index between 0 and props.items.length-1
 					let newIndex = Math.max(Math.min(hoveredGap, items.length - 1), 0)
-					log(`Moving item from ${itemIndex} to ${newIndex}`);
 					moveItem(itemIndex, newIndex);
 				}
 				// after drop, no need to display the gap
@@ -197,9 +190,7 @@ function ItemBucket(props: {
 	const onAddItemBelow = (id: any) => {
 		// TODO: for now just duplicate the item (since we don't know the format)
 		const srcIndex = items.findIndex(I => I.id === id)
-		console.log("onAddItemBelow. srcIndex = ", srcIndex)
 		if (srcIndex !== -1) {
-			console.log("adding item below index ", srcIndex);
 			const newItem = structuredClone(items[srcIndex]);
 			newItem.id += "x"
 			addItem(newItem, srcIndex)
@@ -231,7 +222,6 @@ function ItemBucket(props: {
 								onLetGo={(dragId: any, bucketId: any) => {
 									// Remove the item if it was dropped on a different bucket
 									if (!props.deleteOnMoveDisabled && bucketId !== props.id) {
-										log("Removing item:", dragId);
 										removeItem(dragId);
 									}
 								}}

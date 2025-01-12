@@ -37,7 +37,6 @@ function DNDItem(props: {
         type: props.item_type ?? DEFAULT_ITEM_TYPE,
         canDrag: props.disableDrag !== true,
         item: () => {
-            log("Started to drag.");
             return props.item; 			// sent to the drop target when dropped.
         },
         end: (item: Item, monitor) => {
@@ -45,7 +44,6 @@ function DNDItem(props: {
             if (!dropResult)
                 // Cancelled or invalid drop
                 return;
-            log("Drop result:", dropResult);
             props.onLetGo(item.id, dropResult.id);
         },
         collect: (monitor) => ({

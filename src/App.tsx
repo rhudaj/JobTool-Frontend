@@ -46,7 +46,7 @@ function App() {
         BackendAPI.get<{name: string, data: CV}[]>('all_cvs') // getCVs getCVinfo getCLinfo
         .then(cvs => {
             if (cvs && cvs.length > 0) {
-                log("CVs from backend:", cvs.map(cv => cv.name));
+                log(`Got ${cvs.length} CVs from backend`);
                 set_named_cvs(cvs);
                 set_active_cv(cvs[0]); // set the first CV as the default
             }
@@ -54,15 +54,23 @@ function App() {
         // Get the cv info
         BackendAPI.get<any>('cv_info')
         .then(cv_info => {
-            log("CV info from backend:", cv_info);
-            setCVInfo(cv_info);
+            if (cv_info) {
+                log("Got CV info from backend");
+                setCVInfo(cv_info);
+            } else {
+                log("No CV Info received from backend")
+            }
         })
 
         // Get the cl info
         BackendAPI.get<any>('cl_info')
         .then(cl_info => {
-            log("CL info from backend:", cl_info);
-            setCLInfo(cl_info);
+            if(cl_info) {
+                log("Got CL info from backend:");
+                setCLInfo(cl_info);
+            } else {
+                log("No CL info from backend");
+            }
         })
     }, [log]); // *** added
 
@@ -70,7 +78,7 @@ function App() {
 
     const changeCV = (name: string) => {
         const new_cv = named_cvs.find(cv => cv.name === name);
-        log("Changing CV to:", new_cv.name);
+        log("Changing active_cv to:", new_cv.name);
         set_active_cv(new_cv);
     };
 

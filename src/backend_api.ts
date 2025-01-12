@@ -46,9 +46,6 @@ export class BackendAPI {
     }
 
     // Generic POST method
-    // "getJobInfo":    { job_text: string }     => getJobInfo   => JobInfo
-    // "genCL":         { job_info: string }     => genCL        => string[]
-    // "saveCV":        {name: string, cv: CV}   => saveCV       => nothing
     static async post<IN, OUT>(endpoint: string, body: IN): Promise<OUT | null> {
         return await this.request<OUT>("POST", endpoint, body);
     }
