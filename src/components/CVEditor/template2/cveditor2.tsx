@@ -1,5 +1,5 @@
 import "./cveditor2.sass";
-import { CV, Experience, Link, MonthYear, DateRange } from "shared";
+import { CV, Experience, Link, MonthYear, DateRange } from "job-tool-shared-types";
 import { TextEditDiv } from "../../TextEditDiv/texteditdiv";
 import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";

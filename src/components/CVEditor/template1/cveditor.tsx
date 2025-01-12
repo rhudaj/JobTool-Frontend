@@ -1,5 +1,5 @@
 // // import "./cveditor.scss";
-// import { CV, DateRange, Experience, Link, MonthYear } from "shared";
+// import { CV, DateRange, Experience, Link, MonthYear } from "job-tool-shared-types";
 // import { TextEditDiv } from "../../TextEditDiv/texteditdiv";
 // import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 // import { useImmer } from "use-immer";

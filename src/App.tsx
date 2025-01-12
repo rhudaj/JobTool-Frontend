@@ -1,7 +1,7 @@
 import "./App.scss";
 import { useEffect, useState, useRef, createContext } from "react";
 import { Section } from "./components/Section/Section";
-import { CV, JobInfo } from "shared";
+import { CV, JobInfo } from "job-tool-shared-types";
 import { BackendAPI } from "./backend_api";
 import { CVEditor } from "./components/CVEditor/template2/cveditor2";
 import { CLEditor } from "./components/CLEditor/cleditor";

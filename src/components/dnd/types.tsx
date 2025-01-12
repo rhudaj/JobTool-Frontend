@@ -1,4 +1,4 @@
-import { Experience } from "shared";
+import { Experience } from "job-tool-shared-types";
 import { ExperienceUI } from "../CVEditor/template2/cveditor2";
 import "./types.scss";
 

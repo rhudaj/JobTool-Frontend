@@ -1,4 +1,4 @@
-import { CV, JobInfo } from "shared";
+import { CV, JobInfo } from "job-tool-shared-types";
 import { useLogger } from "./hooks/logger";
 
 /**
