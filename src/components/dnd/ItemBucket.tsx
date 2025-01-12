@@ -136,7 +136,7 @@ function ItemBucket(props: {
 		const diff = dragIndex - gapIndex;
 
 		// Is the gap is around the current dragItem ?
-		if (diff == 0 || diff == -1) {
+		if (diff === 0 || diff === -1) {
 			gapIndex = undefined;
 		}
 
@@ -216,7 +216,7 @@ function ItemBucket(props: {
 				{
 					items.map((I: Item, i: number) => (
 						<>
-							{i == 0 && <DropGap isActive={hoveredGap===prevGap(i)}/>}
+							{i === 0 && <DropGap isActive={hoveredGap===prevGap(i)}/>}
 							<DNDItem
 								key={i}
 								item={I}
