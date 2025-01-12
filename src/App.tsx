@@ -64,7 +64,7 @@ function App() {
             log("CL info from backend:", cl_info);
             setCLInfo(cl_info);
         })
-    }, []);
+    }, [log]); // *** added
 
     // INTERNALLY:
 

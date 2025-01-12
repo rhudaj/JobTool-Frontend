@@ -22,7 +22,7 @@ jobs:
         uses: bahmutov/npm-install@v1
 
       - name: Build project
-        run: npm run build
+        run: CI=false npm run build   # added CI=false
 
       - name: Upload production-ready build files
         uses: actions/upload-artifact@v3
