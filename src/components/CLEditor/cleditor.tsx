@@ -1,6 +1,6 @@
+import "./cleditor.sass"
 import { useEffect } from "react";
 import { TextEditDiv } from "../TextEditDiv/texteditdiv";
-import "./cleditor.scss"
 import ItemBucket from "../dnd/ItemBucket";
 import { useImmer } from "use-immer";
 

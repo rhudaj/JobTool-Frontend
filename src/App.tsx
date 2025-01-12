@@ -1,4 +1,4 @@
-import "./App.scss";
+import "./App.sass";
 import { useEffect, useState, useRef, createContext } from "react";
 import { Section } from "./components/Section/Section";
 import { CV, JobInfo } from "job-tool-shared-types";
@@ -17,6 +17,29 @@ import { JIDisplay } from "./components/JIDisplay/JIDisplay";
 import { EmailEditor } from "./components/EmailEditor/EmailEditor";
 
 export const CVContext = createContext(null);
+
+function SideMenu(props: {
+    labels: string[],
+    onSelect: (val: string) => void
+}) {
+
+    const MenuItem = (text: string) => {
+        return (
+            <div
+                className="menu-item"
+                onClick={()=>props.onSelect(text)}
+            >
+                <p>{text}</p>
+            </div>
+        )
+    };
+
+    return (
+        <div id="side-menu">
+            { props.labels.map(MenuItem) }
+        </div>
+    )
+}
 
 function App() {
 
@@ -37,6 +60,8 @@ function App() {
 
     const JIRef = useRef(null);
     const [jobInfo, setJobInfo] = useState({} as JobInfo);
+
+    const [sec, setSec] = useState<string>(null);
 
     // --------------- MODIFY STATE ---------------
 
@@ -150,79 +175,98 @@ function App() {
         BackendAPI.post<{name: string, cv: CV}, null>("saveCV", {name: cvName, cv: newCV})
     };
 
+    // RENDERING:
+
+    const labeled_sections = [
+        {
+            name: "Resume Builder",
+            content: (
+                <Section id="section-cv" heading="Resume Builder">
+
+                    {/* CONTROLS --------------------------- */}
+
+                    <ButtonSet>
+                        <select onChange={e => changeCV(e.target.value)}>
+                            { named_cvs?.map((cv,i) => <option key={i} value={cv.name}>{cv.name}</option>) }
+                        </select>
+                        <button className="download-button" onClick={() => printReactComponentAsPdf("cv-page")}> Download PDF </button>
+                        <button onClick={saveCV}> Save CV </button>
+                    </ButtonSet>
+
+                    {/* VIEW ------------------------------ */}
+
+                    <DndProvider backend={HTML5Backend}>
+                        <SplitView>
+                            <PrintablePage page_id="cv-page">
+                                { <CVEditor cv={active_cv?.data} ref={cvref}/> }
+                            </PrintablePage>
+                            <InfoPad info={cvInfo}/>
+                        </SplitView>
+                    </DndProvider>
+                </Section>
+            )
+        },
+        {
+            name: "Letter",
+            content: (
+                <Section id="section-cl" heading="Cover Letter">
+
+                    {/* CONTROLS --------------------------- */}
+
+                    <ButtonSet>
+                        <button onClick={() => getCL(jobText)}>
+                            Generate
+                        </button>
+                        <button onClick={() => getCL()}>
+                            Get Template
+                        </button>
+                        <button className="download-button" onClick={() => printReactComponentAsPdf("cl-page")}>
+                            Download PDF
+                        </button>
+                    </ButtonSet>
+
+                    {/* VIEW ------------------------------- */}
+
+                    <DndProvider backend={HTML5Backend}>
+                        <SplitView>
+                            <PrintablePage page_id="cl-page">
+                                <CLEditor paragraphs={CL}/>
+                            </PrintablePage>
+                            <InfoPad info={clInfo}/>
+                        </SplitView>
+                    </DndProvider>
+
+                </Section>
+            )
+        },
+        {
+            name: "Job Analyze",
+            content: (
+                <Section id="section-job-info" heading="Job Info">
+                    <ButtonSet>
+                        <button onClick={getJobInfo}>Extract</button>
+                    </ButtonSet>
+                    <SplitView>
+                        <textarea
+                            id="job-info-input"
+                            onBlur = {(e)=>setJobText(e.target.value)}
+                            placeholder="Paste job description here..."
+                        />
+                        <JIDisplay jobInfo={jobInfo} ref={JIRef}/>
+                    </SplitView>
+                </Section>
+            )
+        }
+    ]
+
     return (
-        <div className="App-Div">
+        <div className="app-root-container">
 
-            <Section id="section-job-info" heading="Job Info">
-                <ButtonSet>
-                    <button onClick={getJobInfo}>Extract</button>
-                </ButtonSet>
-                <SplitView>
-                    <textarea
-                        id="job-info-input"
-                        onBlur = {(e)=>setJobText(e.target.value)}
-                        placeholder="Paste job description here..."
-                    />
-                    <JIDisplay jobInfo={jobInfo} ref={JIRef}/>
-                </SplitView>
-            </Section>
+            <SideMenu labels={labeled_sections.map(ls=>ls.name)} onSelect={setSec}/>
 
-            <Section id="section-email" heading="Email">
-                <EmailEditor />
-            </Section>
-
-            <Section id="section-cl" heading="Cover Letter">
-
-                {/* CONTROLS --------------------------- */}
-
-                <ButtonSet>
-                    <button onClick={() => getCL(jobText)}>
-                        Generate
-                    </button>
-                    <button onClick={() => getCL()}>
-                        Get Template
-                    </button>
-                    <button className="download-button" onClick={() => printReactComponentAsPdf("cl-page")}>
-                        Download PDF
-                    </button>
-                </ButtonSet>
-
-                {/* VIEW ------------------------------- */}
-
-                <DndProvider backend={HTML5Backend}>
-                    <SplitView>
-                        <PrintablePage page_id="cl-page">
-                            <CLEditor paragraphs={CL}/>
-                        </PrintablePage>
-                        <InfoPad info={clInfo}/>
-                    </SplitView>
-                </DndProvider>
-
-            </Section>
-
-            <Section id="section-cv" heading="Resume">
-
-                {/* CONTROLS --------------------------- */}
-
-                <ButtonSet>
-                    <select onChange={e => changeCV(e.target.value)}>
-                        { named_cvs?.map((cv,i) => <option key={i} value={cv.name}>{cv.name}</option>) }
-                    </select>
-                    <button className="download-button" onClick={() => printReactComponentAsPdf("cv-page")}> Download PDF </button>
-                    <button onClick={saveCV}> Save CV </button>
-                </ButtonSet>
-
-                {/* VIEW ------------------------------ */}
-
-                <DndProvider backend={HTML5Backend}>
-                    <SplitView>
-                        <PrintablePage page_id="cv-page">
-                            { active_cv && <CVEditor cv={active_cv.data} ref={cvref}/> }
-                        </PrintablePage>
-                        <InfoPad info={cvInfo}/>
-                    </SplitView>
-                </DndProvider>
-            </Section>
+            <div id="section-container">
+                { labeled_sections.find(ls=>ls.name === sec)?.content }
+            </div>
 
         </div>
     );
