@@ -1,0 +1,19 @@
+@import "../CVEditor/template2/cveditor2.sass"; // for $experiences-gap
+
+.experiences {
+    display: grid;
+    row-gap: $experiences-gap;
+}
+
+.text-item {
+    border: 0.5rem dashed black;
+    padding: 2rem;
+    width: fit-content;
+}
+
+.text-item-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5em;
+}

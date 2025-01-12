@@ -1,0 +1,16 @@
+#info-pad {
+    font-size: 10rem;
+    color: black;
+    background-color: white;
+    padding: 10rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10rem;
+}
+
+.info-pad-sec {
+    padding: 5rem;
+    border-bottom: 2px solid black;
+    padding-bottom: 20rem;
+}

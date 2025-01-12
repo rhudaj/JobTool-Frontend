@@ -1,0 +1,21 @@
+.page-container {
+    /* CENTER THE PAGE */
+    display: flex;
+    justify-content: center;
+}
+
+.A4-page {
+    background-color: white;
+    container-type: size;
+    width: calc(21rem * 36);
+    height: auto;
+    aspect-ratio: 21 / 29.7;
+}
+
+@media print {
+    .A4-page {
+        width: calc(21rem * 45);
+        height: auto;
+        aspect-ratio: 21 / 29.7;
+    }
+}

@@ -1,0 +1,45 @@
+html {
+    /* ALL rem UNITS IN THE APP ARE RELATIVE TO THE BELOW VALUE */
+    font-size: 1px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing:border-box;
+    user-select: none;
+    /* height: 100%;
+    width: 100%; */
+}
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h5 {
+	height: min-content;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+        "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+        "Helvetica Neue", sans-serif;
+}
+
+@media print {
+    @page {
+        /* SETTINGS PART OF PRINT */
+        size: A4;
+        margin: 0 0 0 0;
+    }
+    #header,
+    #footer,
+    #nav {
+        display: none !important;
+    }
+    *, :after, :before {
+        color: #000!important;
+    }
+}
