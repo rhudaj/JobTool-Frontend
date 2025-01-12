@@ -28,7 +28,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: production-files
-          path: ./dist
+          path: ./build  # Corrected path
 
   deploy:
     name: Deploy
@@ -41,13 +41,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: production-files
-          path: ./dist
+          path: ./build  # Corrected path
 
       # - name: Create CNAME file
-      #   run: echo 'roman-hudaj.com' > ./dist/CNAME
+      #   run: echo 'roman-hudaj.com' > ./build/CNAME
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./build  # Corrected path
