@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/JobTool-Frontend/static/css/main.4f61651a.css",
+    "main.js": "/JobTool-Frontend/static/js/main.dcff864e.js",
+    "index.html": "/JobTool-Frontend/index.html",
+    "main.4f61651a.css.map": "/JobTool-Frontend/static/css/main.4f61651a.css.map",
+    "main.dcff864e.js.map": "/JobTool-Frontend/static/js/main.dcff864e.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.4f61651a.css",
+    "static/js/main.dcff864e.js"
+  ]
+}

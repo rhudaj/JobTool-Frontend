@@ -2,7 +2,7 @@
  *  Print a react component as a pdf
  * @param element_id of the react component you wish to print as pdf
  */
-const printReactComponentAsPdf = (element_id: string) => {
+const printReactComponentAsPdf = (element_id: string, savedFileName: string = "my_resume") => {
 
     // get the react component with id element_id
     const component2print = document.getElementById(element_id);
@@ -36,7 +36,12 @@ const printReactComponentAsPdf = (element_id: string) => {
 
     // Adding a slight delay before calling print() can give the browser enough time to fully render the iframe content:
     setTimeout(() => {
+        // The saved pdf's name is the document's title by default.
+        // So, to set the name, change the doc title temporarily.
+        const prev_title = document.title;
+        document.title = savedFileName + ".pdf";
         iframe.contentWindow.print();
+        document.title = prev_title;
         iframe.remove();
     }, 300);
 
