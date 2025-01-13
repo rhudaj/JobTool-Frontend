@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./customTable.css";
-import { useLogger } from "../../../hooks/logger";
+import  useLogger  from "../../../hooks/logger";
 
 function CustomTable(props: {
     data: any[];

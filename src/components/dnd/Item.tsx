@@ -1,7 +1,7 @@
 import "./Item.scss"
 import { useDrag, useDrop } from "react-dnd";
 import React from "react";
-import { useLogger } from "../../hooks/logger";
+import  useLogger  from "../../hooks/logger";
 import { joinClassNames } from "../../hooks/joinClassNames";
 import { Item, DEFAULT_ITEM_TYPE } from "./types";
 import { DNDItemControls } from "./controls/controls";

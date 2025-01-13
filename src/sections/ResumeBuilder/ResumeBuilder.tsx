@@ -4,22 +4,27 @@ import { Section } from "../../components/Section/Section";
 import { CV } from "job-tool-shared-types";
 import { BackendAPI } from "../../backend_api";
 import { PrintablePage } from "../../components/PagePrint/pageprint";
-import { printReactComponentAsPdf } from "../../hooks/component2pdf";
+import useComponent2PDF from "../../hooks/component2pdf";
 import { InfoPad } from "../../components/infoPad/infoPad";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { useLogger } from "../../hooks/logger";
+import  useLogger  from "../../hooks/logger";
 import { SplitView } from "../../components/SplitView/splitview";
 import { CVEditor } from "../../components/CVEditor/cveditor";
 
 function ResumeBuilder() {
 
+    const log = useLogger("ResumeBuilder");
+
     // ---------------- STATE ----------------
 
     const cvref = useRef(null);
     const [named_cvs, set_named_cvs] = useState<{ name: string; data: CV }[]>(null);
+    // TODO: active_cv should be an index into the named_cvs array
     const [active_cv, set_active_cv] = useState<{ name: string; data: CV }>(null);
     const [cvInfo, setCVInfo] = useState<any>([]);
+
+    const saveAsPDF = useComponent2PDF("cv-page")
 
     // Get data on mount
     useEffect(() => {
@@ -59,82 +64,12 @@ function ResumeBuilder() {
         }
     }, []);
 
-    useEffect(()=>{
-        console.log("new cv data: ", active_cv)
-    }, [active_cv])
-
-    const log = useLogger("ResumeBuilder");
-
     // ---------------- CONTROLS ----------------
 
     const changeCV = (name: string) => {
         const new_cv = named_cvs.find((cv) => cv.name === name);
         log("Changing active_cv to:", new_cv.name);
         set_active_cv(new_cv);
-    };
-
-    const promptFileName = (): string|null => {
-        // Get non-empty user input for CV name
-        let cvName: string | null = null;
-
-        while (true) {
-            cvName = prompt("Name the CV")?.trim();
-            // 3 cases
-            if (cvName === null) {
-                // they clicked cancel
-                break;
-            } else if (cvName === "") {
-                // they clicked ok but didn't enter anything
-                cvName = null;
-                alert("Input cannot be left blank.");
-            } else if (named_cvs?.find((cv) => cv.name === cvName)) {
-
-                // alert("CV with that name already exists.");
-                const isConfirmed = window.confirm(
-                    "CV with that name already exists. Are you okay with it?"
-                );
-
-                if (isConfirmed) {
-                    // User clicked "OK"
-                    console.log("User is okay with it.");
-                    break;
-                } else {
-                    // User clicked "Cancel"
-                    console.log("User is not okay with it.");
-                    cvName = null;
-                }
-            } else {
-                // they entered a VALID name
-                break;
-            }
-        }
-
-        if (!cvName) {
-            // Can't save a CV without a valid name
-            log("User cancelled the prompt.");
-        } else {
-            log(`User entered CV name: ${cvName}`);
-        }
-
-        return cvName;
-    };
-
-    const save2backend = () => {
-
-        const name = promptFileName();
-
-        // get CV from the cvref:
-        const newCV = cvref.current.getCV();
-
-        // Save the named CV to the backend
-        BackendAPI.post<{ name: string; cv: CV }, null>("saveCV", {
-            name: name,
-            cv: newCV,
-        });
-    };
-
-    const saveAsPDF = () => {
-        printReactComponentAsPdf("cv-page")
     };
 
     const saveAsJson = () => {
@@ -208,7 +143,7 @@ function ResumeBuilder() {
             </div>
             <div>
                 <h4>Export</h4>
-                <button onClick={saveAsPDF}>PDF</button>
+                <button onClick={()=>saveAsPDF(active_cv.name)}>PDF</button>
                 <button onClick={saveAsJson}>JSON</button>
             </div>
         </div>
@@ -228,5 +163,68 @@ function ResumeBuilder() {
         </Section>
     );
 }
+
+/*
+
+    const save2backend = () => {
+
+        const name = promptFileName();
+
+        // get CV from the cvref:
+        const newCV = cvref.current.getCV();
+
+        // Save the named CV to the backend
+        BackendAPI.post<{ name: string; cv: CV }, null>("saveCV", {
+            name: name,
+            cv: newCV,
+        });
+    };
+
+    const promptFileName = (): string|null => {
+        // Get non-empty user input for CV name
+        let cvName: string | null = null;
+
+        while (true) {
+            cvName = prompt("Name the CV")?.trim();
+            // 3 cases
+            if (cvName === null) {
+                // they clicked cancel
+                break;
+            } else if (cvName === "") {
+                // they clicked ok but didn't enter anything
+                cvName = null;
+                alert("Input cannot be left blank.");
+            } else if (named_cvs?.find((cv) => cv.name === cvName)) {
+
+                // alert("CV with that name already exists.");
+                const isConfirmed = window.confirm(
+                    "CV with that name already exists. Are you okay with it?"
+                );
+
+                if (isConfirmed) {
+                    // User clicked "OK"
+                    console.log("User is okay with it.");
+                    break;
+                } else {
+                    // User clicked "Cancel"
+                    console.log("User is not okay with it.");
+                    cvName = null;
+                }
+            } else {
+                // they entered a VALID name
+                break;
+            }
+        }
+
+        if (!cvName) {
+            // Can't save a CV without a valid name
+            log("User cancelled the prompt.");
+        } else {
+            log(`User entered CV name: ${cvName}`);
+        }
+
+        return cvName;
+    };
+*/
 
 export default ResumeBuilder;

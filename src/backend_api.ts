@@ -1,5 +1,5 @@
 import { CV, JobInfo } from "job-tool-shared-types";
-import { useLogger } from "./hooks/logger";
+import  useLogger  from "./hooks/logger";
 
 /**
  * BackendAPI class

@@ -1,6 +1,6 @@
 import "./App.sass";
 import { useState } from "react";
-import { useLogger } from "./hooks/logger";
+import  useLogger  from "./hooks/logger";
 import ResumeBuilder from "./sections/ResumeBuilder/ResumeBuilder";
 import CLBuilder from "./sections/CLBuilder/CoverLetterBuilder";
 import JobAnalyze from "./sections/JobAnalyze/JobAnalyze";

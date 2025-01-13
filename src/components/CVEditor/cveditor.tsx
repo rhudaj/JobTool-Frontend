@@ -7,7 +7,7 @@ import { joinClassNames } from "../../hooks/joinClassNames";
 import ItemBucket from "../dnd/ItemBucket";
 import { BucketTypes } from "../dnd/types";
 import { format, parse } from "date-fns"
-import { useLogger } from "../../hooks/logger";
+import  useLogger  from "../../hooks/logger";
 
 const Section = (props: {
     head: string;

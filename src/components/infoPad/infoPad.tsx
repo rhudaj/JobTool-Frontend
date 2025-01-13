@@ -1,5 +1,5 @@
 import './infoPad.scss';
-import { useLogger } from '../../hooks/logger';
+import  useLogger  from '../../hooks/logger';
 import ItemBucket from '../dnd/ItemBucket';
 import React from "react";
 import { BucketTypes, InfoPadMap } from '../dnd/types';
