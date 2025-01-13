@@ -1,4 +1,3 @@
-import { CV, JobInfo } from "job-tool-shared-types";
 import  useLogger  from "./hooks/logger";
 
 /**
@@ -6,8 +5,7 @@ import  useLogger  from "./hooks/logger";
  * @todo the user should have to construct one,
  * which will automatically test that the server is running.
  */
-
-export class BackendAPI {
+class BackendAPI {
     private static HOST = "http://localhost:8080";
     private static log = useLogger("BackendAPI");
 
@@ -55,3 +53,5 @@ export class BackendAPI {
         return await this.request<OUT>("GET", endpoint, undefined);
     }
 }
+
+export default BackendAPI;

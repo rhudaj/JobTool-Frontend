@@ -2,7 +2,7 @@ import "./resumebuilder.sass"
 import { useEffect, useState, useRef } from "react";
 import Section from "../../components/Section/Section";
 import { CV } from "job-tool-shared-types";
-import { BackendAPI } from "../../backend_api";
+import BackendAPI from "../../backend_api";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
 import InfoPad from "../../components/infoPad/infoPad";
