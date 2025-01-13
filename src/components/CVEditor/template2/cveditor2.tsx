@@ -8,6 +8,7 @@ import { joinClassNames } from "../../../hooks/joinClassNames";
 import ItemBucket from "../../dnd/ItemBucket";
 import { BucketTypes } from "../../dnd/types";
 import { format, parse } from "date-fns"
+import { useLogger } from "../../../hooks/logger";
 
 const Section = (props: {
     head: string;
@@ -185,14 +186,11 @@ const CVEditor = forwardRef((
 
 	// initialize the CV
 	useEffect(() => {
+		log("New CV from props: ", props.cv);
 		setCV(props.cv);
+		if(!props.cv) return;
+		setSectionOrder(Object.keys(props.cv.sections))
 	}, [props.cv]);
-
-	// initialize the section order
-	useEffect(()=>{
-		if(!CV) return;
-		setSectionOrder(Object.keys(CV.sections))
-	}, [CV])
 
 	// give parent access to CV
 	useImperativeHandle(ref, () => ({
@@ -202,17 +200,21 @@ const CVEditor = forwardRef((
 			const new_sections = {...CV}
 			new_sections.sections = {}
 			sectionOrder.forEach(secName => {
-				new_sections[secName] = CV.sections[secName]
+				new_sections.sections[secName] = CV.sections[secName]
 			})
 			return new_sections;
 		}
 	}));
+
+	const log = useLogger("CVEditor");
 
 	// -------------- SETUP RENDER --------------
 
 	if (!CV || !sectionOrder) {
 		return null;
 	}
+
+	console.log("section order: ", sectionOrder);
 
 	const bt = BucketTypes["experiences"];
 	const sections_ui = sectionOrder.map(sec_head => (
@@ -239,29 +241,31 @@ const CVEditor = forwardRef((
 							}} />
 						))}
 					</ItemBucket>
-				) : (<>
-					<TextEditDiv tv={CV.sections[sec_head].summary} id="summary" onUpdate={val => {
-						setCV(draft => {
-							draft.sections[sec_head].summary = val
-						})
-					}}/>
-					<div className="sub-sec">
-						<div className="sub-sec-head">Languages:</div>
-						<DelimitedList items={CV.sections[sec_head].languages} delimiter=", " onUpdate={vals=> {
+				) : (
+					<>
+						<TextEditDiv tv={CV.sections[sec_head].summary} id="summary" onUpdate={val => {
 							setCV(draft => {
-								draft.sections[sec_head].languages = vals
+								draft.sections[sec_head].summary = val
 							})
 						}}/>
-					</div>
-					<div className="sub-sec">
-						<div className="sub-sec-head">Technology:</div>
-						<DelimitedList items={CV.sections[sec_head].technologies} delimiter=", " onUpdate={vals=> {
-							setCV(draft => {
-								draft.sections[sec_head].technologies = vals
-							})
-						}}/>
-					</div>
-				</>)
+						<div className="sub-sec">
+							<div className="sub-sec-head">Languages:</div>
+							<DelimitedList items={CV.sections[sec_head].languages} delimiter=", " onUpdate={vals=> {
+								setCV(draft => {
+									draft.sections[sec_head].languages = vals
+								})
+							}}/>
+						</div>
+						<div className="sub-sec">
+							<div className="sub-sec-head">Technology:</div>
+							<DelimitedList items={CV.sections[sec_head].technologies} delimiter=", " onUpdate={vals=> {
+								setCV(draft => {
+									draft.sections[sec_head].technologies = vals
+								})
+							}}/>
+						</div>
+					</>
+				)
 			}
 		</Section>
 	))
@@ -272,7 +276,7 @@ const CVEditor = forwardRef((
 		<div id="cv-editor">
 			<div id="full-name" key="name">{CV.name}</div>
 			<div id="link-list">
-				{CV.links.map((l,i) => <LinkUI key={i} {...l} /> )}
+				{CV.links?.map((l,i) => <LinkUI key={i} {...l} /> )}
 			</div>
 			<ItemBucket
 				id="sections-bucket"

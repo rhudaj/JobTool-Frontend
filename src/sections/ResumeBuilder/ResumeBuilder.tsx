@@ -147,7 +147,7 @@ function ResumeBuilder() {
 
         // Prompt the user to enter a custom filename
         // If the user cancels or doesn't enter anything, use the default filename
-        const filename = window.prompt("Enter a filename for your JSON file:", "data.json");
+        const filename = window.prompt("Enter a filename for your JSON file:", "my_resume");
 
         if (filename) {
             // Create a Blob from the JSON string
@@ -162,6 +162,8 @@ function ResumeBuilder() {
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]; // Get the selected file
+        const fileName = file.name.split(".json")[0]
+
         if (!file) return;
 
         const reader = new FileReader();
@@ -171,13 +173,12 @@ function ResumeBuilder() {
             try {
                 const content = e.target?.result as string; // File content as string
                 const parsedJson = JSON.parse(content);     // Parse JSON
-                console.log("parsed json input = ", parsedJson)
-                const named_cv = { name: file.name, data: parsedJson.data }
+                const named_cv = { name: fileName, data: parsedJson }
                 set_named_cvs([named_cv, ...named_cvs])   // add it to the list
                 set_active_cv(named_cv)                   // Store parsed JSON in state
             } catch (error) {
                 console.error("Error parsing JSON file:", error);
-                alert("Invalid .json file.")
+                alert("Invalid .json file")
             }
         };
 
