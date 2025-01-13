@@ -10,7 +10,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useLogger } from "../../hooks/logger";
 import { SplitView } from "../../components/SplitView/splitview";
-import { CVEditor } from "../../components/CVEditor/template2/cveditor2";
+import { CVEditor } from "../../components/CVEditor/cveditor";
 
 function ResumeBuilder() {
 

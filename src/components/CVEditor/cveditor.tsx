@@ -1,14 +1,13 @@
-import "./cveditor2.sass";
+import "./cveditor.sass";
 import { CV, Experience, Link, MonthYear, DateRange } from "job-tool-shared-types";
-import { TextEditDiv } from "../../TextEditDiv/texteditdiv";
+import { TextEditDiv } from "../TextEditDiv/texteditdiv";
 import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
-import { Grid } from "../template1/grid";
-import { joinClassNames } from "../../../hooks/joinClassNames";
-import ItemBucket from "../../dnd/ItemBucket";
-import { BucketTypes } from "../../dnd/types";
+import { joinClassNames } from "../../hooks/joinClassNames";
+import ItemBucket from "../dnd/ItemBucket";
+import { BucketTypes } from "../dnd/types";
 import { format, parse } from "date-fns"
-import { useLogger } from "../../../hooks/logger";
+import { useLogger } from "../../hooks/logger";
 
 const Section = (props: {
     head: string;
@@ -17,7 +16,6 @@ const Section = (props: {
 }) => {
 
 	const formatHeader = (head: string) => (
-		// head.charAt(0).toUpperCase() + head.slice(1).toLowerCase()
 		head.toUpperCase()
 	);
 
