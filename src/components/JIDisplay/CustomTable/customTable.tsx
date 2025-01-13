@@ -134,4 +134,4 @@ function CustomTable(props: {
     );
 }
 
-export { CustomTable };
+export default CustomTable;

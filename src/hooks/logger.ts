@@ -10,19 +10,16 @@ function useLogger(componentName: string) {
     };
 
     const warn = (message: string, ...args: any[]) => {
-        console.log(componentName + ":\n\t", message, ...args);
+        console.warn(componentName + ":\n\t", message, ...args);
     };
 
     const error = (message: string, ...args: any[]) => {
-        console.log(componentName + ":\n\t", message, ...args);
+        console.error(componentName + ":\n\t", message, ...args);
     };
 
-    // `log` is the default export. `warn` and `error` are optional.
-    // const functions = { log, warn, error };
-    // return Object.assign(log, functions);   // `log` as the default export. others are destructured options
-    // Return an array where the first element is log
+    // can specify return value as: log || || [log] || [log, warn] || [log, warn, error]
     const loggerArray = [log, warn, error];
-    return Object.assign(log, { [Symbol.iterator]: () => loggerArray[Symbol.iterator]() });
+    return Object.assign(log, { [Symbol.iterator]: () => loggerArray[Symbol.iterator]() }); // `log` is the default export
 }
 
 export default useLogger;

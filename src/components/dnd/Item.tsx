@@ -4,8 +4,7 @@ import React from "react";
 import  useLogger  from "../../hooks/logger";
 import { joinClassNames } from "../../hooks/joinClassNames";
 import { Item, DEFAULT_ITEM_TYPE } from "./types";
-import { DNDItemControls } from "./controls/controls";
-
+import DNDItemControls from "./controls";
 
 // TODO: should be usable on its own (ie: has its own state) in the case you dont want a bucket.
 function DNDItem(props: {

@@ -1,7 +1,7 @@
 import { ReactElement, useState } from "react";
 import "./splitview.scss"
 
-export function SplitView(props: {
+function SplitView(props: {
     children: [ReactElement, ReactElement];
 }) {
     const[ WRatio, SetWRatio ] = useState(50);
@@ -49,3 +49,5 @@ export function SplitView(props: {
         </div>
     );
 };
+
+export default SplitView;

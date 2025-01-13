@@ -1,6 +1,6 @@
 import "./emaileditor.scss"
 
-export function EmailEditor() {
+function EmailEditor() {
 
     const email = [
         "Dear Hiring Manager,",
@@ -15,3 +15,5 @@ export function EmailEditor() {
         </div>
     );
 }
+
+export default EmailEditor;

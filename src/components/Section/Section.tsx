@@ -1,7 +1,7 @@
 import "./section.sass";
 import { ReactElement } from "react";
 
-export function Section(props: {
+function Section(props: {
     id: string;
     heading: string;
     children: ReactElement | ReactElement[];
@@ -15,3 +15,5 @@ export function Section(props: {
         </div>
     );
 }
+
+export default Section;

@@ -1,11 +1,10 @@
 import './JIDisplay.scss'
-import { useEffect, useState, forwardRef, useImperativeHandle, useRef } from "react";
-import { CV, JobInfo, WordOccurences } from "job-tool-shared-types";
-import { CustomTable } from "./CustomTable/customTable"
-import { SubSection } from "../SubSection/SubSection";
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
+import { JobInfo, WordOccurences } from "job-tool-shared-types";
+import CustomTable from "./CustomTable/customTable"
+import SubSection from "../Section/SubSection";
 
-
-export const JIDisplay = forwardRef((
+const JIDisplay = forwardRef((
     props: {
         jobInfo: JobInfo;
         changeJobInfo?: (JI: JobInfo) => void;
@@ -151,3 +150,5 @@ export const JIDisplay = forwardRef((
         );
     }
 );
+
+export default JIDisplay;

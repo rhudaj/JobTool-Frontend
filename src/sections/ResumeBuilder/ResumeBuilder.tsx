@@ -1,16 +1,16 @@
 import "./resumebuilder.sass"
 import { useEffect, useState, useRef } from "react";
-import { Section } from "../../components/Section/Section";
+import Section from "../../components/Section/Section";
 import { CV } from "job-tool-shared-types";
 import { BackendAPI } from "../../backend_api";
-import { PrintablePage } from "../../components/PagePrint/pageprint";
+import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
-import { InfoPad } from "../../components/infoPad/infoPad";
+import InfoPad from "../../components/infoPad/infoPad";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import  useLogger  from "../../hooks/logger";
-import { SplitView } from "../../components/SplitView/splitview";
-import { CVEditor } from "../../components/CVEditor/cveditor";
+import SplitView from "../../components/SplitView/splitview";
+import CVEditor from "../../components/CVEditor/cveditor";
 
 function ResumeBuilder() {
 

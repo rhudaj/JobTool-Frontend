@@ -1,6 +1,6 @@
 import "./SubSection.scss"
 
-export function SubSection(props: {
+function SubSection(props: {
     id: string;
     heading: string;
     children: React.ReactNode;
@@ -12,3 +12,5 @@ export function SubSection(props: {
         </div>
     );
 };
+
+export default SubSection;

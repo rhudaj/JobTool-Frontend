@@ -1,10 +1,10 @@
 import "./cleditor.sass"
 import { useEffect } from "react";
-import { TextEditDiv } from "../TextEditDiv/texteditdiv";
+import TextEditDiv from "../TextEditDiv/texteditdiv";
 import ItemBucket from "../dnd/ItemBucket";
 import { useImmer } from "use-immer";
 
-export function CLEditor(props: {
+function CLEditor(props: {
     paragraphs: string[],
 }) {
 
@@ -31,3 +31,5 @@ export function CLEditor(props: {
         </ItemBucket>
     );
 }
+
+export default CLEditor;

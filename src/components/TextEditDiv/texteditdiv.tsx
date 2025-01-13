@@ -3,7 +3,7 @@ import "./texteditdiv.scss";
 import { TrackVal } from "../../hooks/trackable";
 import { joinClassNames } from "../../hooks/joinClassNames";
 
-export function TextEditDiv(props: {
+function TextEditDiv(props: {
     tv: string|TrackVal<string>,
     id?: string,
     className?: string,
@@ -61,3 +61,5 @@ export function TextEditDiv(props: {
         </div>
     );
 }
+
+export default TextEditDiv;

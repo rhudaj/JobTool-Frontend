@@ -4,9 +4,7 @@ import ItemBucket from '../dnd/ItemBucket';
 import React from "react";
 import { BucketTypes, InfoPadMap } from '../dnd/types';
 
-
-
-export function InfoPad(props: { info: any} ) {
+function InfoPad(props: { info: any} ) {
 
     const log = useLogger("InfoPad");
 
@@ -66,3 +64,5 @@ export function InfoPad(props: { info: any} ) {
     else
         return <div id="info-pad">{InfoPadComponents}</div>;
 };
+
+export default InfoPad;

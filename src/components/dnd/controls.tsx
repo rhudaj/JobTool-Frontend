@@ -79,4 +79,4 @@ const DNDItemControls = React.forwardRef<HTMLElement, any>((
     );
 });
 
-export { DNDItemControls };
+export default DNDItemControls;

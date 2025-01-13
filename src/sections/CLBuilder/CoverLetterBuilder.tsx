@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { BackendAPI } from "../../backend_api";
 import  useLogger  from "../../hooks/logger";
-import { Section } from "../../components/Section/Section";
+import Section from "../../components/Section/Section";
 import { DndProvider } from "react-dnd";
-import { SplitView } from "../../components/SplitView/splitview";
-import { PrintablePage } from "../../components/PagePrint/pageprint";
-import { CLEditor } from "../../components/CLEditor/cleditor";
-import { InfoPad } from "../../components/infoPad/infoPad";
+import SplitView from "../../components/SplitView/splitview";
+import PrintablePage from "../../components/PagePrint/pageprint";
+import CLEditor from "../../components/CLEditor/cleditor";
+import InfoPad from "../../components/infoPad/infoPad";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import useComponent2PDF from "../../hooks/component2pdf";
 

@@ -1,5 +1,5 @@
 import { Experience } from "job-tool-shared-types";
-import { ExperienceUI } from "../CVEditor/cveditor";
+import { ExperienceUI } from "../CVEditor/cv_components";
 import "./types.scss";
 
 const DEFAULT_ITEM_TYPE = "DRAG-ITEM";
@@ -55,6 +55,5 @@ const InfoPadMap = {
     // CL
     "paragraphs":  "cl-info-pad",
 }
-
 
 export { Item, Bucket, BucketType, DEFAULT_ITEM_TYPE, BucketTypes, InfoPadMap };

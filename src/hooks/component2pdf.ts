@@ -45,7 +45,7 @@ const useComponent2PDF = (element_id: string) => {
             // The saved pdf's name is the document's title by default.
             // So, to set the name, change the doc title temporarily.
             const prev_title = document.title;
-            document.title = name + ".pdf";
+            document.title = name;
             iframe.contentWindow.print();
             document.title = prev_title;
             // remove ifram from DOM, as no longer needed

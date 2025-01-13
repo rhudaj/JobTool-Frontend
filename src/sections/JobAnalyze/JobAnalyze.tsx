@@ -1,7 +1,7 @@
 import { JobInfo } from "job-tool-shared-types";
-import { JIDisplay } from "../../components/JIDisplay/JIDisplay";
-import { Section } from "../../components/Section/Section";
-import { SplitView } from "../../components/SplitView/splitview";
+import JIDisplay from "../../components/JIDisplay/JIDisplay";
+import Section from "../../components/Section/Section";
+import SplitView from "../../components/SplitView/splitview";
 import { BackendAPI } from "../../backend_api";
 import  useLogger  from "../../hooks/logger";
 import { useRef, useState } from "react";
