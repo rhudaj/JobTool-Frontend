@@ -9,9 +9,15 @@ function SideMenu(props: {
     labels: string[];
     onSelect: (val: string) => void;
 }) {
+
+    const [selected, setSelected] = useState<string>(null)
+
     const MenuItem = (p: {text: string}) => {
         return (
-            <div className="menu-item" onClick={() => props.onSelect(p.text)}>
+            <div className={`menu-item ${p.text==selected ? "active": ""}`} onClick={() => {
+                setSelected(p.text)
+                props.onSelect(p.text)
+            }}>
                 <p>{p.text}</p>
             </div>
         );
@@ -47,13 +53,17 @@ function App() {
 
     return (
         <div className="app-root-container">
-            <SideMenu
-                labels={labeled_sections.map((ls) => ls.name)}
-                onSelect={setSec}
-            />
-
-            <div id="section-container">
-                {labeled_sections.find((ls) => ls.name === sec)?.content}
+            <div id="app-header">
+                <h1>Job Tool</h1>
+            </div>
+            <div id="app-content">
+                <SideMenu
+                    labels={labeled_sections.map((ls) => ls.name)}
+                    onSelect={setSec}
+                />
+                <div id="section-container">
+                    {labeled_sections.find((ls) => ls.name === sec)?.content}
+                </div>
             </div>
         </div>
     );

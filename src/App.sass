@@ -9,33 +9,41 @@
     overflow-y: scroll
 
     display: flex
+    flex-direction: column
 
-    #side-menu
-        height: 100cqh
+    #app-content
 
-        display: grid
-        grid-template-columns: max-content  // ensures they all have the same width
-        grid-auto-rows: min-content
-        row-gap: 40rem
+        display: flex
 
-    #section-container
-        width: 100%
-        height: 100%
+        #side-menu
+            height: 100cqh
+
+            display: grid
+            grid-template-columns: max-content  // ensures they all have the same width
+            grid-auto-rows: min-content
+            row-gap: 40rem
+
+        #section-container
+            width: 100%
+            height: 100%
 
 #job-info-input
     height: 100%
     width: 100%
 
-// ------------------- LAYOUT -------------------
+// ------------------- STYLES -------------------
 
 .app-root-container
     background-color: #282c34
     color: white
-    padding: 20rem 2% 25rem 2%
 
 #section-container
-    border: 2rem solid black
     background-color: grey
+
+#app-header
+    font-size: 15rem
+    border-bottom: 3px solid black
+    padding: 10rem
 
 #side-menu
     font-size: 10rem
@@ -48,6 +56,10 @@
     &:hover
         transform: scale(1.1)
         color: rgb(255, 255, 255)
+    &.active
+        color: white
+        font-weight: bold
+
 
 #job-info-input
     padding: 5rem
