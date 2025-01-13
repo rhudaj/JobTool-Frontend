@@ -9,15 +9,15 @@ function SideMenu(props: {
     labels: string[];
     onSelect: (val: string) => void;
 }) {
-    const MenuItem = (text: string) => {
+    const MenuItem = (p: {text: string}) => {
         return (
-            <div className="menu-item" onClick={() => props.onSelect(text)}>
-                <p>{text}</p>
+            <div className="menu-item" onClick={() => props.onSelect(p.text)}>
+                <p>{p.text}</p>
             </div>
         );
     };
 
-    return <div id="side-menu">{props.labels.map(MenuItem)}</div>;
+    return <div id="side-menu">{props.labels.map((l,i)=><MenuItem key={i} text={l}/>)}</div>;
 }
 
 function App() {

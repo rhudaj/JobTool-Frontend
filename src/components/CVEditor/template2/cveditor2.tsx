@@ -196,7 +196,16 @@ const CVEditor = forwardRef((
 
 	// give parent access to CV
 	useImperativeHandle(ref, () => ({
-		getCV: () => CV
+		getCV: () => {
+			// TODO: find a better way
+			// update the sections of the cv based on sectionOrder
+			const new_sections = {...CV}
+			new_sections.sections = {}
+			sectionOrder.forEach(secName => {
+				new_sections[secName] = CV.sections[secName]
+			})
+			return new_sections;
+		}
 	}));
 
 	// -------------- SETUP RENDER --------------
