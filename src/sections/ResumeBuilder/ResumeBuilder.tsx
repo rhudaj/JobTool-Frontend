@@ -190,18 +190,24 @@ function ResumeBuilder() {
     const Controls = () => (
         <div id="resume-builder-controls">
             <div>
-                <p>Import</p>
-                <select onChange={(e) => changeCV(e.target.value)}>
-                    {named_cvs?.map((cv, i) => (
-                        <option key={i} value={cv.name}>
-                            {cv.name}
-                        </option>
-                    ))}
-                </select>
-                <input type="file" accept=".json" onChange={handleFileChange}/>
+                <h4>Import</h4>
+                <div style={{display: "flex", gap: "10rem"}}>
+                    <p>Import Resume:</p>
+                    <input type="file" accept=".json" onChange={handleFileChange}/>
+                </div>
+                <div style={{display: "flex", gap: "10rem"}}>
+                    <p>Selected Resume:</p>
+                    <select onChange={(e) => changeCV(e.target.value)}>
+                        {named_cvs?.map((cv, i) => (
+                            <option key={i} value={cv.name}>
+                                {cv.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
             </div>
             <div>
-                <p>Save as </p>
+                <h4>Export</h4>
                 <button onClick={saveAsPDF}>PDF</button>
                 <button onClick={saveAsJson}>JSON</button>
             </div>
