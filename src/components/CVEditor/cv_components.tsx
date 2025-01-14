@@ -34,7 +34,7 @@ function SummaryUI(props: {
 }) {
 
 	return (
-		<>
+		<div className="sec-summary">
 			<TextEditDiv tv={props.obj.summary} id="summary" onUpdate={val => {
 				const new_obj = {...props.obj}
 				new_obj.summary = val
@@ -56,7 +56,7 @@ function SummaryUI(props: {
 					props.onUpdate(new_obj);
 				}}/>
 			</div>
-		</>
+		</div>
 	)
 }
 

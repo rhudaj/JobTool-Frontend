@@ -1,17 +1,11 @@
 import "./cveditor.sass";
-import { CV, Experience } from "job-tool-shared-types";
+import { CV } from "job-tool-shared-types";
 import * as UI from "./cv_components"
-import TextEditDiv from "../TextEditDiv/texteditdiv";
 import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
 import ItemBucket from "../dnd/ItemBucket";
 import { BucketTypes } from "../dnd/types";
 import  useLogger  from "../../hooks/logger";
-
-const itemType_component_map = new Map<string, (props: { obj: any, onUpdate?: any })=>JSX.Element>([
-	["summary", UI.SummaryUI,],
-	["experience", UI.ExperienceUI]
-]);
 
 // MAIN COMPONENT
 const CVEditor = forwardRef((
@@ -49,15 +43,15 @@ const CVEditor = forwardRef((
 		return null;
 	}
 
-	console.log("section order: ", sectionOrder);
-
-	const bt = BucketTypes["experiences"];
 	const sections_ui = sectionOrder.map(sec_idx => {
 
 		const sec = CV.sections[sec_idx];
-		const sec_content = sec.content;
-		const sec_head = sec.name;
-		const ItemComponent = itemType_component_map.get(sec.item_type);
+		const sec_content = sec.content;	// list of items of the same type
+		const sec_head = sec.name;			// the name/header for the section
+		// Each section specifies an `item_type`, which indicates which React UI component to use for displaying it.
+
+		const bt = BucketTypes[sec.item_type];
+		const ItemComponent = bt.DisplayItem;
 
 		return (
 			<UI.SectionUI head={sec_head.toUpperCase()} id={`sec-${sec_head}`}>
@@ -73,13 +67,16 @@ const CVEditor = forwardRef((
 						})
 					}}
 				>
-					{sec_content?.map((item, i) => (
-						<ItemComponent obj={item} onUpdate={new_val=>{
-							setCV(draft => {
-								draft.sections[sec_idx].content[i] = new_val
-							})
-						}}/>
-					))}
+					{
+						// Map the items of this section to the desired format based on the item_type
+						sec_content?.map((item, i) => (
+							<ItemComponent obj={item} onUpdate={(new_val: any)=>{
+								setCV(draft => {
+									draft.sections[sec_idx].content[i] = new_val
+								})
+							}}/>
+						))
+					}
 				</ItemBucket>
 			</UI.SectionUI>
 		);

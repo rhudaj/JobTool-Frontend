@@ -1,5 +1,5 @@
 import { Experience } from "job-tool-shared-types";
-import { ExperienceUI } from "../CVEditor/cv_components";
+import { ExperienceUI, SummaryUI } from "../CVEditor/cv_components";
 import "./types.scss";
 
 const DEFAULT_ITEM_TYPE = "DRAG-ITEM";
@@ -17,7 +17,7 @@ interface Bucket {
 interface BucketType {
     item_type: string,
     isVertical: boolean,
-    DisplayItem?: (props: any) => JSX.Element,
+    DisplayItem: (props: any) => JSX.Element,
     displayItemsClass?: string
 };
 
@@ -26,19 +26,24 @@ const BucketTypes: { [key: string]: BucketType } = {
         item_type: "text",
         isVertical: false,
         displayItemsClass: "text-item-list",
-        DisplayItem: (props: string) => <div className="text-item" key={props}>{props}</div>
+        DisplayItem: (props: {obj: string}) => <div className="text-item">{props.obj}</div>
+    },
+    "summary": {
+        item_type: "summary",
+        isVertical: true,
+        DisplayItem: SummaryUI,
     },
     "experiences": {
         item_type: "experience",
         isVertical: true,
         displayItemsClass:"experiences",
-        DisplayItem: (props: Experience) => ExperienceUI({obj: props})
+        DisplayItem: ExperienceUI
     },
     "cl-info-pad": {
         item_type: "cl-item",
         isVertical: true,
         displayItemsClass: "text-item-list",
-        DisplayItem: (props: string) => <div className="text-item" key={props}>{props}</div>
+        DisplayItem: (props: {obj: string}) => <div className="text-item">{props.obj}</div>
     }
 };
 
