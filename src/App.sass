@@ -3,10 +3,11 @@
 
 .app-root-container
     width: 100vw
-    height: 100%
-    min-height: 100%
+    height: 100vh
+
+    // IMPORTANT:
     overflow-x: hidden
-    overflow-y: scroll
+    overflow-y: hidden
 
     display: flex
     flex-direction: column
@@ -24,8 +25,11 @@
             row-gap: 40rem
 
         #section-container
-            width: 100%
-            height: 100%
+            width: 300%
+            height: 100cqh // SOMEHOW THIS WORKS!
+
+            // ONLY THIS IS ALLOWED TO SCROLL!
+            overflow-y: scroll
 
 #job-info-input
     height: 100%
