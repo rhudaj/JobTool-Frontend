@@ -5,6 +5,7 @@ import React from "react";
 import { joinClassNames } from "../../hooks/joinClassNames";
 import ItemBucket from "../dnd/ItemBucket";
 import { format, parse } from "date-fns"
+import * as UI from "./cv_components"
 
 function SectionUI(props: {
     head: string;
@@ -27,13 +28,48 @@ function SectionUI(props: {
 	)
 };
 
-function ExperienceUI(props: Experience & { onUpdate?: any }) {
+function SummaryUI(props: {
+	obj: any,
+	onUpdate?: any
+}) {
+
+	return (
+		<>
+			<TextEditDiv tv={props.obj.summary} id="summary" onUpdate={val => {
+				const new_obj = {...props.obj}
+				new_obj.summary = val
+				props.onUpdate(new_obj);
+			}}/>
+			<div className="sub-sec">
+				<div className="sub-sec-head">Languages:</div>
+				<UI.DelimitedList items={props.obj.languages} delimiter=", " onUpdate={val=> {
+					const new_obj = {...props.obj}
+					new_obj.languages = val
+					props.onUpdate(new_obj);
+				}}/>
+			</div>
+			<div className="sub-sec">
+				<div className="sub-sec-head">Technology:</div>
+				<UI.DelimitedList items={props.obj.technologies} delimiter=", " onUpdate={val=> {
+					const new_obj = {...props.obj}
+					new_obj.languages = val
+					props.onUpdate(new_obj);
+				}}/>
+			</div>
+		</>
+	)
+}
+
+function ExperienceUI(props: {
+	obj: Experience,
+	onUpdate?: any
+}) {
 
 	const handleUpdate = (field: keyof Experience, value: any) => {
 		props.onUpdate({ ...props, [field]: value });
 	};
 
-	if (!props.title) {
+	if (!props.obj.title) {
 		// Invalid object
 		return null;
 	}
@@ -43,25 +79,25 @@ function ExperienceUI(props: Experience & { onUpdate?: any }) {
 			<div className="header-info">
 				<div>
 					<div>
-						<TextEditDiv className="title" tv={props.title} onUpdate={val => handleUpdate('title', val)} />
-						{ props.link && <LinkUI {...props.link} /> }
+						<TextEditDiv className="title" tv={props.obj.title} onUpdate={val => handleUpdate('title', val)} />
+						{ props.obj.link && <LinkUI {...props.obj.link} /> }
 					</div>
-					<DateUI dateRange={props.date} onUpdate={val => handleUpdate('date', val)} />
+					<DateUI dateRange={props.obj.date} onUpdate={val => handleUpdate('date', val)} />
 				</div>
 				<div>
-					{ props.role     ? <TextEditDiv className="role" tv={props.role} onUpdate={val => handleUpdate('role', val)} /> 		: null }
-					{ props.location ? <TextEditDiv className="location" tv={props.location} onUpdate={val => handleUpdate('location', val)}/> 	: null }
+					{ props.obj.role     ? <TextEditDiv className="role" tv={props.obj.role} onUpdate={val => handleUpdate('role', val)} /> 		: null }
+					{ props.obj.location ? <TextEditDiv className="location" tv={props.obj.location} onUpdate={val => handleUpdate('location', val)}/> 	: null }
 				</div>
 			</div>
 			{/* ROW 2 */}
 			<div className="exp-content">
 				<ul
 					// If only one item => don't render bullet point:
-					style={{ listStyleType: props.description.length === 1 ? 'none' : 'disc' }}
+					style={{ listStyleType: props.obj.description.length === 1 ? 'none' : 'disc' }}
 				>
 					<ItemBucket
-						id={`${props.title}-bucket`}
-						values={props.description}
+						id={`${props.obj.title}-bucket`}
+						values={props.obj.description}
 						onUpdate={newPoints => {
 							handleUpdate('description', newPoints);
 						}}
@@ -70,10 +106,10 @@ function ExperienceUI(props: Experience & { onUpdate?: any }) {
 						displayItemsClass="exp-points"
 						deleteOnMoveDisabled
 					>
-						{ props.description.map((descrItem, i) => (
+						{ props.obj.description.map((descrItem, i) => (
 							<li key={i}>
 								<TextEditDiv tv={descrItem} onUpdate={val => {
-									const newPoints = [...props.description];
+									const newPoints = [...props.obj.description];
 									newPoints[i] = val;
 									handleUpdate('description', newPoints);
 								}} />
@@ -83,7 +119,7 @@ function ExperienceUI(props: Experience & { onUpdate?: any }) {
 				</ul>
 			</div>
 			{/* ROW 3 */}
-			<DelimitedList className="item-list" items={props.item_list} delimiter=" / " onUpdate={val => handleUpdate('item_list', val)} />
+			<DelimitedList className="item-list" items={props.obj.item_list} delimiter=" / " onUpdate={val => handleUpdate('item_list', val)} />
 		</div>
 	);
 };
@@ -168,4 +204,4 @@ function DelimitedList(props: {
 	);
 };
 
-export { SectionUI, ExperienceUI, DateUI, LinkUI, DelimitedList }
+export { SectionUI, SummaryUI, ExperienceUI, DateUI, LinkUI, DelimitedList }

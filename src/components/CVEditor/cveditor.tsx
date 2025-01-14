@@ -8,6 +8,11 @@ import ItemBucket from "../dnd/ItemBucket";
 import { BucketTypes } from "../dnd/types";
 import  useLogger  from "../../hooks/logger";
 
+const itemType_component_map = new Map<string, (props: { obj: any, onUpdate?: any })=>JSX.Element>([
+	["summary", UI.SummaryUI,],
+	["experience", UI.ExperienceUI]
+]);
+
 // MAIN COMPONENT
 const CVEditor = forwardRef((
 	props: { cv: CV },
@@ -19,25 +24,22 @@ const CVEditor = forwardRef((
 	// -------------- MODEL --------------
 
 	const [CV, setCV] = useImmer<CV>(null);
-	const [sectionOrder, setSectionOrder] = useImmer<string[]>(null);
+	const [sectionOrder, setSectionOrder] = useImmer<number[]>(null);
 
 	// initialize the CV & sectionOrder
 	useEffect(() => {
 		setCV(props.cv);
 		if(!props.cv) return;
-		setSectionOrder(Object.keys(props.cv.sections))
+		setSectionOrder(Array.from(Array(props.cv.sections.length).keys()))
 	}, [props.cv]);
 
 	// give parent access to CV
 	useImperativeHandle(ref, () => ({
 		getCV: () => {
 			// Update the sections of the cv based on sectionOrder (TODO: find a better way)
-			const new_sections = {...CV}
-			new_sections.sections = {}
-			sectionOrder.forEach(secName => {
-				new_sections.sections[secName] = CV.sections[secName]
-			})
-			return new_sections;
+			const new_cv = {...CV}
+			new_cv.sections = sectionOrder.map(sec_idx => CV.sections[sec_idx])
+			return new_cv
 		}
 	}));
 
@@ -50,66 +52,46 @@ const CVEditor = forwardRef((
 	console.log("section order: ", sectionOrder);
 
 	const bt = BucketTypes["experiences"];
-	const sections_ui = sectionOrder.map(sec_head => (
-		<UI.SectionUI head={sec_head.toUpperCase()} id={`sec-${sec_head}`}>
-			{
-				(sec_head !== "summary") ? (
-					<ItemBucket
-						id={sec_head}
-						values={CV.sections[sec_head] as any[]}
-						item_type={bt.item_type}
-						isVertical={bt.isVertical}
-						displayItemsClass={bt.displayItemsClass}
-						onUpdate={(newItems) => {
+	const sections_ui = sectionOrder.map(sec_idx => {
+
+		const sec = CV.sections[sec_idx];
+		const sec_content = sec.content;
+		const sec_head = sec.name;
+		const ItemComponent = itemType_component_map.get(sec.item_type);
+
+		return (
+			<UI.SectionUI head={sec_head.toUpperCase()} id={`sec-${sec_head}`}>
+				<ItemBucket
+					id={sec_head}
+					values={sec.content}
+					item_type={bt.item_type}
+					isVertical={bt.isVertical}
+					displayItemsClass={bt.displayItemsClass}
+					onUpdate={new_vals => {
+						setCV(draft => {
+							draft.sections[sec_idx].content = new_vals
+						})
+					}}
+				>
+					{sec_content?.map((item, i) => (
+						<ItemComponent obj={item} onUpdate={new_val=>{
 							setCV(draft => {
-								draft.sections[sec_head] = newItems
-							})
-						}}
-					>
-						{CV.sections[sec_head]?.map((exp, i) => (
-							<UI.ExperienceUI key={i} {...exp} onUpdate={(newExp: Experience) => {
-								setCV(draft => {
-									draft.sections[sec_head][i] = newExp
-								})
-							}} />
-						))}
-					</ItemBucket>
-				) : (
-					<>
-						<TextEditDiv tv={CV.sections[sec_head].summary} id="summary" onUpdate={val => {
-							setCV(draft => {
-								draft.sections[sec_head].summary = val
+								draft.sections[sec_idx].content[i] = new_val
 							})
 						}}/>
-						<div className="sub-sec">
-							<div className="sub-sec-head">Languages:</div>
-							<UI.DelimitedList items={CV.sections[sec_head].languages} delimiter=", " onUpdate={vals=> {
-								setCV(draft => {
-									draft.sections[sec_head].languages = vals
-								})
-							}}/>
-						</div>
-						<div className="sub-sec">
-							<div className="sub-sec-head">Technology:</div>
-							<UI.DelimitedList items={CV.sections[sec_head].technologies} delimiter=", " onUpdate={vals=> {
-								setCV(draft => {
-									draft.sections[sec_head].technologies = vals
-								})
-							}}/>
-						</div>
-					</>
-				)
-			}
-		</UI.SectionUI>
-	))
+					))}
+				</ItemBucket>
+			</UI.SectionUI>
+		);
+	})
 
 	// -------------- VIEW --------------
 
 	return (
 		<div id="cv-editor">
-			<div id="full-name" key="name">{CV.name}</div>
+			<div id="full-name" key="name">{CV.header_info.name}</div>
 			<div id="link-list">
-				{CV.links?.map((l,i) => <UI.LinkUI key={i} {...l} /> )}
+				{CV.header_info.links?.map((l,i) => <UI.LinkUI key={i} {...l} /> )}
 			</div>
 			<ItemBucket
 				id="sections-bucket"

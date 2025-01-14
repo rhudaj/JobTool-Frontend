@@ -32,7 +32,7 @@ const BucketTypes: { [key: string]: BucketType } = {
         item_type: "experience",
         isVertical: true,
         displayItemsClass:"experiences",
-        DisplayItem: (props: Experience) => ExperienceUI(props)
+        DisplayItem: (props: Experience) => ExperienceUI({obj: props})
     },
     "cl-info-pad": {
         item_type: "cl-item",
