@@ -20,8 +20,7 @@ function ResumeBuilder() {
 
     const cvref = useRef(null);
     const [named_cvs, set_named_cvs] = useState<{ name: string; data: CV }[]>(null);
-    // TODO: active_cv should be an index into the named_cvs array
-    const [active_cv, set_active_cv] = useState<{ name: string; data: CV }>(null);
+    const [cur, set_cur] = useState<number>(null);
     const [cvInfo, setCVInfo] = useState<any>([]);
 
     const saveAsPDF = useComponent2PDF("cv-page")
@@ -39,7 +38,7 @@ function ResumeBuilder() {
             .then(data => {
                 const named_cv = {name: "sample_cv", data: data}
                 set_named_cvs([named_cv])
-                set_active_cv(named_cv)
+                set_cur(0)
             })
         } else {
             // USE THE BACKEND SERVER:
@@ -49,7 +48,7 @@ function ResumeBuilder() {
                 if (cvs && cvs.length > 0) {
                     log(`Got ${cvs.length} CVs from backend`);
                     set_named_cvs(cvs);
-                    set_active_cv(cvs[0]); // set the first CV as the default
+                    set_cur(0);             // use the first one by default
                 }
             });
             // Get the cv info
@@ -67,50 +66,49 @@ function ResumeBuilder() {
     // ---------------- CONTROLS ----------------
 
     const changeCV = (name: string) => {
-        const new_cv = named_cvs.find((cv) => cv.name === name);
-        log("Changing active_cv to:", new_cv.name);
-        set_active_cv(new_cv);
+        const idx = named_cvs.findIndex(cv => cv.name === name);
+        log("Changing active_cv to:", named_cvs[idx].name);
+        set_cur(idx);
     };
 
+    /** save the resume as json to the Downloads folder */
     const saveAsJson = () => {
 
         // get the modified cv:
-        const modified_cv = cvref.current.getCV() as CV;
-        const jsonString = JSON.stringify(modified_cv);
-
-        console.log("saving modified_cv: ", modified_cv);
+        const jsonString = JSON.stringify(
+            cvref.current.getCV()
+        );
 
         // Prompt the user to enter a custom filename
-        // If the user cancels or doesn't enter anything, use the default filename
         const filename = window.prompt("Enter a filename for your JSON file:", "my_resume");
+        if(!filename) return;
 
-        if (filename) {
-            // Create a Blob from the JSON string
-            const blob = new Blob([jsonString], { type: 'application/json' });
-            // Create a download link and trigger it
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;  // Use the filename entered by the user
-            link.click();  // Trigger the download
-        }
+        // Create a Blob (file-like object) from the JSON string:
+        const blob = new Blob([jsonString], { type: 'application/json' });
+
+        // Create a download link and trigger it
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;  // Use the filename entered by the user
+        link.click();  // Trigger the download
     };
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]; // Get the selected file
-        const fileName = file.name.split(".json")[0]
+    const handleJsonInport = (event: React.ChangeEvent<HTMLInputElement>) => {
 
+        const file = event.target.files?.[0]; // Get the selected file
         if (!file) return;
+
+        const name = file.name.split(".json")[0]
 
         const reader = new FileReader();
 
         // Read the file as text
         reader.onload = (e) => {
             try {
-                const content = e.target?.result as string; // File content as string
-                const parsedJson = JSON.parse(content);     // Parse JSON
-                const named_cv = { name: fileName, data: parsedJson }
+                const json_str = e.target?.result as string; // File content as string
+                const named_cv = { name: name, data: JSON.parse(json_str) }
                 set_named_cvs([named_cv, ...named_cvs])   // add it to the list
-                set_active_cv(named_cv)                   // Store parsed JSON in state
+                set_cur(0)                   // Store parsed JSON in state
             } catch (error) {
                 console.error("Error parsing JSON file:", error);
                 alert("Invalid .json file")
@@ -126,15 +124,17 @@ function ResumeBuilder() {
         <div id="resume-builder-controls">
             <div>
                 <h4>Import</h4>
+
                 <div style={{display: "flex", gap: "10rem"}}>
                     <p>Import Resume:</p>
-                    <input type="file" accept=".json" onChange={handleFileChange}/>
+                    <input type="file" accept=".json" onChange={handleJsonInport}/>
                 </div>
+
                 <div style={{display: "flex", gap: "10rem"}}>
                     <p>Selected Resume:</p>
                     <select onChange={(e) => changeCV(e.target.value)}>
                         {named_cvs?.map((cv, i) => (
-                            <option key={i} value={cv.name}>
+                            <option key={i} value={cv.name} selected={i===cur}>
                                 {cv.name}
                             </option>
                         ))}
@@ -143,7 +143,7 @@ function ResumeBuilder() {
             </div>
             <div>
                 <h4>Export</h4>
-                <button onClick={()=>saveAsPDF(active_cv.name)}>PDF</button>
+                <button onClick={()=>saveAsPDF(named_cvs[cur].name)}>PDF</button>
                 <button onClick={saveAsJson}>JSON</button>
             </div>
         </div>
@@ -155,7 +155,7 @@ function ResumeBuilder() {
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
                     <PrintablePage page_id="cv-page">
-                        {<CVEditor cv={active_cv?.data} ref={cvref} />}
+                        {named_cvs && <CVEditor cv={named_cvs[cur]?.data} ref={cvref} />}
                     </PrintablePage>
                     <InfoPad info={cvInfo} />
                 </SplitView>
