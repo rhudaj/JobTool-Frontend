@@ -1,10 +1,13 @@
 import React from "react";
 import "./texteditdiv.scss";
-import { TrackVal } from "../../hooks/trackable";
 import { joinClassNames } from "../../hooks/joinClassNames";
 
+/**
+ * @param tv standard text || html string
+ * @note any style update (bold, italics, underline supported to the browser will update the string value).
+ */
 function TextEditDiv(props: {
-    tv: string|TrackVal<string>,
+    tv: string,
     id?: string,
     className?: string,
     onUpdate?: (newVal: string) => void
@@ -18,8 +21,8 @@ function TextEditDiv(props: {
      * Disabled <= onBlur */
     const [isEditing, setIsEditing] = React.useState(false);
 
+    // prevent default paste behavior (which copies styles)
     const onPaste = (e: React.ClipboardEvent) => {
-        // prevent default paste behavior (which copies styles)
         e.preventDefault();
         // 1 - Get text representation of clipboard:
         const txt = e.clipboardData.getData("text/plain");
@@ -32,14 +35,13 @@ function TextEditDiv(props: {
             selection.getRangeAt(0).insertNode(document.createTextNode(txt));
     };
 
+    // When done editing
     const onBlur = (e: React.FocusEvent) => {
         setIsEditing(false);
-		// assert tv as type TrackVal<string>:
-        if (typeof props.tv === "string") {
-            if (props.onUpdate) props.onUpdate(e.target.textContent)
-        } else {
-            // fires when an element has lost focus
-		    props.tv.value = e.target.textContent;
+        const html_str = e.target.innerHTML;
+        // use the inner html, in order to copy along styles
+        if (props.onUpdate) {
+            props.onUpdate(html_str)
         }
 	};
 
@@ -55,10 +57,8 @@ function TextEditDiv(props: {
             onPaste={onPaste}
             onBlur={onBlur}
             onDoubleClick={()=>setIsEditing(true)}
-        >
-            { props.tv }
-            {/* { typeof props.tv === "string" ? props.tv : props.tv.value } */}
-        </div>
+            dangerouslySetInnerHTML={{__html: props.tv}}
+        />
     );
 }
 

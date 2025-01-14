@@ -12,6 +12,8 @@ import  useLogger  from "../../hooks/logger";
 import SplitView from "../../components/SplitView/splitview";
 import CVEditor from "../../components/CVEditor/cveditor";
 
+const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
+
 function ResumeBuilder() {
 
     const [log, warn, error] = useLogger("ResumeBuilder");
@@ -27,8 +29,7 @@ function ResumeBuilder() {
 
     // Get data on mount
     useEffect(() => {
-        console.log("process.env.USE_BACKEND = ", process.env.REACT_APP_USE_BACKEND)
-        if(process.env.REACT_APP_USE_BACKEND === "0") {
+        if(!USE_BACKEND) {
             // use SAMPLES from the /public folder:
             const path = process.env.PUBLIC_URL + "/samples/"
             // sample cv:
@@ -43,15 +44,16 @@ function ResumeBuilder() {
             .then(response => response.json())
             .then(setCVInfo)
         } else {
-            // USE THE BACKEND SERVER:
             // Get all saved CVs
             BackendAPI.get<{ name: string; data: CV }[]>("all_cvs") // getCVs getCVinfo getCLinfo
-            .then((cvs) => {
-                if (cvs && cvs.length > 0) {
-                    log(`Got ${cvs.length} CVs from backend`);
-                    set_named_cvs(cvs);
-                    set_cur(0);             // use the first one by default
-                }
+            .then(cvs => {
+                if (!cvs) return;
+                // filter any corrupt data:
+                cvs = cvs.filter(cv => cv && cv.name && cv.data)
+                // set the state:
+                log(`Got ${cvs.length} CVs from backend`);
+                set_named_cvs(cvs);
+                set_cur(0);             // use the first one by default
             });
             // Get the cv info
             BackendAPI.get<any>("cv_info").then(setCVInfo);
@@ -114,65 +116,7 @@ function ResumeBuilder() {
         reader.readAsText(file); // Trigger file reading
     };
 
-    // ---------------- RENDER ----------------
-
-    const Controls = () => (
-        <div id="resume-builder-controls">
-            <div>
-                <h4>Import</h4>
-
-                <div style={{display: "flex", gap: "10rem"}}>
-                    <p>Import Resume as JSON:</p>
-                    <input type="file" accept=".json" onChange={ev=>jsonFileImport(ev, (name, data)=>{
-                        const named_cv = {name: name, data: data}
-                        set_named_cvs([named_cv, ...named_cvs])
-                        set_cur(0);
-                    })}/>
-                </div>
-
-                <div style={{display: "flex", gap: "10rem"}}>
-                    <p>Selected Resume:</p>
-                    <select onChange={(e) => changeCV(e.target.value)}>
-                        {named_cvs?.map((cv, i) => (
-                            <option key={i} value={cv.name} selected={i===cur}>
-                                {cv.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div style={{display: "flex", gap: "10rem"}}>
-                    <p>Import Resume Items as JSON:</p>
-                    <input type="file" accept=".json" onChange={ev => jsonFileImport(ev, (name, data)=>{
-                        setCVInfo(data);
-                    })}/>
-                </div>
-
-            </div>
-            <div>
-                <h4>Export</h4>
-                <button onClick={()=>saveAsPDF(named_cvs[cur].name)}>PDF</button>
-                <button onClick={saveAsJson}>JSON</button>
-            </div>
-        </div>
-    );
-
-    return (
-        <Section id="section-cv" heading="Resume Builder">
-            <Controls/>
-            <DndProvider backend={HTML5Backend}>
-                <SplitView>
-                    <PrintablePage page_id="cv-page">
-                        {named_cvs && <CVEditor cv={named_cvs[cur]?.data} ref={cvref} />}
-                    </PrintablePage>
-                    <InfoPad info={cvInfo} />
-                </SplitView>
-                </DndProvider>
-        </Section>
-    );
-}
-
-/*
+    /* If USE_BACKEND */
 
     const save2backend = () => {
 
@@ -233,6 +177,67 @@ function ResumeBuilder() {
 
         return cvName;
     };
-*/
+
+    // ---------------- RENDER ----------------
+
+    const Controls = () => (
+        <div id="resume-builder-controls">
+            <div>
+                <h4>Import</h4>
+                <div style={{display: "flex", gap: "10rem"}}>
+                    <p>Import Resume as JSON:</p>
+                    <input type="file" accept=".json" onChange={ev=>jsonFileImport(ev, (name, data)=>{
+                        const named_cv = {name: name, data: data}
+                        set_named_cvs([named_cv, ...named_cvs])
+                        set_cur(0);
+                    })}/>
+                </div>
+
+                <div style={{display: "flex", gap: "10rem"}}>
+                    <p>Selected Resume:</p>
+                    <select onChange={e => changeCV(e.target.value)}>
+                        {named_cvs?.map((ncv, i) => (
+                            <option key={i} value={ncv.name} selected={i===cur}>
+                                {ncv.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div style={{display: "flex", gap: "10rem"}}>
+                    <p>Import Resume Items as JSON:</p>
+                    <input type="file" accept=".json" onChange={ev => jsonFileImport(ev, (name, data)=>setCVInfo(data))}/>
+                </div>
+
+            </div>
+            <div>
+                <h4>Export</h4>
+                <button onClick={()=>saveAsPDF(named_cvs[cur].name)}>PDF</button>
+                <button onClick={saveAsJson}>JSON</button>
+            </div>
+            {USE_BACKEND && (
+                <div>
+                    <h4>Save to backend</h4>
+                    <button onClick={save2backend}>Save</button>
+                </div>
+            )}
+        </div>
+    );
+
+    return (
+        <Section id="section-cv" heading="Resume Builder">
+            <Controls/>
+            <DndProvider backend={HTML5Backend}>
+                <SplitView>
+                    <PrintablePage page_id="cv-page">
+                        {named_cvs && <CVEditor cv={named_cvs[cur]?.data} ref={cvref} />}
+                    </PrintablePage>
+                    <InfoPad info={cvInfo} />
+                </SplitView>
+                </DndProvider>
+        </Section>
+    );
+}
+
 
 export default ResumeBuilder;
