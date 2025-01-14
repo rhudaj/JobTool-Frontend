@@ -14,7 +14,7 @@ import CVEditor from "../../components/CVEditor/cveditor";
 
 function ResumeBuilder() {
 
-    const log = useLogger("ResumeBuilder");
+    const [log, warn, error] = useLogger("ResumeBuilder");
 
     // ---------------- STATE ----------------
 
@@ -93,24 +93,25 @@ function ResumeBuilder() {
         link.click();  // Trigger the download
     };
 
-    const handleJsonInport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const jsonFileImport = (
+        event: React.ChangeEvent<HTMLInputElement>,
+        handleData: (name: string, data: any) => void,
+    ) => {
 
         const file = event.target.files?.[0]; // Get the selected file
         if (!file) return;
-
         const name = file.name.split(".json")[0]
 
         const reader = new FileReader();
 
-        // Read the file as text
         reader.onload = (e) => {
             try {
-                const json_str = e.target?.result as string; // File content as string
-                const named_cv = { name: name, data: JSON.parse(json_str) }
-                set_named_cvs([named_cv, ...named_cvs])   // add it to the list
-                set_cur(0)                   // Store parsed JSON in state
+                const json_str = e.target?.result as string; // File content as text
+                const json_obj = JSON.parse(json_str);
+                // *** call the callback ***
+                handleData(name, json_obj)
             } catch (error) {
-                console.error("Error parsing JSON file:", error);
+                warn("Error parsing JSON file:", error);
                 alert("Invalid .json file")
             }
         };
@@ -126,8 +127,12 @@ function ResumeBuilder() {
                 <h4>Import</h4>
 
                 <div style={{display: "flex", gap: "10rem"}}>
-                    <p>Import Resume:</p>
-                    <input type="file" accept=".json" onChange={handleJsonInport}/>
+                    <p>Import Resume as JSON:</p>
+                    <input type="file" accept=".json" onChange={ev=>jsonFileImport(ev, (name, data)=>{
+                        const named_cv = {name: name, data: data}
+                        set_named_cvs([named_cv, ...named_cvs])
+                        set_cur(0);
+                    })}/>
                 </div>
 
                 <div style={{display: "flex", gap: "10rem"}}>
@@ -140,6 +145,14 @@ function ResumeBuilder() {
                         ))}
                     </select>
                 </div>
+
+                <div style={{display: "flex", gap: "10rem"}}>
+                    <p>Import Resume Items as JSON:</p>
+                    <input type="file" accept=".json" onChange={ev => jsonFileImport(ev, (name, data)=>{
+                        setCVInfo(data);
+                    })}/>
+                </div>
+
             </div>
             <div>
                 <h4>Export</h4>
