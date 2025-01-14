@@ -7,6 +7,12 @@ import ItemBucket from "../dnd/ItemBucket";
 import { BucketTypes } from "../dnd/types";
 import  useLogger  from "../../hooks/logger";
 
+// const MAP = new Map([
+// 	["summary", UI.SummaryUI],
+// 	["experiences", UI.ExperienceUI]
+// ]);
+
+
 // MAIN COMPONENT
 const CVEditor = forwardRef((
 	props: { cv: CV },
@@ -26,6 +32,10 @@ const CVEditor = forwardRef((
 		if(!props.cv) return;
 		setSectionOrder(Array.from(Array(props.cv.sections.length).keys()))
 	}, [props.cv]);
+
+	useEffect(()=>{
+		console.log("new CV: ", CV)
+	}, [CV])
 
 	// give parent access to CV
 	useImperativeHandle(ref, () => ({
@@ -51,7 +61,6 @@ const CVEditor = forwardRef((
 		// Each section specifies an `item_type`, which indicates which React UI component to use for displaying it.
 
 		const bt = BucketTypes[sec.item_type];
-		const ItemComponent = bt.DisplayItem;
 
 		return (
 			<UI.SectionUI head={sec_head.toUpperCase()} id={`sec-${sec_head}`}>
@@ -68,13 +77,16 @@ const CVEditor = forwardRef((
 					}}
 				>
 					{
-						// Map the items of this section to the desired format based on the item_type
 						sec_content?.map((item, i) => (
-							<ItemComponent obj={item} onUpdate={(new_val: any)=>{
-								setCV(draft => {
-									draft.sections[sec_idx].content[i] = new_val
-								})
-							}}/>
+							bt.DisplayItem({
+								obj: item,
+								onUpdate: (new_val: any)=>{
+									setCV(draft => {
+										console.log("new_val = ", new_val)
+										draft.sections[sec_idx].content[i] = new_val
+									})
+								}
+							})
 						))
 					}
 				</ItemBucket>

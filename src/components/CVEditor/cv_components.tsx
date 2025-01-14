@@ -62,11 +62,11 @@ function SummaryUI(props: {
 
 function ExperienceUI(props: {
 	obj: Experience,
-	onUpdate?: any
+	onUpdate?: (newObj: Experience) => void;
 }) {
 
 	const handleUpdate = (field: keyof Experience, value: any) => {
-		props.onUpdate({ ...props, [field]: value });
+		props.onUpdate({ ...props.obj, [field]: value });
 	};
 
 	if (!props.obj.title) {
