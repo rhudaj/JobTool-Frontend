@@ -8,7 +8,7 @@ function CLEditor(props: {
     paragraphs: string[],
 }) {
 
-    const [pgs, setPgs] = useImmer<string[]>([]);
+    const [pgs, setPgs] = useImmer<string[]>(null);
 
     useEffect(()=> {
         setPgs(props.paragraphs);

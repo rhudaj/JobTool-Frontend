@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import BackendAPI from "../../backend_api";
 import  useLogger  from "../../hooks/logger";
 import Section from "../../components/Section/Section";
@@ -10,37 +10,45 @@ import InfoPad from "../../components/infoPad/infoPad";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import useComponent2PDF from "../../hooks/component2pdf";
 
-function CLBuilder() {
+function CLBuilder(props: {}) {
 
     // ---------------- MODEL ----------------
 
     const [CL, setCL] = useState<string[]>(null);
-    const [clInfo, setCLInfo] = useState<any>([]);
+    const [clInfo, setCLInfo] = useState<any>(null);
 
-    const saveAsPDF = useComponent2PDF("cl-page")
+    const saveAsPDF = useComponent2PDF("cl-page");
 
     // Load data on mount
     useEffect(() => {
-        // Get the cl info
-        BackendAPI.get<any>("cl_info").then((cl_info) => {
-            if (cl_info) {
-                log("Got CL info from backend:");
-                setCLInfo(cl_info);
-            } else {
-                log("No CL info from backend");
-            }
-        });
+        if(process.env.REACT_APP_USE_BACKEND === "1") {
+            // Get the cl info
+            BackendAPI.get<any>("cl_info").then((cl_info) => {
+                if (cl_info) {
+                    console.log("Got CL info from backend:");
+                    setCLInfo(cl_info);
+                } else {
+                    console.log("No CL info from backend");
+                }
+            });
+        } else {
+            setCL([
+                (new Date()).toDateString(),
+                "Dear Hiring Manager",
+                "..."
+            ])
+        }
     }, []);
 
-    const log = useLogger("CLBuilder")
 
     // ---------------- CONTROLLER ----------------
 
-    const getCL = (input: string = null) => {
+    const getCL = useCallback((input: string = null) => {
         BackendAPI.post<{ job_info: string }, string[]>("genCL", {
             job_info: input,
-        }).then(setCL);
-    };
+        })
+        .then(setCL);
+    }, []);
 
     // ---------------- VIEW ----------------
 
@@ -58,9 +66,9 @@ function CLBuilder() {
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
                     <PrintablePage page_id="cl-page">
-                        <CLEditor paragraphs={CL} />
+                        <CLEditor paragraphs={CL}/>
                     </PrintablePage>
-                    <InfoPad info={clInfo} />
+                    <InfoPad info={clInfo}/>
                 </SplitView>
             </DndProvider>
         </Section>
