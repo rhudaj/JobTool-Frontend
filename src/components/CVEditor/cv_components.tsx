@@ -77,6 +77,7 @@ function ExperienceUI(props: {
 		<div className="experience">
 			{/* ROW 1 */}
 			<div className="header-info">
+				{/* ROW 1 */}
 				<div>
 					<div>
 						<TextEditDiv className="title" tv={props.obj.title} onUpdate={val => handleUpdate('title', val)} />
@@ -84,8 +85,12 @@ function ExperienceUI(props: {
 					</div>
 					<DateUI dateRange={props.obj.date} onUpdate={val => handleUpdate('date', val)} />
 				</div>
+				{/* ROW 2 */}
 				<div>
-					{ props.obj.role     ? <TextEditDiv className="role" tv={props.obj.role} onUpdate={val => handleUpdate('role', val)} /> 		: null }
+					<div className="role-item-list">
+						{ props.obj.role     	? <TextEditDiv className="role" tv={props.obj.role} onUpdate={val => handleUpdate('role', val)} /> 		: null }
+						{ props.obj.item_list && props.obj.item_list.length>0  	? <DelimitedList className="item-list" items={props.obj.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} /> : null}
+					</div>
 					{ props.obj.location ? <TextEditDiv className="location" tv={props.obj.location} onUpdate={val => handleUpdate('location', val)}/> 	: null }
 				</div>
 			</div>
@@ -118,8 +123,6 @@ function ExperienceUI(props: {
 					</ItemBucket>
 				</ul>
 			</div>
-			{/* ROW 3 */}
-			<DelimitedList className="item-list" items={props.obj.item_list} delimiter=" / " onUpdate={val => handleUpdate('item_list', val)} />
 		</div>
 	);
 };

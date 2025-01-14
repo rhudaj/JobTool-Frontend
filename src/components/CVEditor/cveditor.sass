@@ -1,6 +1,7 @@
 // PAGE RELATED:
 $base-font-size: 0.26cqw
-$page-padding:          calc(20 * $base-font-size)
+$page-padding-sides:            calc(25 * $base-font-size)
+$page-padding-top:              calc(20 * $base-font-size)
 
 // CV CONTENT SPECIFIC:
 $hr-line-width:         .5rem
@@ -11,7 +12,10 @@ $exp-head-content-gap:  calc(5 * $base-font-size)
 $exp-indent:             2.5em
 $link-col-gap:          calc(3 * $base-font-size)
 $skills-col-gap:        calc(3 * $base-font-size)
-$bullet-point-gap:      calc(2 * $base-font-size)
+
+$bullet-point-gap:      calc(3 * $base-font-size)
+$text-line-height:      calc(7 * $base-font-size)
+
 $sec-row-gap:           calc(6 * $base-font-size)
 $sec-head-line-gap:     calc(3 * $base-font-size)
 $sec-head-line-height:  calc(0.5 * $base-font-size)
@@ -35,7 +39,7 @@ $title-font:            calc(8 * $base-font-size)
 
 #cv-editor
     height: 100% // take up the whole page
-    padding: $page-padding
+    padding: $page-padding-top  $page-padding-sides
     color: black
     font-family: 'Arial Narrow Bold', sans-serif
     overflow: hidden
@@ -64,16 +68,31 @@ $title-font:            calc(8 * $base-font-size)
                 display: flex
                 flex-direction: column
                 gap: 0.25em
-                & > *         // children rows
+                & > *                   // children rows
                     display: flex
-                    & > *
+                    & > *               // both rows
                         width: 100%
-                    & > :first-child
+                    & > :first-child    // role - link
                         width: 100%
                         display: flex
                         column-gap: 3%
                     & > :last-child
                         text-align: right
+                        white-space: nowrap
+                        width: min-content
+                    .role-item-list
+                        display: flex
+                        gap: 5rem
+                        white-space: nowrap
+                        .item-list
+                            width: max-content
+                            white-space: nowrap
+                        &:has(.role)
+                            .item-list::before
+                                font-weight: bold
+                                content: "|\00a0\00a0"
+
+
             // second child
             .exp-content
                 padding-left: $exp-indent
@@ -110,6 +129,10 @@ hr
 
 // STYLES ------------------
 
+#cv-editor
+    .section > *
+        line-height: $text-line-height
+
 .exp-points
     display: flex
     flex-direction: column
@@ -122,7 +145,7 @@ hr
     font-style: italic
 
 .item-list
-    padding-left: $exp-indent
+    // padding-left: $exp-indent
     font-style: italic
 
 // LINK ------------------------------------------------
