@@ -29,17 +29,19 @@ function ResumeBuilder() {
     useEffect(() => {
         console.log("process.env.USE_BACKEND = ", process.env.REACT_APP_USE_BACKEND)
         if(process.env.REACT_APP_USE_BACKEND === "0") {
-            // USE A SAMPLE:
-            console.log("Using sample cv")
-            fetch(process.env.PUBLIC_URL + "/samples/sample_cv.json")
-            .then(response => {
-                return response.json()
-            })
+            // use SAMPLES from the /public folder:
+            const path = process.env.PUBLIC_URL + "/samples/"
+            // sample cv:
+            fetch(path + "jane_doe_resume.json")
+            .then(response => response.json())
             .then(data => {
-                const named_cv = {name: "sample_cv", data: data}
-                set_named_cvs([named_cv])
+                set_named_cvs([{name: "sample_cv", data: data}])
                 set_cur(0)
             })
+            // sample cv info:
+            fetch(path + "cv_info.json")
+            .then(response => response.json())
+            .then(setCVInfo)
         } else {
             // USE THE BACKEND SERVER:
             // Get all saved CVs
@@ -52,14 +54,7 @@ function ResumeBuilder() {
                 }
             });
             // Get the cv info
-            BackendAPI.get<any>("cv_info").then((cv_info) => {
-                if (cv_info) {
-                    log("Got CV info from backend");
-                    setCVInfo(cv_info);
-                } else {
-                    log("No CV Info received from backend");
-                }
-            });
+            BackendAPI.get<any>("cv_info").then(setCVInfo);
         }
     }, []);
 
