@@ -1,179 +1,257 @@
 {
     "header_info": {
-        "name": "Jane Doe",
+        "name": { "track": "Jane Doe" },
         "links": [
             {
                 "url": "https://jane-doe.com/",
                 "icon": "fa fa-globe",
-                "text": "jane-doe.com"
+                "text": { "track": "jane-doe.com" }
             },
             {
                 "url": "https://github.com/janedoe",
                 "icon": "fa fa-github",
-                "text": "janedoe"
+                "text": { "track": "janedoe" }
             },
             {
                 "url": "https://www.linkedin.com/in/janedoe",
                 "icon": "fa fa-linkedin",
-                "text": "in/janedoe"
+                "text": { "track": "in/janedoe" }
             },
             {
                 "url": "mailto:jane.doe@example.com",
                 "icon": "fa fa-envelope",
-                "text": "jane.doe@example.com"
+                "text": { "track": "jane.doe@example.com" }
             },
             {
                 "url": "tel:123-456-7890",
                 "icon": "fa fa-phone",
-                "text": "123-456-7890"
+                "text": { "track": "123-456-7890" }
             }
         ]
     },
     "sections": [
         {
-            "name": "summary",
-            "item_type": "summary",
-            "content": [{
-                "summary": "My name is Jane Doe. I am an accomplished full stack developer with a passion for building scalable web applications and solving complex problems. I am proficient in:",
-                "languages": [
-                    "JavaScript",
-                    "Python",
-                    "Ruby",
-                    "Java",
-                    "TypeScript",
-                    "HTML",
-                    "CSS",
-                    "SQL"
-                ],
-                "technologies": [
-                    "React",
-                    "Vue.js",
-                    "Node.js",
-                    "Django",
-                    "Rails",
-                    "MongoDB",
-                    "PostgreSQL",
-                    "AWS",
-                    "Docker",
-                    "Kubernetes",
-                    "GraphQL",
-                    "Git"
-                ]
-            }]
-        },
-        {
-            "name": "education",
-            "item_type": "experiences",
+            "name": { "track": "summary" },
+            "item_type": { "track": "summary" },
             "content": [
                 {
-                    "date": {
-                        "start": { "month": 9, "year": 2016 },
-                        "end": { "month": 5, "year": 2020 }
+                    "summary": {
+                        "track": "My name is Jane Doe. I am an accomplished full stack developer with a passion for building scalable web applications and solving complex problems. I am proficient in:"
                     },
-                    "title": "Bachelor of Science in Computer Science",
-                    "location": "Tech University",
-                    "description": [
-                        "Specialization: Software Development",
-                        "Dean’s List: 2018, 2019, 2020",
-                        "Courses: Data Structures, Algorithms, Web Development, Database Management"
-                    ],
-                    "item_list": []
+                    "languages": {
+                        "tracl": [
+                            "JavaScript",
+                            "Python",
+                            "Ruby",
+                            "Java",
+                            "TypeScript",
+                            "HTML",
+                            "CSS",
+                            "SQL"
+                        ]
+                    },
+                    "technologies": {
+                        "track": [
+                            "React",
+                            "Vue.js",
+                            "Node.js",
+                            "Django",
+                            "Rails",
+                            "MongoDB",
+                            "PostgreSQL",
+                            "AWS",
+                            "Docker",
+                            "Kubernetes",
+                            "GraphQL",
+                            "Git"
+                        ]
+                    }
                 }
             ]
         },
         {
-            "name": "experience",
+            "name": { "track": "education" },
             "item_type": "experiences",
             "content": [
                 {
                     "date": {
-                        "start": { "month": 6, "year": 2020 },
-                        "end": { "month": 12, "year": 2022 }
+                        "track": {
+                            "start": { "month": 9, "year": 2016 },
+                            "end": { "month": 5, "year": 2020 }
+                        }
                     },
-                    "title": "Tech Innovations Inc.",
-                    "role": "Full Stack Developer",
-                    "location": "San Francisco, CA",
-                    "description": [
-                        "Developed and maintained scalable web applications using React and Node.js.",
-                        "Implemented RESTful APIs for seamless integration with frontend applications.",
-                        "Collaborated with a team of 10+ developers using Agile methodologies."
-                    ],
-                    "item_list": ["React", "Node.js", "PostgreSQL", "Git"]
-                },
-                {
-                    "date": {
-                        "start": { "month": 1, "year": 2023 },
-                        "end": { "month": 12, "year": 2024 }
+                    "title": {
+                        "track": "Bachelor of Science in Computer Science"
                     },
-                    "title": "CodeSphere Solutions",
-                    "role": "Software Engineer",
-                    "location": "Remote",
+                    "location": { "track": "Tech University" },
                     "description": [
-                        "Led the migration of legacy systems to cloud-based infrastructure using AWS.",
-                        "Optimized application performance, reducing load times by 40%.",
-                        "Designed and implemented CI/CD pipelines to streamline deployments."
+                        { "track": "Specialization: Software Development" },
+                        { "track": "Dean’s List: 2018, 2019, 2020" },
+                        {
+                            "track": "Courses: Data Structures, Algorithms, Web Development, Database Management"
+                        }
                     ],
-                    "item_list": ["AWS", "Docker", "Kubernetes", "CI/CD"]
-                },
-                {
-                    "date": {
-                        "start": { "month": 2, "year": 2021 },
-                        "end": { "month": 5, "year": 2022 }
-                    },
-                    "title": "NextGen Tech",
-                    "role": "Frontend Developer",
-                    "location": "Austin, TX",
-                    "description": [
-                        "Developed interactive user interfaces for enterprise applications using Angular.",
-                        "Collaborated with UX designers to create responsive and accessible designs.",
-                        "Improved application performance, achieving a 25% reduction in loading time."
-                    ],
-                    "item_list": ["Angular", "TypeScript", "SCSS", "Performance Optimization"]
+                    "item_list": { "track": [] }
                 }
             ]
         },
         {
-            "name": "projects",
+            "name": { "track": "experience" },
             "item_type": "experiences",
             "content": [
                 {
-                    "date": { "start": { "month": 8, "year": 2024 } },
-                    "title": "E-Commerce Platform",
+                    "date": {
+                        "track": {
+                            "start": { "month": 6, "year": 2020 },
+                            "end": { "month": 12, "year": 2022 }
+                        }
+                    },
+                    "title": { "track": "Tech Innovations Inc." },
+                    "role": { "track": "Full Stack Developer" },
+                    "location": { "track": "San Francisco, CA" },
+                    "description": [
+                        {
+                            "track": "Developed and maintained scalable web applications using React and Node.js."
+                        },
+                        {
+                            "track": "Implemented RESTful APIs for seamless integration with frontend applications."
+                        },
+                        {
+                            "track": "Collaborated with a team of 10+ developers using Agile methodologies."
+                        }
+                    ],
+                    "item_list": {
+                        "track": ["React", "Node.js", "PostgreSQL", "Git"]
+                    }
+                },
+                {
+                    "date": {
+                        "track": {
+                            "start": { "month": 1, "year": 2023 },
+                            "end": { "month": 12, "year": 2024 }
+                        }
+                    },
+                    "title": { "track": "CodeSphere Solutions" },
+                    "role": { "track": "Software Engineer" },
+                    "location": { "track": "Remote" },
+                    "description": [
+                        {
+                            "track": "Led the migration of legacy systems to cloud-based infrastructure using AWS."
+                        },
+                        {
+                            "track": "Optimized application performance, reducing load times by 40%."
+                        },
+                        {
+                            "track": "Designed and implemented CI/CD pipelines to streamline deployments."
+                        }
+                    ],
+                    "item_list": {
+                        "track": ["AWS", "Docker", "Kubernetes", "CI/CD"]
+                    }
+                },
+                {
+                    "date": {
+                        "track": {
+                            "start": { "month": 2, "year": 2021 },
+                            "end": { "month": 5, "year": 2022 }
+                        }
+                    },
+                    "title": { "track": "NextGen Tech" },
+                    "role": { "track": "Frontend Developer" },
+                    "location": { "track": "Austin, TX" },
+                    "description": [
+                        {
+                            "track": "Developed interactive user interfaces for enterprise applications using Angular."
+                        },
+                        {
+                            "track": "Collaborated with UX designers to create responsive and accessible designs."
+                        },
+                        {
+                            "track": "Improved application performance, achieving a 25% reduction in loading time."
+                        }
+                    ],
+                    "item_list": {
+                        "track": [
+                            "Angular",
+                            "TypeScript",
+                            "SCSS",
+                            "Performance Optimization"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": { "track": "projects" },
+            "item_type": "experiences",
+            "content": [
+                {
+                    "date": {
+                        "track": { "start": { "month": 8, "year": 2024 } }
+                    },
+                    "title": { "track": "E-Commerce Platform" },
                     "link": {
                         "url": "https://github.com/janedoe/ecommerce-platform",
                         "icon": "fa fa-link"
                     },
                     "description": [
-                        "Built a full-stack e-commerce platform using React, Node.js, and MongoDB.",
-                        "Implemented secure user authentication and payment processing."
+                        {
+                            "track": "Built a full-stack e-commerce platform using React, Node.js, and MongoDB."
+                        },
+                        {
+                            "track": "Implemented secure user authentication and payment processing."
+                        }
                     ],
-                    "item_list": ["React", "Node.js", "MongoDB", "Stripe API"]
+                    "item_list": {
+                        "track": ["React", "Node.js", "MongoDB", "Stripe API"]
+                    }
                 },
                 {
-                    "date": { "start": { "month": 11, "year": 2023 } },
-                    "title": "Personal Portfolio",
+                    "date": {
+                        "track": { "start": { "month": 11, "year": 2023 } }
+                    },
+                    "title": { "track": "Personal Portfolio" },
                     "link": {
                         "url": "https://github.com/janedoe/portfolio",
                         "icon": "fa fa-link"
                     },
                     "description": [
-                        "Designed and developed a responsive portfolio website using Vue.js and SCSS.",
-                        "Showcased professional experience and project highlights."
+                        {
+                            "track": "Designed and developed a responsive portfolio website using Vue.js and SCSS."
+                        },
+                        {
+                            "track": "Showcased professional experience and project highlights."
+                        }
                     ],
-                    "item_list": ["Vue.js", "SCSS", "Responsive Design"]
+                    "item_list": {
+                        "track": ["Vue.js", "SCSS", "Responsive Design"]
+                    }
                 },
                 {
-                    "date": { "start": { "month": 3, "year": 2023 } },
-                    "title": "Weather Dashboard",
+                    "date": {
+                        "track": { "start": { "month": 3, "year": 2023 } }
+                    },
+                    "title": { "track": "Weather Dashboard" },
                     "link": {
                         "url": "https://github.com/janedoe/weather-dashboard",
                         "icon": "fa fa-link"
                     },
                     "description": [
-                        "Created a real-time weather dashboard using React and OpenWeatherMap API.",
-                        "Implemented dynamic data visualizations with Chart.js for user-friendly insights."
+                        {
+                            "track": "Created a real-time weather dashboard using React and OpenWeatherMap API."
+                        },
+                        {
+                            "track": "Implemented dynamic data visualizations with Chart.js for user-friendly insights."
+                        }
                     ],
-                    "item_list": ["React", "OpenWeatherMap API", "Chart.js", "Responsive Design"]
+                    "item_list": {
+                        "track": [
+                            "React",
+                            "OpenWeatherMap API",
+                            "Chart.js",
+                            "Responsive Design"
+                        ]
+                    }
                 }
             ]
         }

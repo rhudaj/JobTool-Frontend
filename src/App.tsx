@@ -2,8 +2,8 @@ import "./App.sass";
 import { useState } from "react";
 import  useLogger  from "./hooks/logger";
 import ResumeBuilder from "./sections/ResumeBuilder/ResumeBuilder";
-import CLBuilder from "./sections/CLBuilder/CoverLetterBuilder";
-import JobAnalyze from "./sections/JobAnalyze/JobAnalyze";
+// import CLBuilder from "./sections/CLBuilder/CoverLetterBuilder";
+// import JobAnalyze from "./sections/JobAnalyze/JobAnalyze";
 
 function SideMenu(props: {
     labels: string[];
@@ -26,6 +26,14 @@ function SideMenu(props: {
     return <div id="side-menu">{props.labels.map((l,i)=><MenuItem key={i} text={l}/>)}</div>;
 }
 
+function TopMenu(props: {}) {
+    return (
+        <div id="app-header">
+            <h1>Job Tool</h1>
+        </div>
+    )
+};
+
 function App() {
 
     // --------------- STATE ---------------
@@ -41,24 +49,22 @@ function App() {
             name: "Resume Builder",
             content: <ResumeBuilder/>,
         },
-        {
-            name: "Letter",
-            content: <CLBuilder/>,
-        },
-        {
-            name: "Job Analyze",
-            content: <JobAnalyze/>
-        },
+        // {
+        //     name: "Letter",
+        //     content: <CLBuilder/>,
+        // },
+        // {
+        //     name: "Job Analyze",
+        //     content: <JobAnalyze/>
+        // },
     ];
 
     return (
         <div className="app-root-container">
-            <div id="app-header">
-                <h1>Job Tool</h1>
-            </div>
+            <TopMenu/>
             <div id="app-content">
                 <SideMenu
-                    labels={labeled_sections.map((ls) => ls.name)}
+                    labels={labeled_sections.map(ls => ls.name)}
                     onSelect={setSec}
                 />
                 <div id="section-container">
