@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import TextEditDiv from "../TextEditDiv/texteditdiv";
 import ItemBucket from "../dnd/ItemBucket";
 import { useImmer } from "use-immer";
-import { TrackVal } from "../../hooks/trackable";
 
 function CLEditor(props: {
     paragraphs: string[],
@@ -26,7 +25,7 @@ function CLEditor(props: {
         >
             {
                 pgs?.map((p: string, i: number)=>(
-                    <TextEditDiv key={i} id={`cl-row-${i}`} tv={new TrackVal<string>(p)}/>
+                    <TextEditDiv key={i} id={`cl-row-${i}`} tv={p}/>
                 ))
             }
         </ItemBucket>
