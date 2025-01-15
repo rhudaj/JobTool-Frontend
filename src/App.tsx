@@ -2,8 +2,8 @@ import "./App.sass";
 import { useState } from "react";
 import  useLogger  from "./hooks/logger";
 import ResumeBuilder from "./sections/ResumeBuilder/ResumeBuilder";
-// import CLBuilder from "./sections/CLBuilder/CoverLetterBuilder";
-// import JobAnalyze from "./sections/JobAnalyze/JobAnalyze";
+import CLBuilder from "./sections/CLBuilder/CoverLetterBuilder";
+import JobAnalyze from "./sections/JobAnalyze/JobAnalyze";
 
 function SideMenu(props: {
     labels: string[];
@@ -49,14 +49,14 @@ function App() {
             name: "Resume Builder",
             content: <ResumeBuilder/>,
         },
-        // {
-        //     name: "Letter",
-        //     content: <CLBuilder/>,
-        // },
-        // {
-        //     name: "Job Analyze",
-        //     content: <JobAnalyze/>
-        // },
+        {
+            name: "Letter",
+            content: <CLBuilder/>,
+        },
+        {
+            name: "Job Analyze",
+            content: <JobAnalyze/>
+        },
     ];
 
     return (
