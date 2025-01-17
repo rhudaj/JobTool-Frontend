@@ -5,21 +5,12 @@ import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
 import ItemBucket from "../dnd/ItemBucket";
 import { BucketTypes } from "../dnd/types";
-import  useLogger  from "../../hooks/logger";
-
-// const MAP = new Map([
-// 	["summary", UI.SummaryUI],
-// 	["experiences", UI.ExperienceUI]
-// ]);
-
 
 // MAIN COMPONENT
 const CVEditor = forwardRef((
 	props: { cv: CV },
 	ref: React.ForwardedRef<any>
 ) => {
-
-	const log = useLogger("CVEditor");
 
 	// -------------- MODEL --------------
 

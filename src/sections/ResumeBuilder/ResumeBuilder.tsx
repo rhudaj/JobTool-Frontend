@@ -228,12 +228,12 @@ function ResumeBuilder() {
         <Section id="section-cv" heading="Resume Builder">
             <Controls/>
             <DndProvider backend={HTML5Backend}>
-                {/* <SplitView> */}
+                <SplitView>
                     <PrintablePage page_id="cv-page">
                         {named_cvs && <CVEditor cv={named_cvs[cur]?.data} ref={cvref} />}
                     </PrintablePage>
-                    {/* <InfoPad info={cvInfo} /> */}
-                {/* </SplitView> */}
+                    <InfoPad info={cvInfo} />
+                </SplitView>
                 </DndProvider>
         </Section>
     );
