@@ -25,7 +25,11 @@ function CLEditor(props: {
         >
             {
                 pgs?.map((p: string, i: number)=>(
-                    <TextEditDiv key={i} id={`cl-row-${i}`} tv={p}/>
+                    <TextEditDiv key={i} id={`cl-row-${i}`} tv={p} onUpdate={newVal => {
+                        setPgs(draft => {
+                            draft[i] = newVal;
+                        })
+                    }}/>
                 ))
             }
         </ItemBucket>

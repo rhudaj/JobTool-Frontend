@@ -1,10 +1,9 @@
 import "./Item.scss"
 import { useDrag, useDrop } from "react-dnd";
 import React from "react";
-import  useLogger  from "../../hooks/logger";
 import { joinClassNames } from "../../hooks/joinClassNames";
 import { Item, DEFAULT_ITEM_TYPE } from "./types";
-import DNDItemControls from "./controls";
+import ItemControlsContainer from "./controls";
 
 // TODO: should be usable on its own (ie: has its own state) in the case you dont want a bucket.
 function DNDItem(props: {
@@ -14,15 +13,12 @@ function DNDItem(props: {
     onHover?: (dragId: string, isBelow: boolean, isRight: boolean) => void,
     onLetGo?: (dragId: any, bucketId: any) => void, // send to parent when you drop on a bucket
     onDelete?: (id: any) => void,
-    onAddItemBelow?: (id: any) => void,
+    onAddItem?: (id: any, below: boolean) => void,
 } & {
     // Optional props
     disableDrag?: boolean		// defaults to false
     disableReplace?: boolean 	// defaults to false
 }) {
-
-
-    const log = useLogger("DNDItem");
 
     // -------------------- STATE ---------------------
 
@@ -98,11 +94,16 @@ function DNDItem(props: {
             <div ref={ref} className={classNames}>
                 {props.children}
             </div>
-            <DNDItemControls ref={ref}>
+            <ItemControlsContainer ref={ref}>
                 <div ref={drag} className="move-handle">M</div>
                 { props.onDelete && <div className="delete-button" onClick={()=>props.onDelete(props.item.id)}>X</div>}
-                { props.onAddItemBelow && <div className="add-item-below" onClick={()=>props.onAddItemBelow(props.item.id)}>+</div> }
-            </DNDItemControls>
+                { props.onAddItem &&
+                    <>
+                        <div className="add-item" onClick={()=>props.onAddItem(props.item.id, true)}>↓</div>
+                        <div className="add-item" onClick={()=>props.onAddItem(props.item.id, false)}>↑</div>
+                    </>
+                }
+            </ItemControlsContainer>
         </>
     );
 };

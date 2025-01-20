@@ -5,7 +5,7 @@ import React from "react";
  * A button that will hover over some reference element and
  * notify the parent to delete it when clicked.
  */
-const DNDItemControls = React.forwardRef<HTMLElement, any>((
+const ItemControlsContainer = React.forwardRef<HTMLElement, any>((
     props: { children: React.ReactElement },
     ref: React.RefObject<HTMLElement>
 ) => {
@@ -79,4 +79,4 @@ const DNDItemControls = React.forwardRef<HTMLElement, any>((
     );
 });
 
-export default DNDItemControls;
+export default ItemControlsContainer;
