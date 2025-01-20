@@ -23,7 +23,6 @@ function DNDItem(props: {
     // -------------------- STATE ---------------------
 
     // const ref = React.useRef(null);
-    const dragRef = React.useRef(null)
     const ref = React.useRef(null)  // "preview ref"
 
     // -----------------DRAG FUNCTIONALITY-----------------

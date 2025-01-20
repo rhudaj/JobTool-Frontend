@@ -31,13 +31,8 @@ function CLBuilder(props: {}) {
                     console.log("No CL info from backend");
                 }
             });
-        } else {
-            setCL([
-                (new Date()).toDateString(),
-                "Dear Hiring Manager",
-                "..."
-            ])
         }
+        setCL([])
     }, []);
 
 

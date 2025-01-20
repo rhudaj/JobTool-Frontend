@@ -11,7 +11,15 @@ function CLEditor(props: {
     const [pgs, setPgs] = useImmer<string[]>(null);
 
     useEffect(()=> {
-        setPgs(props.paragraphs);
+        setPgs([
+            "Roman Hudaj",
+            "Toronto, ON",
+            "rhudaj@uwaterloo.ca",
+            "",
+            new Date().toDateString(),
+            "Dear Hiring Manager",
+            ...(props.paragraphs ? props.paragraphs : [])
+        ]);
     }, [props.paragraphs]);
 
     return (
