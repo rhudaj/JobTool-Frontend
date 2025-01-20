@@ -29,32 +29,26 @@ function SectionUI(props: {
 };
 
 function SummaryUI(props: {
-	obj: any,
-	onUpdate?: any
+	obj: any,		// summary object
+	onUpdate?: any	// summary object => void
 }) {
+
+	const handleUpdate = (key: string, newVal: any) => {
+		const new_obj = {...props.obj}
+		new_obj[key] = newVal
+		props.onUpdate(new_obj);
+	};
 
 	return (
 		<div className="sec-summary">
-			<TextEditDiv tv={props.obj.summary} id="summary" onUpdate={val => {
-				const new_obj = {...props.obj}
-				new_obj.summary = val
-				props.onUpdate(new_obj);
-			}}/>
+			<TextEditDiv tv={props.obj["summary"]} id="summary" onUpdate={val => handleUpdate("summary", val)}/>
 			<div className="sub-sec">
 				<div className="sub-sec-head">Languages:</div>
-				<UI.DelimitedList items={props.obj.languages} delimiter=", " onUpdate={val=> {
-					const new_obj = {...props.obj}
-					new_obj.languages = val
-					props.onUpdate(new_obj);
-				}}/>
+				<UI.DelimitedList items={props.obj["languages"]} delimiter=", " onUpdate={val => handleUpdate("languages", val)}/>
 			</div>
 			<div className="sub-sec">
 				<div className="sub-sec-head">Technology:</div>
-				<UI.DelimitedList items={props.obj.technologies} delimiter=", " onUpdate={val=> {
-					const new_obj = {...props.obj}
-					new_obj.languages = val
-					props.onUpdate(new_obj);
-				}}/>
+				<UI.DelimitedList items={props.obj["technologies"]} delimiter=", " onUpdate={val => handleUpdate("technologies", val)}/>
 			</div>
 		</div>
 	)

@@ -72,8 +72,8 @@ const CVEditor = forwardRef((
 							bt.DisplayItem({
 								obj: item,
 								onUpdate: (new_val: any)=>{
+									console.log(`section ${sec_head}, new_val = `, new_val)
 									setCV(draft => {
-										console.log("new_val = ", new_val)
 										draft.sections[sec_idx].content[i] = new_val
 									})
 								}
