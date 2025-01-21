@@ -1,29 +1,66 @@
 import "./cveditor.sass";
 import { Experience, Link, MonthYear, DateRange } from "job-tool-shared-types";
 import TextEditDiv from "../TextEditDiv/texteditdiv";
-import React from "react";
 import { joinClassNames } from "../../hooks/joinClassNames";
 import ItemBucket from "../dnd/ItemBucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
+import { BucketTypes } from "../dnd/types";
+import { useImmer } from "use-immer";
+import { useEffect } from "react";
 
-function SectionUI(props: {
-    head: string;
-    id?: string;
-    children: React.ReactNode;
-}) {
+function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
+
+	const [sec, setSec] = useImmer(props.obj);
+
+	useEffect(()=>{
+		if(sec === props.obj) return;
+		props.onUpdate(sec);
+	}, [sec]);
+
+	if(!sec) {
+		return null;
+	}
 
 	const formatHeader = (head: string) => (
 		head.toUpperCase()
 	);
 
+	const bt = BucketTypes[sec.item_type];
+
 	return (
 		<div className="section">
 			<div className="sec-head">
-				<p>{formatHeader(props.head)}</p>
+				<p>{formatHeader(sec.name)}</p>
 				<hr />
 			</div>
-			<div id={props.id} className="sec-content">{props.children}</div>
+			<div id={`sec-${sec.name}`} className="sec-content">
+				<ItemBucket
+					id={sec.name}
+					values={sec.content}
+					item_type={bt.item_type}
+					isVertical={bt.isVertical}
+					displayItemsClass={bt.displayItemsClass}
+					onUpdate={new_items =>{
+						const copy = {...sec};
+						copy.content = new_items;
+						props.onUpdate(copy);
+					}}
+				>
+					{
+						sec.content?.map((item, i) => (
+							bt.DisplayItem({
+								obj: item,
+								onUpdate: newVal => {
+									setSec(draft=>{
+										draft.content[i] = newVal;
+									})
+								}
+							})
+						))
+					}
+				</ItemBucket>
+			</div>
 		</div>
 	)
 };

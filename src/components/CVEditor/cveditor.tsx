@@ -4,7 +4,6 @@ import * as UI from "./cv_components"
 import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
 import ItemBucket from "../dnd/ItemBucket";
-import { BucketTypes } from "../dnd/types";
 
 // MAIN COMPONENT
 const CVEditor = forwardRef((
@@ -15,75 +14,24 @@ const CVEditor = forwardRef((
 	// -------------- MODEL --------------
 
 	const [CV, setCV] = useImmer<CV>(null);
-	const [sectionOrder, setSectionOrder] = useImmer<number[]>(null);
 
-	// initialize the CV & sectionOrder
 	useEffect(() => {
 		setCV(props.cv);
-		if(!props.cv) return;
-		setSectionOrder(Array.from(Array(props.cv.sections.length).keys()))
 	}, [props.cv]);
 
-	useEffect(()=>{
-		console.log("new CV: ", CV)
-	}, [CV])
 
 	// give parent access to CV
 	useImperativeHandle(ref, () => ({
 		getCV: () => {
-			// Update the sections of the cv based on sectionOrder (TODO: find a better way)
-			const new_cv = {...CV}
-			new_cv.sections = sectionOrder.map(sec_idx => CV.sections[sec_idx])
-			return new_cv
+			return CV;
 		}
 	}));
 
 	// -------------- VIEW (setup) --------------
 
-	if (!CV || !sectionOrder) {
+	if (!CV) {
 		return null;
 	}
-
-	const sections_ui = sectionOrder.map(sec_idx => {
-
-		const sec = CV.sections[sec_idx];
-		const sec_content = sec.content;	// list of items of the same type
-		const sec_head = sec.name;			// the name/header for the section
-		// Each section specifies an `item_type`, which indicates which React UI component to use for displaying it.
-
-		const bt = BucketTypes[sec.item_type];
-
-		return (
-			<UI.SectionUI head={sec_head.toUpperCase()} id={`sec-${sec_head}`}>
-				<ItemBucket
-					id={sec_head}
-					values={sec.content}
-					item_type={bt.item_type}
-					isVertical={bt.isVertical}
-					displayItemsClass={bt.displayItemsClass}
-					onUpdate={new_vals => {
-						setCV(draft => {
-							draft.sections[sec_idx].content = new_vals
-						})
-					}}
-				>
-					{
-						sec_content?.map((item, i) => (
-							bt.DisplayItem({
-								obj: item,
-								onUpdate: (new_val: any)=>{
-									console.log(`section ${sec_head}, new_val = `, new_val)
-									setCV(draft => {
-										draft.sections[sec_idx].content[i] = new_val
-									})
-								}
-							})
-						))
-					}
-				</ItemBucket>
-			</UI.SectionUI>
-		);
-	})
 
 	// -------------- VIEW --------------
 
@@ -95,14 +43,26 @@ const CVEditor = forwardRef((
 			</div>
 			<ItemBucket
 				id="sections-bucket"
-				values={sectionOrder} // only worry about tracking the string names (assumes all unique)
+				values={CV.sections} // only worry about tracking the string names (assumes all unique)
 				isVertical={true}
 				item_type="section"
 				displayItemsClass="section"
-				onUpdate={newSecOrder => {
-					setSectionOrder([...newSecOrder])
+				onUpdate={new_vals => {
+					setCV(draft => {
+						draft.sections = new_vals
+					})
 				}}
-			>{sections_ui}</ItemBucket>
+			>
+				{
+					CV.sections?.map((sec, i) => (
+						<UI.SectionUI obj={sec} onUpdate={new_obj => {
+							setCV(draft => {
+								draft.sections[i] = new_obj;
+							})
+						}}/>
+					))
+				}
+			</ItemBucket>
 		</div>
 	);
 });
