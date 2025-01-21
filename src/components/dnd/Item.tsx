@@ -10,11 +10,10 @@ function DNDItem(props: {
     item: Item,
     children: JSX.Element,
     item_type?: string,
-    onHover?: (dragId: string, isBelow: boolean, isRight: boolean) => void,
+    onHover?: (hoverId: string, dragId: string, isBelow: boolean, isRight: boolean) => void,
     onLetGo?: (dragId: any, bucketId: any) => void, // send to parent when you drop on a bucket
     onDelete?: (id: any) => void,
     onAddItem?: (id: any, below: boolean) => void,
-} & {
     // Optional props
     disableDrag?: boolean		// defaults to false
     disableReplace?: boolean 	// defaults to false
@@ -22,8 +21,7 @@ function DNDItem(props: {
 
     // -------------------- STATE ---------------------
 
-    // const ref = React.useRef(null);
-    const ref = React.useRef(null)  // "preview ref"
+    const ref = React.useRef(null);
 
     // -----------------DRAG FUNCTIONALITY-----------------
 
@@ -63,7 +61,9 @@ function DNDItem(props: {
                 const rect = ref.current.getBoundingClientRect();
                 const dragPos = monitor.getClientOffset();
 
-                props.onHover(dragItem.id,
+                props.onHover(
+                    props.item.id,  // hovered item's ID
+                    dragItem.id,
                     (dragPos.y - rect.top) > (rect.bottom - rect.top)/2, 	// is it below?
                     (dragPos.x - rect.left) > (rect.right - rect.left)/2	// is it right?
                 );
@@ -75,12 +75,9 @@ function DNDItem(props: {
         [props.item, props.onHover]
     );
 
-    // Inject the dnd props into the reference
-    drop(preview(ref))
+    drop(preview(ref));     // Inject the dnd props into the reference
 
     // -----------------RENDER-----------------
-
-    // Create the custom default layer
 
     const classNames = joinClassNames(
         "dnd-item-wrapper",

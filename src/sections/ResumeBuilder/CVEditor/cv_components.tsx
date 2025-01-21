@@ -14,6 +14,7 @@ function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 	const [sec, setSec] = useImmer(props.obj);
 
 	useEffect(()=>{
+		console.log("SectionUI, new sec: ", sec);
 		if(sec === props.obj) return;
 		props.onUpdate(sec);
 	}, [sec]);
@@ -41,10 +42,10 @@ function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 					item_type={bt.item_type}
 					isVertical={bt.isVertical}
 					displayItemsClass={bt.displayItemsClass}
-					onUpdate={new_items =>{
-						const copy = {...sec};
-						copy.content = new_items;
-						props.onUpdate(copy);
+					onUpdate={newVal =>{
+						setSec(draft=>{
+							draft.content = newVal;
+						})
 					}}
 				>
 					{

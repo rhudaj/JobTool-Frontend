@@ -100,7 +100,6 @@ function ItemBucket(
         displayItemsClass?: string;
         item_type?: string;
         onUpdate?: (newValues: any[]) => void;
-    } & {
         // DISABLE OPTIONS (all default to false)
         deleteDisabled?: boolean;
         replaceDisabled?: boolean;
@@ -111,6 +110,7 @@ function ItemBucket(
     // ----------------- STATE -----------------
 
     const { items, setItems, addItem, moveItem, removeItem, changeItemValue } =
+        // TODO: clean this up
         useBucket(
             !props.values
                 ? []
@@ -120,11 +120,11 @@ function ItemBucket(
                   }))
         );
 
-    const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(
-        undefined
-    );
+    // TODO: clean this up
+    const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
 
     React.useEffect(() => {
+        // TODO: clean this up
         setItems(
             !props.values
                 ? []
@@ -147,18 +147,23 @@ function ItemBucket(
 
     // ----------------- DND RELATED -----------------
 
-    const onBucketItemHover = (
-        hoverId: string,
-        dragId: string,
-        isPastHalf: boolean
-    ) => {
+    const onItemHover = (hoverId: string, dragId: string, isBelow: boolean, isRight: boolean) => {
+
         if (props.dropDisabled) return;
+
+        // console.log(`onItemHover(${items.findIndex(I=>I.id===hoverId)}, ${items.findIndex(I=>I.id===dragId)}, ${isBelow}, ${isRight})`);
 
         // Find the index of the item being hovered over:
         const hoveredIndex = items.findIndex((I) => I.id === hoverId);
+
+        // Wether its "past half" depends on orientation of the bucket
+        const isPastHalf = props.isVertical ? isBelow : isRight;
+
+        // Find the corresponding gap:
         let gapIndex = isPastHalf
             ? nextGap(hoveredIndex)
             : prevGap(hoveredIndex);
+
         const dragIndex = items.findIndex((I) => I.id === dragId);
         const diff = dragIndex - gapIndex;
 
@@ -259,18 +264,14 @@ function ItemBucket(
                             <DropGap isActive={hoveredGap === prevGap(i)} />
                         )}
                         <DNDItem
+                            // Specific to current item:
                             key={i}
                             item={I}
                             item_type={props.item_type}
+                            // Not specific (TODO: pass as context)
                             onDelete={!props.deleteDisabled && removeItem}
                             onAddItem={onAddItem}
-                            onHover={(dragId, isBelow, isRight) => {
-                                // What's considered next/prev item depends on orientation
-                                const isPastHalf = props.isVertical
-                                    ? isBelow
-                                    : isRight;
-                                onBucketItemHover(I.id, dragId, isPastHalf);
-                            }}
+                            onHover={onItemHover}
                             onLetGo={(dragId: any, bucketId: any) => {
                                 // Remove the item if it was dropped on a different bucket
                                 if (
