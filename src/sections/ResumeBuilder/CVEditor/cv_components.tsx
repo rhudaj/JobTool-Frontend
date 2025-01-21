@@ -71,9 +71,7 @@ function SummaryUI(props: {
 }) {
 
 	const handleUpdate = (key: string, newVal: any) => {
-		const new_obj = {...props.obj}
-		new_obj[key] = newVal
-		props.onUpdate(new_obj);
+		props.onUpdate({...props.obj, [key]: newVal});
 	};
 
 	return (
@@ -96,12 +94,12 @@ function ExperienceUI(props: {
 	onUpdate?: (newObj: Experience) => void;
 }) {
 
-	const handleUpdate = (field: keyof Experience, value: any) => {
-		props.onUpdate({ ...props.obj, [field]: value });
+	const handleUpdate = (field: keyof Experience, val: any) => {
+		if(!props.onUpdate) return;
+		props.onUpdate({ ...props.obj, [field]: val });
 	};
 
-	if (!props.obj.title) {
-		// Invalid object
+	if (!props?.obj?.title) {
 		return null;
 	}
 	return (

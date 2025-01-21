@@ -42,7 +42,8 @@ const nextGap = (itemIndex: number) => itemIndex + 1;
  * items - guaranteed to be defined, but might be empty ([]).
  */
 const useBucket = (initItems: Item[]) => {
-    const [items, setItems] = useImmer<Item[]>(initItems);
+
+    const [items, setItems] = useImmer<Item[]>(initItems ?? []);
 
     // -----------------HELPERS-----------------
 
@@ -91,58 +92,42 @@ const useBucket = (initItems: Item[]) => {
  * TODO: hover and drop only works when over an item, not if there is empty space at the bottom of all items
  * TODO: controls should be put here next to each item (since they only make sense if the item is in a bucker)
  */
-function ItemBucket(
-    props: {
-        id: any;
-        values: any[];
-        children: JSX.Element[];
-        isVertical: boolean;
-        displayItemsClass?: string;
-        item_type?: string;
-        onUpdate?: (newValues: any[]) => void;
-        // DISABLE OPTIONS (all default to false)
-        deleteDisabled?: boolean;
-        replaceDisabled?: boolean;
-        dropDisabled?: boolean;
-        deleteOnMoveDisabled?: boolean;
-    }
-) {
+function ItemBucket(props: {
+    id: any;
+    values: any[];
+    children: JSX.Element[];
+    isVertical: boolean;
+    displayItemsClass?: string;
+    item_type?: string;
+    onUpdate?: (newValues: any[]) => void;
+    // DISABLE OPTIONS (all default to false)
+    deleteDisabled?: boolean;
+    replaceDisabled?: boolean;
+    dropDisabled?: boolean;
+    deleteOnMoveDisabled?: boolean;
+}) {
     // ----------------- STATE -----------------
 
-    const { items, setItems, addItem, moveItem, removeItem, changeItemValue } =
-        // TODO: clean this up
-        useBucket(
-            !props.values
-                ? []
-                : props.values.map((v, i) => ({
-                      id: objectHash.sha1(v) + `${i}`, // encode the order in it as well just in case
-                      value: v,
-                  }))
-        );
+    const { items, setItems, addItem, moveItem, removeItem, changeItemValue } = useBucket(null);
 
-    // TODO: clean this up
     const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
 
+    let justUpdated = false;
+
     React.useEffect(() => {
-        // TODO: clean this up
-        setItems(
-            !props.values
-                ? []
-                : props.values.map((v) => ({
-                      id: objectHash.sha1(v),
-                      value: v,
-                  }))
-        );
+        setItems(!props.values ? [] : props.values.map(v => ({
+            id: objectHash.sha1(v),
+            value: v,
+        })));
+        justUpdated = true;
     }, [props.values]);
 
     // Called whenever INTERNAL state changes:
     React.useEffect(() => {
+        if (justUpdated || !props.onUpdate) return;
         const newValues = items?.map((I) => I.value);
-        // Only call the callback if the values have changed
-        if (JSON.stringify(newValues) === JSON.stringify(props.values))
-            // shallow comparison
-            return;
-        if (props.onUpdate) props.onUpdate(newValues); // && items != bucket.items
+        if (JSON.stringify(newValues) == JSON.stringify(props.values)) return;
+        props.onUpdate(newValues); // && items != bucket.items
     }, [items]);
 
     // ----------------- DND RELATED -----------------
@@ -243,6 +228,10 @@ function ItemBucket(
     };
 
     // -----------------RENDER-----------------
+
+    if (!items) {
+        return null
+    }
 
     const wrapperClassNames = joinClassNames(
         "bucket-wrapper",
