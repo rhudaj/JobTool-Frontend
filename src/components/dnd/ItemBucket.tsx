@@ -112,12 +112,13 @@ const useBucket = () => {
 
 // Define the shape of your context
 interface BucketItemContext {
+    bucket_id: string,
     item_type?: string,
     disableReplace?: boolean,
     onDelete?: (id: any) => void,
     onAddItem?: (id: any, below: boolean) => void,
     onHover?: (hoverId: string, dragId: string, isBelow: boolean, isRight: boolean) => void,
-    onLetGo?: (dragId: any, bucketId: any) => void;
+    onRemove?: (dragId: any) => void;
 };
 
 /**
@@ -265,21 +266,16 @@ function ItemBucket(props: {
                         { i === 0 && <DropGap isActive={hoveredGap === prevGap(i)} /> }
                         <BucketContext.Provider
                             value={{
+                                bucket_id: props.id,
                                 item_type: props.item_type,
                                 disableReplace: props.replaceDisabled,
                                 onDelete: !props.deleteDisabled && bucket.removeItem,
                                 onAddItem: bucket.addBlankItem,
                                 onHover: onItemHover,
-                                onLetGo: (dragId: any, bucketId: any) => {
-                                    if (!props.deleteOnMoveDisabled && bucketId !== props.id) {
-                                        bucket.removeItem(dragId);
-                                    }
-                                },
+                                onRemove: !props.deleteOnMoveDisabled && bucket.removeItem,
                             }}
                         >
-                            <DNDItem key={i} item={I}>
-                                {props.children[i]}
-                            </DNDItem>
+                            <DNDItem key={i} item={I} children={props.children[i]}/>
                         </BucketContext.Provider>
                         <DropGap
                             key={`drop-gap-${i}`}

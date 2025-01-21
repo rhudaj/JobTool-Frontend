@@ -7,10 +7,7 @@ import ItemControlsContainer from "./controls";
 import { BucketContext } from "./ItemBucket";
 
 // TODO: should be usable on its own (ie: has its own state) in the case you dont want a bucket.
-function DNDItem(props: {
-    item: Item,
-    children: JSX.Element,
-}) {
+function DNDItem(props: { item: Item, children: JSX.Element }) {
 
     const bucketContext = useContext(BucketContext);
 
@@ -27,9 +24,10 @@ function DNDItem(props: {
             return props.item; 			// sent to the drop target when dropped.
         },
         end: (item: Item, monitor) => {
-            const dropResult: {id: any} = monitor.getDropResult();
-            if (!dropResult) return;// Cancelled or invalid drop
-            bucketContext.onLetGo(item.id, dropResult.id);
+            const dropResult: {id: any} = monitor.getDropResult();  // the bucket we dropped on
+            // Cancelled/invalid drop || same bucket
+            if(!dropResult || dropResult.id === bucketContext.bucket_id) return;
+            bucketContext.onRemove(item.id);
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging()
