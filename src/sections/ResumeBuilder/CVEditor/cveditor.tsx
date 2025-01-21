@@ -3,7 +3,7 @@ import { CV } from "job-tool-shared-types";
 import * as UI from "./cv_components"
 import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
-import ItemBucket from "../dnd/ItemBucket";
+import ItemBucket from "../../../components/dnd/ItemBucket";
 
 // MAIN COMPONENT
 const CVEditor = forwardRef((

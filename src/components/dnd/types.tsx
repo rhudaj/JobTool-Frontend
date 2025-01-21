@@ -1,5 +1,4 @@
-import { Experience } from "job-tool-shared-types";
-import { ExperienceUI, SummaryUI } from "../CVEditor/cv_components";
+import { ExperienceUI, SummaryUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
 import "./types.scss";
 
 const DEFAULT_ITEM_TYPE = "DRAG-ITEM";
@@ -7,11 +6,6 @@ const DEFAULT_ITEM_TYPE = "DRAG-ITEM";
 interface Item {
     id: any;
     value: any;		// can't be a JSX element. Anything else is fine.
-};
-
-interface Bucket {
-    id: any;
-    items: Item[];
 };
 
 interface BucketType {
@@ -47,7 +41,6 @@ const BucketTypes: { [key: string]: BucketType } = {
     }
 };
 
-
 const InfoPadMap = {
     // CV
     "languages":    "info-pad-text-list",
@@ -61,4 +54,4 @@ const InfoPadMap = {
     "paragraphs":  "cl-info-pad",
 }
 
-export { Item, Bucket, BucketType, DEFAULT_ITEM_TYPE, BucketTypes, InfoPadMap };
+export { Item, BucketType, DEFAULT_ITEM_TYPE, BucketTypes, InfoPadMap };

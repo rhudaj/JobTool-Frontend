@@ -1,11 +1,11 @@
 import "./cveditor.sass";
 import { Experience, Link, MonthYear, DateRange } from "job-tool-shared-types";
-import TextEditDiv from "../TextEditDiv/texteditdiv";
-import { joinClassNames } from "../../hooks/joinClassNames";
-import ItemBucket from "../dnd/ItemBucket";
+import TextEditDiv from "../../../components/TextEditDiv/texteditdiv";
+import { joinClassNames } from "../../../hooks/joinClassNames";
+import ItemBucket from "../../../components/dnd/ItemBucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
-import { BucketTypes } from "../dnd/types";
+import { BucketTypes } from "../../../components/dnd/types";
 import { useImmer } from "use-immer";
 import { useEffect } from "react";
 

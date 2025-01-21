@@ -4,6 +4,8 @@ import SubSection from "../../../components/Section/SubSection";
 import { useImmer } from 'use-immer';
 import TextEditDiv from '../../../components/TextEditDiv/texteditdiv';
 
+
+// TODO: fix the JobInfo interface in /shared.
 interface JobInfo2 {
     name: string,
     type?: string,

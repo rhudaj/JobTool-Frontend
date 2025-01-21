@@ -1,4 +1,5 @@
-@import "../CVEditor/cveditor.sass"; // for $experiences-gap
+@import "../../sections/ResumeBuilder/CVEditor/cveditor.sass"; // for $experiences-gap
+// TODO: should not have to import
 
 .experiences {
     display: grid;

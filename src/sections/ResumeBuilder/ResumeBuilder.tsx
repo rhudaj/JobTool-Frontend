@@ -10,7 +10,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import  useLogger  from "../../hooks/logger";
 import SplitView from "../../components/SplitView/splitview";
-import CVEditor from "../../components/CVEditor/cveditor";
+import CVEditor from "./CVEditor/cveditor";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 
