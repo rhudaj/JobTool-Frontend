@@ -1,46 +1,47 @@
+import "./jobanalyze.sass"
 import { JobInfo } from "job-tool-shared-types";
-import JIDisplay from "../../components/JIDisplay/JIDisplay";
+import JIDisplay from "./JIDisplay/JIDisplay";
 import Section from "../../components/Section/Section";
 import SplitView from "../../components/SplitView/splitview";
 import BackendAPI from "../../backend_api";
-import  useLogger  from "../../hooks/logger";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function JobAnalyze() {
+
     const JIRef = useRef(null);
+    const [initJobText, setInitJobText] = useState("");
     const [jobText, setJobText] = useState("");
-    const [jobInfo, setJobInfo] = useState({} as JobInfo);
 
-    const log = useLogger("JobAnalyze");
-
-    const getJobInfo = () => {
-        if (!jobText) {
-            log("No job text to extract from.");
-            return;
-        }
-
-        BackendAPI.post<{ job_text: string }, JobInfo>("getJobInfo", {
-            job_text: jobText,
-        }).then(
-            (jobInfo: JobInfo | null) => jobInfo !== null && setJobInfo(jobInfo)
-        );
+    const saveAnnotation = () => {
+        BackendAPI.post<{ job_text: string, annotations: any[] }, null>("save_annotation", {
+            job_text: initJobText,
+            annotations: JIRef.current.get(),
+        })
     };
+
+
+    useEffect(()=>{
+        console.log("initJobText: ", initJobText);
+    }, [initJobText])
 
     return (
         <Section id="section-job-info" heading="Job Info">
             <div id="job-info-controls">
-                <button onClick={getJobInfo}>Extract</button>
+                <button disabled={true}>Extract</button>
+                <button onClick={saveAnnotation}>Save Annotation</button>
             </div>
             <SplitView>
                 <textarea
                     id="job-info-input"
+                    onPaste={(e)=> setInitJobText(e.clipboardData.getData("text/plain"))}
                     onBlur={(e) => setJobText(e.target.value)}
-                    placeholder="Paste job description here..."
+                    placeholder="Paste Job Description Here..."
                 />
-                <JIDisplay jobInfo={jobInfo} ref={JIRef} />
+                <JIDisplay ref={JIRef} />
             </SplitView>
-        </Section>
+            </Section>
     );
 };
+
 
 export default JobAnalyze;
