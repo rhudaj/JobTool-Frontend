@@ -2,7 +2,7 @@ import "./Item.scss"
 import { useDrag, useDrop } from "react-dnd";
 import React, { useContext } from "react";
 import { joinClassNames } from "../../hooks/joinClassNames";
-import { Item, DEFAULT_ITEM_TYPE } from "./types";
+import { Item } from "./types";
 import ItemControlsContainer from "./controls";
 import { BucketContext } from "./ItemBucket";
 
@@ -18,7 +18,7 @@ function DNDItem(props: { item: Item, children: JSX.Element }) {
     // -----------------DRAG FUNCTIONALITY-----------------
 
     const [{isDragging}, drag, preview] = useDrag(() => ({
-        type: bucketContext.item_type ?? DEFAULT_ITEM_TYPE,
+        type: bucketContext.item_type,
         canDrag: true,
         item: () => {
             return props.item; 			// sent to the drop target when dropped.
@@ -39,7 +39,7 @@ function DNDItem(props: { item: Item, children: JSX.Element }) {
 
     const [{isDropTarget}, drop] = useDrop(
         () => ({
-            accept: bucketContext.item_type ?? DEFAULT_ITEM_TYPE,
+            accept: bucketContext.item_type,
             canDrop: (dropItem: Item) => {
                 return bucketContext.disableReplace !== true && dropItem.id !== props.item.id;
             },

@@ -19,12 +19,14 @@ const CVEditor = forwardRef((
 		setCV(props.cv);
 	}, [props.cv]);
 
+	useEffect(() => {
+		console.log("CVEditor, New CV")
+	}, [CV]);
+
 
 	// give parent access to CV
 	useImperativeHandle(ref, () => ({
-		getCV: () => {
-			return CV;
-		}
+		getCV: () => { return CV }
 	}));
 
 	// -------------- VIEW (setup) --------------
@@ -39,10 +41,9 @@ const CVEditor = forwardRef((
 		<div id="cv-editor">
 			<div id="full-name" key="name">{CV.header_info.name}</div>
 			<div id="link-list">
-				{CV.header_info.links?.map((l,i) => <UI.LinkUI key={i} {...l} /> )}
+				{CV.header_info?.links?.map((l,i) => <UI.LinkUI key={i} {...l} /> )}
 			</div>
 			<ItemBucket
-				key="sections-bucket"
 				id="sections-bucket"
 				values={CV.sections} // only worry about tracking the string names (assumes all unique)
 				isVertical={true}

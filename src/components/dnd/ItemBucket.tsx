@@ -110,10 +110,10 @@ const useBucket = () => {
 
 
 
-// Define the shape of your context
+// Provided to the children of a bucket (<DNDItem>'s)
 interface BucketItemContext {
     bucket_id: string,
-    item_type?: string,
+    item_type: string,
     disableReplace?: boolean,
     onDelete?: (id: any) => void,
     onAddItem?: (id: any, below: boolean) => void,
@@ -136,7 +136,6 @@ function ItemBucket(props: {
     displayItemsClass?: string;
     item_type?: string;
     onUpdate?: (newValues: any[]) => void;
-    // DISABLE OPTIONS (all default to false)
     deleteDisabled?: boolean;
     replaceDisabled?: boolean;
     dropDisabled?: boolean;
@@ -145,11 +144,11 @@ function ItemBucket(props: {
     // ----------------- STATE -----------------
 
     const bucket = useBucket();
-
     const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
 
     React.useEffect(() => {
         bucket.setValues(props.values ?? []);
+        console.log(`ItemBucket '${props.id}', new values`);
     }, [props.values]);
 
     // Called whenever INTERNAL state changes:
@@ -165,7 +164,7 @@ function ItemBucket(props: {
 
     const onItemHover = (hoverId: string, dragId: string, isBelow: boolean, isRight: boolean) => {
 
-        if (props.dropDisabled) return; // TODO: bring this check outside.
+        // if (props.dropDisabled) return; // TODO: bring this check outside.
 
         // Wether its "past half" depends on orientation of the bucket
         const isPastHalf = props.isVertical ? isBelow : isRight;
@@ -247,19 +246,13 @@ function ItemBucket(props: {
         return null
     }
 
-    const wrapperClassNames = joinClassNames(
+    const classes = joinClassNames(
         "bucket-wrapper",
         isHovered ? "hover" : ""
     );
 
     return (
-        <div
-            ref={dropRef}
-            className={wrapperClassNames}
-            onMouseLeave={() =>
-                hoveredGap !== undefined && setHoveredGap(undefined)
-            }
-        >
+        <div ref={dropRef} className={classes} onMouseLeave={() => setHoveredGap(undefined)}>
             <div className={props.displayItemsClass}>
                 {bucket.items.map((I: Item, i: number) => (
                     <>
@@ -267,20 +260,17 @@ function ItemBucket(props: {
                         <BucketContext.Provider
                             value={{
                                 bucket_id: props.id,
-                                item_type: props.item_type,
+                                item_type: props.item_type ?? DEFAULT_ITEM_TYPE,
                                 disableReplace: props.replaceDisabled,
                                 onDelete: !props.deleteDisabled && bucket.removeItem,
                                 onAddItem: bucket.addBlankItem,
-                                onHover: onItemHover,
+                                onHover: !props.dropDisabled && onItemHover,
                                 onRemove: !props.deleteOnMoveDisabled && bucket.removeItem,
                             }}
                         >
                             <DNDItem key={i} item={I} children={props.children[i]}/>
                         </BucketContext.Provider>
-                        <DropGap
-                            key={`drop-gap-${i}`}
-                            isActive={hoveredGap === nextGap(i)}
-                        />
+                        <DropGap isActive={hoveredGap === nextGap(i)} />
                     </>
                 ))}
             </div>
