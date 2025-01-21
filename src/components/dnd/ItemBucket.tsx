@@ -79,6 +79,13 @@ const useBucket = () => {
         });
     };
 
+    const addBlankItem = (id: any, below: boolean) => {
+        // TODO: for now just duplicate the item (since we don't know the format)
+        let srcIndex = items.findIndex(I => I.id === id);
+        const index2add = srcIndex + (below ? 1 : 0);
+        addItem(index2add);
+    }
+
     const moveItem = (indexBefore: number, indexAfter: number) => {
         setItems((draft) => {
             const [movedItem] = draft.splice(indexBefore, 1);
@@ -98,8 +105,11 @@ const useBucket = () => {
         });
     };
 
-    return { items, setValues, getValues, addItem, moveItem, removeItem, changeItemValue };
+    return { items, setValues, getValues, addItem, addBlankItem, moveItem, removeItem, changeItemValue, getIdx };
 };
+
+
+
 
 /**
  * Bucket of DND Items component
@@ -145,14 +155,14 @@ function ItemBucket(props: {
 
     const onItemHover = (hoverId: string, dragId: string, isBelow: boolean, isRight: boolean) => {
 
-        if (props.dropDisabled) return;
-
-        // Find the index of the item being hovered over:
-        const hoveredIndex = bucket.items.findIndex((I) => I.id === hoverId);
-        const dragIndex = bucket.items.findIndex((I) => I.id === dragId);
+        if (props.dropDisabled) return; // TODO: bring this check outside.
 
         // Wether its "past half" depends on orientation of the bucket
         const isPastHalf = props.isVertical ? isBelow : isRight;
+
+        // Find the index of the item being hovered over:
+        const hoveredIndex = bucket.getIdx(hoverId);
+        const dragIndex = bucket.getIdx(dragId);
 
         // Find the corresponding gap:
         let gapIndex = isPastHalf ? nextGap(hoveredIndex) : prevGap(hoveredIndex);
@@ -178,7 +188,8 @@ function ItemBucket(props: {
                 // An item was dropped on the bucket (or a nested drop target).
 
                 if (bucket.items.length === 0) {
-                    return bucket.addItem(hoveredGap, dropItem);
+                    bucket.addItem(0, dropItem);
+                    return;
                 }
 
                 // drop was ON TOP of a nested item?
@@ -220,13 +231,6 @@ function ItemBucket(props: {
         [bucket.items, hoveredGap]
     );
 
-    const onAddItem = (id: any, below: boolean) => {
-        // TODO: for now just duplicate the item (since we don't know the format)
-        let srcIndex = bucket.items.findIndex((I) => I.id === id);
-        const index2add = srcIndex + (below ? 1 : 0);
-        bucket.addItem(index2add);
-    };
-
     // -----------------RENDER-----------------
 
     if (!bucket.items) {
@@ -259,14 +263,11 @@ function ItemBucket(props: {
                             item_type={props.item_type}
                             // Not specific (TODO: pass as context)
                             onDelete={!props.deleteDisabled && bucket.removeItem}
-                            onAddItem={onAddItem}
+                            onAddItem={bucket.addBlankItem}
                             onHover={onItemHover}
                             onLetGo={(dragId: any, bucketId: any) => {
                                 // Remove the item if it was dropped on a different bucket
-                                if (
-                                    !props.deleteOnMoveDisabled &&
-                                    bucketId !== props.id
-                                ) {
+                                if (!props.deleteOnMoveDisabled && bucketId !== props.id) {
                                     bucket.removeItem(dragId);
                                 }
                             }}
