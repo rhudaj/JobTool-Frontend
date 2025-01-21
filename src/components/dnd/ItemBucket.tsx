@@ -67,9 +67,13 @@ const useBucket = () => {
 
     /**
      * Call assumes item is not already in the bucket.
-     * Puts item inside
+     * If no item is specified, inserts an empty one.
      */
-    const addItem = (item: Item, atIndex: number) => {
+    const addItem = (atIndex: number, item?: Item) => {
+        if (!item) {
+            // duplicate one of the items in the bucket to get its structure.
+			item = emptyObject(items[0]); // deep copy
+        }
         setItems((draft) => {
             draft.splice(atIndex, 0, item);
         });
@@ -174,7 +178,7 @@ function ItemBucket(props: {
                 // An item was dropped on the bucket (or a nested drop target).
 
                 if (bucket.items.length === 0) {
-                    return bucket.addItem(dropItem, hoveredGap);
+                    return bucket.addItem(hoveredGap, dropItem);
                 }
 
                 // drop was ON TOP of a nested item?
@@ -191,7 +195,7 @@ function ItemBucket(props: {
                     bucket.changeItemValue(nestedDropTarget.id, dropItem.value);
                 } else if (notInBucket) {
                     // Not in the bucket yet, so add it.
-                    bucket.addItem(dropItem, hoveredGap);
+                    bucket.addItem(hoveredGap, dropItem);
                 } else if (bucket.moveItem) {
                     // Its in the bucket already, and we've dropped it somewhere else inside
                     // that's not over another item. So re-order.
@@ -219,15 +223,8 @@ function ItemBucket(props: {
     const onAddItem = (id: any, below: boolean) => {
         // TODO: for now just duplicate the item (since we don't know the format)
         let srcIndex = bucket.items.findIndex((I) => I.id === id);
-        console.log("srcIndex = ", srcIndex);
-        if (srcIndex !== -1) {
-            let newItem = structuredClone(bucket.items[srcIndex]);
-			newItem = emptyObject(newItem);
-            // newItem.id += "x";
-            const index2add = srcIndex + (below ? 1 : 0);
-            console.log("adding item to index = ", index2add);
-            bucket.addItem(newItem, index2add);
-        }
+        const index2add = srcIndex + (below ? 1 : 0);
+        bucket.addItem(index2add);
     };
 
     // -----------------RENDER-----------------
