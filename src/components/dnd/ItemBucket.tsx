@@ -1,6 +1,6 @@
 import "./ItemBucket.scss";
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import React from "react";
+import React, { useEffect } from "react";
 import { joinClassNames } from "../../hooks/joinClassNames";
 import { Item, DEFAULT_ITEM_TYPE } from "./types";
 import { useImmer } from "use-immer";
@@ -36,14 +36,15 @@ function DropGap(props: { isActive: boolean }) {
 const prevGap = (itemIndex: number) => itemIndex;
 const nextGap = (itemIndex: number) => itemIndex + 1;
 
+// TODO: Item { idx: int, bucket: string, value: any }
+
 /**
  * Bucket State Manager
  * @param values - initial values of the bucket
- * items - guaranteed to be defined, but might be empty ([]).
  */
-const useBucket = (initItems: Item[]) => {
+const useBucket = () => {
 
-    const [items, setItems] = useImmer<Item[]>(initItems ?? []);
+    const [items, setItems] = useImmer<Item[]>(null);
 
     // -----------------HELPERS-----------------
 
@@ -52,6 +53,17 @@ const useBucket = (initItems: Item[]) => {
     };
 
     // -----------------STATE MODIFIERS-----------------
+
+    const setValues = (item_values: any[]) => {
+        setItems(item_values.map(v => ({
+            id: objectHash.sha1(v),
+            value: v,
+        })));
+    };
+
+    const getValues = () => {
+        return items?.map((I) => I.value);
+    };
 
     /**
      * Call assumes item is not already in the bucket.
@@ -82,7 +94,7 @@ const useBucket = (initItems: Item[]) => {
         });
     };
 
-    return { items, setItems, addItem, moveItem, removeItem, changeItemValue };
+    return { items, setValues, getValues, addItem, moveItem, removeItem, changeItemValue };
 };
 
 /**
@@ -108,27 +120,22 @@ function ItemBucket(props: {
 }) {
     // ----------------- STATE -----------------
 
-    const { items, setItems, addItem, moveItem, removeItem, changeItemValue } = useBucket(null);
+    const bucket = useBucket();
 
     const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
 
-    let justUpdated = false;
-
     React.useEffect(() => {
-        setItems(!props.values ? [] : props.values.map(v => ({
-            id: objectHash.sha1(v),
-            value: v,
-        })));
-        justUpdated = true;
+        bucket.setValues(props.values ?? []);
     }, [props.values]);
 
     // Called whenever INTERNAL state changes:
     React.useEffect(() => {
-        if (justUpdated || !props.onUpdate) return;
-        const newValues = items?.map((I) => I.value);
-        if (JSON.stringify(newValues) == JSON.stringify(props.values)) return;
+        // if (justUpdated || !props.onUpdate) return;
+        if (!bucket.items || !props.onUpdate) return;
+        const newValues = bucket.getValues();
+        if (JSON.stringify(newValues) == JSON.stringify(props.values)) return;  // needed, else maximum depth! TODO: don't want to have to do this...
         props.onUpdate(newValues); // && items != bucket.items
-    }, [items]);
+    }, [bucket.items]);
 
     // ----------------- DND RELATED -----------------
 
@@ -136,20 +143,16 @@ function ItemBucket(props: {
 
         if (props.dropDisabled) return;
 
-        // console.log(`onItemHover(${items.findIndex(I=>I.id===hoverId)}, ${items.findIndex(I=>I.id===dragId)}, ${isBelow}, ${isRight})`);
-
         // Find the index of the item being hovered over:
-        const hoveredIndex = items.findIndex((I) => I.id === hoverId);
+        const hoveredIndex = bucket.items.findIndex((I) => I.id === hoverId);
+        const dragIndex = bucket.items.findIndex((I) => I.id === dragId);
 
         // Wether its "past half" depends on orientation of the bucket
         const isPastHalf = props.isVertical ? isBelow : isRight;
 
         // Find the corresponding gap:
-        let gapIndex = isPastHalf
-            ? nextGap(hoveredIndex)
-            : prevGap(hoveredIndex);
+        let gapIndex = isPastHalf ? nextGap(hoveredIndex) : prevGap(hoveredIndex);
 
-        const dragIndex = items.findIndex((I) => I.id === dragId);
         const diff = dragIndex - gapIndex;
 
         // Is the gap is around the current dragItem ?
@@ -170,34 +173,34 @@ function ItemBucket(props: {
             ) => {
                 // An item was dropped on the bucket (or a nested drop target).
 
-                if (items.length === 0) {
-                    return addItem(dropItem, hoveredGap);
+                if (bucket.items.length === 0) {
+                    return bucket.addItem(dropItem, hoveredGap);
                 }
 
                 // drop was ON TOP of a nested item?
                 const nestedDropTarget: any = monitor.getDropResult();
 
                 // bucket ALREADY holds it?
-                const itemIndex = items.findIndex(
+                const itemIndex = bucket.items.findIndex(
                     (item) => item.id === dropItem.id
                 );
                 const notInBucket = itemIndex === -1;
 
                 if (nestedDropTarget?.id !== undefined) {
                     // => nested item handled the drop
-                    changeItemValue(nestedDropTarget.id, dropItem.value);
+                    bucket.changeItemValue(nestedDropTarget.id, dropItem.value);
                 } else if (notInBucket) {
                     // Not in the bucket yet, so add it.
-                    addItem(dropItem, hoveredGap);
-                } else if (moveItem) {
+                    bucket.addItem(dropItem, hoveredGap);
+                } else if (bucket.moveItem) {
                     // Its in the bucket already, and we've dropped it somewhere else inside
                     // that's not over another item. So re-order.
                     // CLAMP index between 0 and props.items.length-1
                     let newIndex = Math.max(
-                        Math.min(hoveredGap, items.length - 1),
+                        Math.min(hoveredGap, bucket.items.length - 1),
                         0
                     );
-                    moveItem(itemIndex, newIndex);
+                    bucket.moveItem(itemIndex, newIndex);
                 }
                 // after drop, no need to display the gap
                 if (hoveredGap !== undefined) setHoveredGap(undefined);
@@ -210,26 +213,26 @@ function ItemBucket(props: {
             }),
         }),
         // dependency array - if any of these values change, the above object will be recreated.
-        [items, hoveredGap]
+        [bucket.items, hoveredGap]
     );
 
     const onAddItem = (id: any, below: boolean) => {
         // TODO: for now just duplicate the item (since we don't know the format)
-        let srcIndex = items.findIndex((I) => I.id === id);
+        let srcIndex = bucket.items.findIndex((I) => I.id === id);
         console.log("srcIndex = ", srcIndex);
         if (srcIndex !== -1) {
-            let newItem = structuredClone(items[srcIndex]);
+            let newItem = structuredClone(bucket.items[srcIndex]);
 			newItem = emptyObject(newItem);
             // newItem.id += "x";
             const index2add = srcIndex + (below ? 1 : 0);
             console.log("adding item to index = ", index2add);
-            addItem(newItem, index2add);
+            bucket.addItem(newItem, index2add);
         }
     };
 
     // -----------------RENDER-----------------
 
-    if (!items) {
+    if (!bucket.items) {
         return null
     }
 
@@ -247,7 +250,7 @@ function ItemBucket(props: {
             }
         >
             <div className={props.displayItemsClass}>
-                {items.map((I: Item, i: number) => (
+                {bucket.items.map((I: Item, i: number) => (
                     <>
                         {i === 0 && (
                             <DropGap isActive={hoveredGap === prevGap(i)} />
@@ -258,7 +261,7 @@ function ItemBucket(props: {
                             item={I}
                             item_type={props.item_type}
                             // Not specific (TODO: pass as context)
-                            onDelete={!props.deleteDisabled && removeItem}
+                            onDelete={!props.deleteDisabled && bucket.removeItem}
                             onAddItem={onAddItem}
                             onHover={onItemHover}
                             onLetGo={(dragId: any, bucketId: any) => {
@@ -267,7 +270,7 @@ function ItemBucket(props: {
                                     !props.deleteOnMoveDisabled &&
                                     bucketId !== props.id
                                 ) {
-                                    removeItem(dragId);
+                                    bucket.removeItem(dragId);
                                 }
                             }}
                             disableReplace={props.replaceDisabled}

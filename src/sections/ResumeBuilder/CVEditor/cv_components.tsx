@@ -29,7 +29,7 @@ function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 	const bt = BucketTypes[sec.item_type];
 
 	return (
-		<div className="section">
+		<div className="section" >
 			<div className="sec-head">
 				<p>{formatHeader(sec.name)}</p>
 				<hr />

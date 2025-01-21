@@ -42,6 +42,7 @@ const CVEditor = forwardRef((
 				{CV.header_info.links?.map((l,i) => <UI.LinkUI key={i} {...l} /> )}
 			</div>
 			<ItemBucket
+				key="sections-bucket"
 				id="sections-bucket"
 				values={CV.sections} // only worry about tracking the string names (assumes all unique)
 				isVertical={true}
@@ -55,7 +56,7 @@ const CVEditor = forwardRef((
 			>
 				{
 					CV.sections?.map((sec, i) => (
-						<UI.SectionUI obj={sec} onUpdate={new_obj => {
+						<UI.SectionUI key={i} obj={sec} onUpdate={new_obj => {
 							setCV(draft => {
 								draft.sections[i] = new_obj;
 							})
