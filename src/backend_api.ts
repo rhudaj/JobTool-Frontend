@@ -38,13 +38,14 @@ class BackendAPI {
             const data: T = await response.json();
             return data;
         } catch (err: unknown) {
-            this.log("Request error at", url, "err:", err);
+            this.log("ERROR with request to", url, "err:", err);
             return null;
         }
     }
 
     // Generic POST method
     static async post<IN, OUT>(endpoint: string, body: IN): Promise<OUT | null> {
+        console.log("post body: ", body);
         return await this.request<OUT>("POST", endpoint, body);
     }
 

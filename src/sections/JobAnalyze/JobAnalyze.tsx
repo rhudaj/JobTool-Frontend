@@ -9,16 +9,15 @@ import { useEffect, useRef, useState } from "react";
 function JobAnalyze() {
 
     const JIRef = useRef(null);
-    const [initJobText, setInitJobText] = useState("");
-    const [jobText, setJobText] = useState("");
+    const [initJobText, setInitJobText] = useState<string>("");
+    const [jobText, setJobText] = useState<string>("");
 
     const saveAnnotation = () => {
         BackendAPI.post<{ job_text: string, annotations: any[] }, null>("save_annotation", {
             job_text: initJobText,
             annotations: JIRef.current.get(),
-        })
+        });
     };
-
 
     useEffect(()=>{
         console.log("initJobText: ", initJobText);
