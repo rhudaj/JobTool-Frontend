@@ -7,20 +7,15 @@ import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 import { BucketTypes } from "../../../components/dnd/types";
 import { useImmer } from "use-immer";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 
 	const [sec, setSec] = useImmer(props.obj);
 
 	useEffect(()=>{
-		if(sec === props.obj) return;
 		props.onUpdate(sec);
 	}, [sec]);
-
-	if(!sec) {
-		return null;
-	}
 
 	const formatHeader = (head: string) => (
 		head.toUpperCase()
@@ -69,6 +64,8 @@ function SummaryUI(props: {
 	obj: any,		// summary object
 	onUpdate?: any	// summary object => void
 }) {
+
+	console.log("SummaryUI render: ", props.obj);
 
 	const handleUpdate = (key: string, newVal: any) => {
 		props.onUpdate({...props.obj, [key]: newVal});

@@ -42,24 +42,28 @@ const nextGap = (itemIndex: number) => itemIndex + 1;
  * Bucket State Manager
  * @param values - initial values of the bucket
  */
-const useBucket = () => {
+const useBucket = (initialValues: any[]) => {
 
     const [items, setItems] = useImmer<Item[]>(null);
 
-    // -----------------HELPERS-----------------
-
-    const getIdx = (id: any): number => {
-        return items.findIndex((item) => item.id === id);
-    };
-
-    // -----------------STATE MODIFIERS-----------------
-
-    const setValues = (item_values: any[]) => {
-        setItems(item_values.map(v => ({
+    useEffect(()=>{
+        console.log('useBucket received new initialValues:', initialValues);
+        setItems(initialValues.map(v => ({
             id: objectHash.sha1(v),
             value: v,
-        })));
-    };
+        })))
+    }, [initialValues])
+
+    useEffect(()=>{
+        console.log('useBucket items updated:', items);
+    }, [items])
+
+
+    // -----------------HELPERS-----------------
+
+    const getIdx = (id: any) => items.findIndex(I => I.id === id);
+
+    // -----------------STATE MODIFIERS-----------------
 
     const getValues = () => {
         return items?.map((I) => I.value);
@@ -105,9 +109,8 @@ const useBucket = () => {
         });
     };
 
-    return { items, setValues, getValues, addItem, addBlankItem, moveItem, removeItem, changeItemValue, getIdx };
+    return { items, getValues, addItem, addBlankItem, moveItem, removeItem, changeItemValue, getIdx };
 };
-
 
 
 // Provided to the children of a bucket (<DNDItem>'s)
@@ -143,13 +146,9 @@ function ItemBucket(props: {
 }) {
     // ----------------- STATE -----------------
 
-    const bucket = useBucket();
-    const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
+    const bucket = useBucket(props.values);
 
-    React.useEffect(() => {
-        bucket.setValues(props.values ?? []);
-        console.log(`ItemBucket '${props.id}', new values`);
-    }, [props.values]);
+    const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
 
     // Called whenever INTERNAL state changes:
     React.useEffect(() => {
@@ -252,22 +251,20 @@ function ItemBucket(props: {
     );
 
     return (
-        <div ref={dropRef} className={classes} onMouseLeave={() => setHoveredGap(undefined)}>
+        <div ref={dropRef} className={classes} onMouseLeave={()=>setHoveredGap(undefined)}>
             <div className={props.displayItemsClass}>
                 {bucket.items.map((I: Item, i: number) => (
                     <>
                         { i === 0 && <DropGap isActive={hoveredGap === prevGap(i)} /> }
-                        <BucketContext.Provider
-                            value={{
-                                bucket_id: props.id,
-                                item_type: props.item_type ?? DEFAULT_ITEM_TYPE,
-                                disableReplace: props.replaceDisabled,
-                                onDelete: !props.deleteDisabled && bucket.removeItem,
-                                onAddItem: bucket.addBlankItem,
-                                onHover: !props.dropDisabled && onItemHover,
-                                onRemove: !props.deleteOnMoveDisabled && bucket.removeItem,
-                            }}
-                        >
+                        <BucketContext.Provider value={{
+                            bucket_id: props.id,
+                            item_type: props.item_type ?? DEFAULT_ITEM_TYPE,
+                            disableReplace: props.replaceDisabled,
+                            onDelete: !props.deleteDisabled && bucket.removeItem,
+                            onAddItem: bucket.addBlankItem,
+                            onHover: !props.dropDisabled && onItemHover,
+                            onRemove: !props.deleteOnMoveDisabled && bucket.removeItem,
+                        }}>
                             <DNDItem key={i} item={I} children={props.children[i]}/>
                         </BucketContext.Provider>
                         <DropGap isActive={hoveredGap === nextGap(i)} />
