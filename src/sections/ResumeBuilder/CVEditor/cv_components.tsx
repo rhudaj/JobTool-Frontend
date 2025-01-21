@@ -14,7 +14,6 @@ function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 	const [sec, setSec] = useImmer(props.obj);
 
 	useEffect(()=>{
-		console.log("SectionUI, new sec: ", sec);
 		if(sec === props.obj) return;
 		props.onUpdate(sec);
 	}, [sec]);
