@@ -110,6 +110,15 @@ const useBucket = () => {
 
 
 
+// Define the shape of your context
+interface BucketItemContext {
+    item_type?: string,
+    disableReplace?: boolean,
+    onDelete?: (id: any) => void,
+    onAddItem?: (id: any, below: boolean) => void,
+    onHover?: (hoverId: string, dragId: string, isBelow: boolean, isRight: boolean) => void,
+    onLetGo?: (dragId: any, bucketId: any) => void;
+};
 
 /**
  * Bucket of DND Items component
@@ -253,28 +262,25 @@ function ItemBucket(props: {
             <div className={props.displayItemsClass}>
                 {bucket.items.map((I: Item, i: number) => (
                     <>
-                        {i === 0 && (
-                            <DropGap isActive={hoveredGap === prevGap(i)} />
-                        )}
-                        <DNDItem
-                            // Specific to current item:
-                            key={i}
-                            item={I}
-                            item_type={props.item_type}
-                            // Not specific (TODO: pass as context)
-                            onDelete={!props.deleteDisabled && bucket.removeItem}
-                            onAddItem={bucket.addBlankItem}
-                            onHover={onItemHover}
-                            onLetGo={(dragId: any, bucketId: any) => {
-                                // Remove the item if it was dropped on a different bucket
-                                if (!props.deleteOnMoveDisabled && bucketId !== props.id) {
-                                    bucket.removeItem(dragId);
-                                }
+                        { i === 0 && <DropGap isActive={hoveredGap === prevGap(i)} /> }
+                        <BucketContext.Provider
+                            value={{
+                                item_type: props.item_type,
+                                disableReplace: props.replaceDisabled,
+                                onDelete: !props.deleteDisabled && bucket.removeItem,
+                                onAddItem: bucket.addBlankItem,
+                                onHover: onItemHover,
+                                onLetGo: (dragId: any, bucketId: any) => {
+                                    if (!props.deleteOnMoveDisabled && bucketId !== props.id) {
+                                        bucket.removeItem(dragId);
+                                    }
+                                },
                             }}
-                            disableReplace={props.replaceDisabled}
                         >
-                            {props.children[i]}
-                        </DNDItem>
+                            <DNDItem key={i} item={I}>
+                                {props.children[i]}
+                            </DNDItem>
+                        </BucketContext.Provider>
                         <DropGap
                             key={`drop-gap-${i}`}
                             isActive={hoveredGap === nextGap(i)}
@@ -286,4 +292,5 @@ function ItemBucket(props: {
     );
 }
 
+export const BucketContext = React.createContext<BucketItemContext>(null);
 export default ItemBucket;

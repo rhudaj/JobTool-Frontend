@@ -1,23 +1,18 @@
 import "./Item.scss"
 import { useDrag, useDrop } from "react-dnd";
-import React from "react";
+import React, { useContext } from "react";
 import { joinClassNames } from "../../hooks/joinClassNames";
 import { Item, DEFAULT_ITEM_TYPE } from "./types";
 import ItemControlsContainer from "./controls";
+import { BucketContext } from "./ItemBucket";
 
 // TODO: should be usable on its own (ie: has its own state) in the case you dont want a bucket.
 function DNDItem(props: {
     item: Item,
     children: JSX.Element,
-    item_type?: string,
-    onHover?: (hoverId: string, dragId: string, isBelow: boolean, isRight: boolean) => void,
-    onLetGo?: (dragId: any, bucketId: any) => void, // send to parent when you drop on a bucket
-    onDelete?: (id: any) => void,
-    onAddItem?: (id: any, below: boolean) => void,
-    // Optional props
-    disableDrag?: boolean		// defaults to false
-    disableReplace?: boolean 	// defaults to false
 }) {
+
+    const bucketContext = useContext(BucketContext);
 
     // -------------------- STATE ---------------------
 
@@ -26,42 +21,40 @@ function DNDItem(props: {
     // -----------------DRAG FUNCTIONALITY-----------------
 
     const [{isDragging}, drag, preview] = useDrag(() => ({
-        type: props.item_type ?? DEFAULT_ITEM_TYPE,
-        canDrag: props.disableDrag !== true,
+        type: bucketContext.item_type ?? DEFAULT_ITEM_TYPE,
+        canDrag: true,
         item: () => {
             return props.item; 			// sent to the drop target when dropped.
         },
         end: (item: Item, monitor) => {
             const dropResult: {id: any} = monitor.getDropResult();
-            if (!dropResult)
-                // Cancelled or invalid drop
-                return;
-            props.onLetGo(item.id, dropResult.id);
+            if (!dropResult) return;// Cancelled or invalid drop
+            bucketContext.onLetGo(item.id, dropResult.id);
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging()
         }),
-        }), [props.item, props.onHover]
+        }), [props.item, bucketContext.onHover]
     );
 
     // -----------------DROP FUNCTIONALITY-----------------
 
     const [{isDropTarget}, drop] = useDrop(
         () => ({
-            accept: props.item_type ?? DEFAULT_ITEM_TYPE,
+            accept: bucketContext.item_type ?? DEFAULT_ITEM_TYPE,
             canDrop: (dropItem: Item) => {
-                return props.disableReplace !== true && dropItem.id !== props.item.id;
+                return bucketContext.disableReplace !== true && dropItem.id !== props.item.id;
             },
             drop: () => props.item,
             hover: (dragItem: Item, monitor) => {
 
-                if ( !props.onHover || dragItem.id === props.item.id )
+                if ( !bucketContext.onHover || dragItem.id === props.item.id )
                     return;
 
                 const rect = ref.current.getBoundingClientRect();
                 const dragPos = monitor.getClientOffset();
 
-                props.onHover(
+                bucketContext.onHover(
                     props.item.id,  // hovered item's ID
                     dragItem.id,
                     (dragPos.y - rect.top) > (rect.bottom - rect.top)/2, 	// is it below?
@@ -72,7 +65,7 @@ function DNDItem(props: {
                 isDropTarget: monitor.canDrop() && monitor.isOver()
             }),
         }),
-        [props.item, props.onHover]
+        [props.item, bucketContext.onHover]
     );
 
     drop(preview(ref));     // Inject the dnd props into the reference
@@ -82,7 +75,7 @@ function DNDItem(props: {
     const classNames = joinClassNames(
         "dnd-item-wrapper",
         isDragging ? "dragging" : "", isDropTarget ? "droppable": "",
-        props.disableDrag === true ? "no-drag" : "can-drag"
+        "can-drag" // props.disableDrag === true ? "no-drag" : "can-drag"
     );
 
     return (
@@ -92,11 +85,11 @@ function DNDItem(props: {
             </div>
             <ItemControlsContainer ref={ref}>
                 <div ref={drag} className="move-handle">M</div>
-                { props.onDelete && <div className="delete-button" onClick={()=>props.onDelete(props.item.id)}>X</div>}
-                { props.onAddItem &&
+                { bucketContext.onDelete && <div className="delete-button" onClick={()=>bucketContext.onDelete(props.item.id)}>X</div>}
+                { bucketContext.onAddItem &&
                     <>
-                        <div className="add-item" onClick={()=>props.onAddItem(props.item.id, true)}>↓</div>
-                        <div className="add-item" onClick={()=>props.onAddItem(props.item.id, false)}>↑</div>
+                        <div className="add-item" onClick={()=>bucketContext.onAddItem(props.item.id, true)}>↓</div>
+                        <div className="add-item" onClick={()=>bucketContext.onAddItem(props.item.id, false)}>↑</div>
                     </>
                 }
             </ItemControlsContainer>
