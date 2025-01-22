@@ -20,6 +20,7 @@ const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/"
  *                       CV STATE MANAGER                           *
 ------------------------------------------------------------------- */
 
+// Manages any state/controls relating to the CV builder
 function useCVManager() {
 
     // ---------------- STATE (internal) ----------------
@@ -106,10 +107,26 @@ function useCVManager() {
  *                         SUB COMPONENTS                           *
 ------------------------------------------------------------------- */
 
-function SavedCVs(props: {}) {
-    // ---------------- STATE ----------------
-    const [namedCVs, setNamedCVs] = useState<NamedCV[]>(null);
-}
+function SavedCVs(props: {
+    cvNames: string[],
+    curIdx: number,
+    onChange: (name: string) => void,
+}) {
+    const curName = props.cvNames ? props.cvNames[props.curIdx] : "";
+
+    return (
+        <div style={{display: "flex", gap: "10rem"}}>
+            <p>Selected Resume:</p>
+            <select onChange={e => props.onChange(e.target.value)}>
+                {props.cvNames?.map((name, i) => (
+                    <option key={i} value={curName} selected={i===props.curIdx}>
+                        {name}
+                    </option>
+                ))}
+            </select>
+        </div>
+    )
+};
 
 /* ------------------------------------------------------------------
  *                         ROOT COMPONENT                           *
@@ -131,28 +148,16 @@ function ResumeBuilder() {
     const Controls = () => (
         <div id="resume-builder-controls">
             <div>
+                <SavedCVs cvNames={state.cvNames()} curIdx={state.curIdx()} onChange={state.changeCV}/>
                 <h4>Import</h4>
                 <div style={{display: "flex", gap: "10rem"}}>
                     <p>Import Resume as JSON:</p>
                     <input type="file" accept=".json" onChange={e=>util.jsonFileImport(e, state.importFromJson)}/>
                 </div>
-
-                <div style={{display: "flex", gap: "10rem"}}>
-                    <p>Selected Resume:</p>
-                    <select onChange={e => state.changeCV(e.target.value)}>
-                        {state.cvNames()?.map((name, i) => (
-                            <option key={i} value={name} selected={i===state.curIdx()}>
-                                {name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
                 <div style={{display: "flex", gap: "10rem"}}>
                     <p>Import Resume Items as JSON:</p>
                     <input type="file" accept=".json" onChange={ev => util.jsonFileImport(ev, ({name, data})=>state.setCVInfo(data))}/>
                 </div>
-
             </div>
             <div>
                 <h4>Export</h4>
