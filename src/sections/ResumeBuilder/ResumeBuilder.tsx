@@ -112,18 +112,20 @@ function SavedCVs(props: {
     curIdx: number,
     onChange: (name: string) => void,
 }) {
+
     const curName = props.cvNames ? props.cvNames[props.curIdx] : "";
 
+    const CVThumnail = (name: string) => (
+        <div className="cv-thumbnail" onClick={e => props.onChange(name)}>
+            {name}
+        </div>
+    );
+
     return (
-        <div style={{display: "flex", gap: "10rem"}}>
-            <p>Selected Resume:</p>
-            <select onChange={e => props.onChange(e.target.value)}>
-                {props.cvNames?.map((name, i) => (
-                    <option key={i} value={curName} selected={i===props.curIdx}>
-                        {name}
-                    </option>
-                ))}
-            </select>
+        <div>
+            <div className="cv-thumnail-container">
+                {props.cvNames?.map(CVThumnail)}
+            </div>
         </div>
     )
 };
