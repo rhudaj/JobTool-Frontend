@@ -40,8 +40,6 @@ function App() {
 
     const [sec, setSec] = useState<string>(null);
 
-    const log = useLogger("App");
-
     // RENDERING:
 
     const labeled_sections = [
@@ -64,11 +62,11 @@ function App() {
             <TopMenu/>
             <div id="app-content">
                 <SideMenu
-                    labels={labeled_sections.map(ls => ls.name)}
+                    labels={labeled_sections?.map(ls => ls.name)}
                     onSelect={setSec}
                 />
                 <div id="section-container">
-                    {labeled_sections.find((ls) => ls.name === sec)?.content}
+                    {labeled_sections?.find(ls => ls.name===sec)?.content}
                 </div>
             </div>
         </div>

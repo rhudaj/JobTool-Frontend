@@ -148,11 +148,12 @@ function ItemBucket(props: {
 
     const bucket = useBucket(props.values);
 
+    const [test, setTest] = React.useState(0);      // TODO: this is a workaround since component is not re-rendering when bucket.items changes.
+
     const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
 
-    // Called whenever INTERNAL state changes:
     React.useEffect(() => {
-        // if (justUpdated || !props.onUpdate) return;
+        setTest(Math.random());
         if (!bucket.items || !props.onUpdate) return;
         const newValues = bucket.getValues();
         if (JSON.stringify(newValues) == JSON.stringify(props.values)) return;  // needed, else maximum depth! TODO: don't want to have to do this...
@@ -251,7 +252,7 @@ function ItemBucket(props: {
     );
 
     return (
-        <div ref={dropRef} className={classes} onMouseLeave={()=>setHoveredGap(undefined)}>
+        <div key={test} ref={dropRef} className={classes} onMouseLeave={()=>setHoveredGap(undefined)}>
             <div className={props.displayItemsClass}>
                 {bucket.items.map((I: Item, i: number) => (
                     <>

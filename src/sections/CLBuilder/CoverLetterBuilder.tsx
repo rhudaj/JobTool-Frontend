@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import BackendAPI from "../../backend_api";
-import  useLogger  from "../../hooks/logger";
 import Section from "../../components/Section/Section";
 import { DndProvider } from "react-dnd";
 import SplitView from "../../components/SplitView/splitview";

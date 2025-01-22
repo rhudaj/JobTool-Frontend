@@ -122,10 +122,7 @@ function ExperienceUI(props: {
 			</div>
 			{/* ROW 2 */}
 			<div className="exp-content">
-				<ul
-					// If only one item => don't render bullet point:
-					style={{ listStyleType: props.obj.description.length === 1 ? 'none' : 'disc' }}
-				>
+				<ul>
 					<ItemBucket
 						id={`${props.obj.title}-bucket`}
 						values={props.obj.description}
