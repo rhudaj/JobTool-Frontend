@@ -1,7 +1,7 @@
 import "./resumebuilder.sass"
 import { useEffect, useState, useRef } from "react";
 import Section from "../../components/Section/Section";
-import { CV } from "job-tool-shared-types";
+import { CV, NamedCV } from "job-tool-shared-types";
 import BackendAPI from "../../backend_api";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
@@ -11,56 +11,63 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import  useLogger  from "../../hooks/logger";
 import SplitView from "../../components/SplitView/splitview";
 import CVEditor from "./CVEditor/cveditor";
+import * as util from "../../util/fileInOut";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
+const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/"
 
-function ResumeBuilder() {
+/* ------------------------------------------------------------------
+ *                       CV STATE MANAGER                           *
+------------------------------------------------------------------- */
 
-    const [log, warn, error] = useLogger("ResumeBuilder");
+function useCVManager() {
 
-    // ---------------- STATE ----------------
+    // ---------------- STATE (internal) ----------------
 
-    const cvref = useRef(null);
     const [named_cvs, set_named_cvs] = useState<{ name: string; data: CV }[]>(null);
-    const [cur, set_cur] = useState<number>(null);
     const [cvInfo, setCVInfo] = useState<any>([]);
+    const [cur, set_cur] = useState<number>(null);
 
-    const saveAsPDF = useComponent2PDF("cv-page")
-
-    // Get data on mount
-    useEffect(() => {
+    useEffect(()=>{
         if(!USE_BACKEND) {
-            // use SAMPLES from the /public folder:
-            const path = process.env.PUBLIC_URL + "/samples/"
-            // sample cv:
-            fetch(path + "jane_doe_resume.json")
-            .then(response => response.json())
-            .then(data => {
-                set_named_cvs([{name: "sample_cv", data: data}])
-                set_cur(0)
-            })
-            // sample cv info:
-            fetch(path + "cv_info.json")
-            .then(response => response.json())
+            // USE CV SAMPLES FROM /public:
+            // NAMED CVS:
+            fetch(SAMPLES_PATH + "jane_doe_resume.json")
+            .then(r => r.json())
+            .then(data => set_named_cvs([{name: "sample_cv", data: data}]))
+            // CV-INFO:
+            fetch(SAMPLES_PATH + "cv_info.json")
+            .then(r => r.json())
             .then(setCVInfo)
-        } else {
-            // Get all saved CVs
-            BackendAPI.get<{ name: string; data: CV }[]>("all_cvs") // getCVs getCVinfo getCLinfo
+        }
+        // USE SAVED FILES FROM BACKEND:
+        else {
+            // NAMED CVS:
+            BackendAPI.get<NamedCV[]>("all_cvs") // getCVs getCVinfo getCLinfo
             .then(cvs => {
                 if (!cvs) return;
-                // filter any corrupt data:
+                // filter any corrupt data (TODO: this should not be necessary)
                 cvs = cvs.filter(cv => cv && cv.name && cv.data)
-                // set the state:
-                log(`Got ${cvs.length} CVs from backend`);
                 set_named_cvs(cvs);
-                set_cur(0);             // use the first one by default
             });
-            // Get the cv info
+            // CV-INFO:
             BackendAPI.get<any>("cv_info").then(setCVInfo);
         }
-    }, []);
+    }, [])
 
-    // ---------------- CONTROLS ----------------
+    useEffect(()=>{
+        if(!named_cvs || named_cvs.length === 0) return;
+        log(`Got ${named_cvs.length} CVs from backend`);
+        set_cur(0)
+    }, [named_cvs])
+
+    const log = useLogger("ResumeBuilder");
+
+    // ---------------- CONTROLS (what user sees) ----------------
+
+    // CONTROLS:
+
+    // setters
 
     const changeCV = (name: string) => {
         const idx = named_cvs.findIndex(cv => cv.name === name);
@@ -68,115 +75,56 @@ function ResumeBuilder() {
         set_cur(idx);
     };
 
-    /** save the resume as json to the Downloads folder */
-    const saveAsJson = () => {
-
-        // get the modified cv:
-        const jsonString = JSON.stringify(
-            cvref.current.getCV()
-        );
-
-        // Prompt the user to enter a custom filename
-        const filename = window.prompt("Enter a filename for your JSON file:", "my_resume");
-        if(!filename) return;
-
-        // Create a Blob (file-like object) from the JSON string:
-        const blob = new Blob([jsonString], { type: 'application/json' });
-
-        // Create a download link and trigger it
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;  // Use the filename entered by the user
-        link.click();  // Trigger the download
-    };
-
-    const jsonFileImport = (
-        event: React.ChangeEvent<HTMLInputElement>,
-        handleData: (name: string, data: any) => void,
-    ) => {
-
-        const file = event.target.files?.[0]; // Get the selected file
-        if (!file) return;
-        const name = file.name.split(".json")[0]
-
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-            try {
-                const json_str = e.target?.result as string; // File content as text
-                const json_obj = JSON.parse(json_str);
-                // *** call the callback ***
-                handleData(name, json_obj)
-            } catch (error) {
-                warn("Error parsing JSON file:", error);
-                alert("Invalid .json file")
-            }
-        };
-
-        reader.readAsText(file); // Trigger file reading
-    };
-
-    /* If USE_BACKEND */
-
-    const save2backend = () => {
-
-        const name = promptFileName();
-
-        // get CV from the cvref:
-        const newCV = cvref.current.getCV();
-
-        // Save the named CV to the backend
+    const save2backend = (cv: CV) => {
+        const name = util.promptFileName(cvNames());
         BackendAPI.post<{ name: string; cv: CV }, null>("saveCV", {
             name: name,
-            cv: newCV,
+            cv: cv,
         });
     };
 
-    const promptFileName = (): string|null => {
-        // Get non-empty user input for CV name
-        let cvName: string | null = null;
-
-        while (true) {
-            cvName = prompt("Name the CV")?.trim();
-            // 3 cases
-            if (cvName === null) {
-                // they clicked cancel
-                break;
-            } else if (cvName === "") {
-                // they clicked ok but didn't enter anything
-                cvName = null;
-                alert("Input cannot be left blank.");
-            } else if (named_cvs?.find((cv) => cv.name === cvName)) {
-
-                // alert("CV with that name already exists.");
-                const isConfirmed = window.confirm(
-                    "CV with that name already exists. Are you okay with it?"
-                );
-
-                if (isConfirmed) {
-                    // User clicked "OK"
-                    console.log("User is okay with it.");
-                    break;
-                } else {
-                    // User clicked "Cancel"
-                    console.log("User is not okay with it.");
-                    cvName = null;
-                }
-            } else {
-                // they entered a VALID name
-                break;
-            }
-        }
-
-        if (!cvName) {
-            // Can't save a CV without a valid name
-            log("User cancelled the prompt.");
-        } else {
-            log(`User entered CV name: ${cvName}`);
-        }
-
-        return cvName;
+    const importFromJson = (named_cv: NamedCV)=>{
+        set_named_cvs([named_cv, ...named_cvs])
     };
+
+    // GETTERS:
+
+    const curIdx = () => cur;
+
+    const cvNames = () => named_cvs?.map(ncv=>ncv.name);
+
+    const curName = () => named_cvs[cur].name;
+
+    const curData = () => named_cvs[cur]?.data;
+
+    const getCVInfo = () => cvInfo;
+
+    return { curIdx, cvNames, curName, getCVInfo, curData, setCVInfo, importFromJson, changeCV, save2backend };
+};
+
+/* ------------------------------------------------------------------
+ *                         SUB COMPONENTS                           *
+------------------------------------------------------------------- */
+
+function SavedCVs(props: {}) {
+    // ---------------- STATE ----------------
+    const [namedCVs, setNamedCVs] = useState<NamedCV[]>(null);
+}
+
+/* ------------------------------------------------------------------
+ *                         ROOT COMPONENT                           *
+------------------------------------------------------------------- */
+function ResumeBuilder() {
+
+    // ---------------- STATE ----------------
+
+    const state = useCVManager();
+    const editor_ref = useRef(null);
+    const saveAsPDF = useComponent2PDF("cv-page")
+
+    const [log, warn, error] = useLogger("ResumeBuilder");
+
+    // ---------------- CONTROLS ----------------
 
     // ---------------- RENDER ----------------
 
@@ -186,19 +134,15 @@ function ResumeBuilder() {
                 <h4>Import</h4>
                 <div style={{display: "flex", gap: "10rem"}}>
                     <p>Import Resume as JSON:</p>
-                    <input type="file" accept=".json" onChange={ev=>jsonFileImport(ev, (name, data)=>{
-                        const named_cv = {name: name, data: data}
-                        set_named_cvs([named_cv, ...named_cvs])
-                        set_cur(0);
-                    })}/>
+                    <input type="file" accept=".json" onChange={e=>util.jsonFileImport(e, state.importFromJson)}/>
                 </div>
 
                 <div style={{display: "flex", gap: "10rem"}}>
                     <p>Selected Resume:</p>
-                    <select onChange={e => changeCV(e.target.value)}>
-                        {named_cvs?.map((ncv, i) => (
-                            <option key={i} value={ncv.name} selected={i===cur}>
-                                {ncv.name}
+                    <select onChange={e => state.changeCV(e.target.value)}>
+                        {state.cvNames()?.map((name, i) => (
+                            <option key={i} value={name} selected={i===state.curIdx()}>
+                                {name}
                             </option>
                         ))}
                     </select>
@@ -206,19 +150,19 @@ function ResumeBuilder() {
 
                 <div style={{display: "flex", gap: "10rem"}}>
                     <p>Import Resume Items as JSON:</p>
-                    <input type="file" accept=".json" onChange={ev => jsonFileImport(ev, (name, data)=>setCVInfo(data))}/>
+                    <input type="file" accept=".json" onChange={ev => util.jsonFileImport(ev, ({name, data})=>state.setCVInfo(data))}/>
                 </div>
 
             </div>
             <div>
                 <h4>Export</h4>
-                <button onClick={()=>saveAsPDF(named_cvs[cur].name)}>PDF</button>
-                <button onClick={saveAsJson}>JSON</button>
+                <button onClick={()=>saveAsPDF(state.curName())}>PDF</button>
+                <button onClick={()=>util.downloadAsJson(editor_ref.current.getCV())}>JSON</button>
             </div>
             {USE_BACKEND && (
                 <div>
                     <h4>Save to backend</h4>
-                    <button onClick={save2backend}>Save</button>
+                    <button onClick={()=>state.save2backend(editor_ref.current.getCV())}>Save</button>
                 </div>
             )}
         </div>
@@ -230,9 +174,9 @@ function ResumeBuilder() {
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
                     <PrintablePage page_id="cv-page">
-                        {named_cvs && <CVEditor cv={named_cvs[cur]?.data} ref={cvref} />}
+                        {state.cvNames() && <CVEditor cv={state.curData()} ref={editor_ref} />}
                     </PrintablePage>
-                    <InfoPad info={cvInfo} />
+                    <InfoPad info={state.getCVInfo()} />
                 </SplitView>
                 </DndProvider>
         </Section>

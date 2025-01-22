@@ -7,7 +7,7 @@ import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 import { BucketTypes } from "../../../components/dnd/types";
 import { useImmer } from "use-immer";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 
