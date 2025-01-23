@@ -39,11 +39,24 @@ function useCVManager() {
                 "sample_resume3.json"
             ];
             const temp = [];
-            samps.forEach(name=>{
+
+            const fetchPromises = samps.map((name) =>
                 fetch(`${SAMPLES_PATH}/CVs/${name}`)
-                .then(r => r.json())
-                .then(data => temp.push({name, data}))
+                  .then((r) => r.json())
+                  .then((data) => ({ name, data })) // return data with the name for later use
+              );
+
+            // Wait for all fetches to finish
+            Promise.all(fetchPromises)
+            .then((results) => {
+                set_named_cvs(results);
             })
+            .catch((error) => {
+                // Handle any errors in the fetches
+                console.error("Error fetching CV data:", error);
+            });
+
+
             set_named_cvs(temp);
 
             // CV-INFO:
