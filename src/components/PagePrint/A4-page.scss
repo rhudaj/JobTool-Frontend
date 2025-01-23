@@ -2,12 +2,13 @@
     /* CENTER THE PAGE */
     display: flex;
     justify-content: center;
+    // width: 100%;
 }
 
 .A4-page {
     background-color: white;
     container-type: size;
-    width: calc(21rem * 36);
+    width: 100%;
     height: auto;
     aspect-ratio: 21 / 29.7;
 }

@@ -14,6 +14,9 @@
         padding: 3rem
         width: 50rem
 
+#ss-named-cvs
+    padding: 0 100rem
+
 .cv-thumnail-container
     display: flex
     gap: 20rem
@@ -32,8 +35,23 @@
         align-content: center
 
         font-size: 10rem
-        color: black
+        color: grey
         background-color: white
+
+        border-radius: 7rem
 
         &:hover
             border: 2rem solid blue
+
+        &.active
+            color: black
+            font-weight: bold
+            border: 2rem solid black
+
+#ss-export
+    display: flex
+    justify-content: center
+    gap: 30rem
+    button
+        width: max-content
+        padding: 5rem 10rem

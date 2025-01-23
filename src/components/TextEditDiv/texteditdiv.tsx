@@ -1,6 +1,6 @@
 import React from "react";
 import "./texteditdiv.scss";
-import { joinClassNames } from "../../hooks/joinClassNames";
+import { joinClassNames } from "../../util/joinClassNames";
 
 /**
  * @param tv standard text || html string

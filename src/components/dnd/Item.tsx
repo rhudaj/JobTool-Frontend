@@ -1,7 +1,7 @@
 import "./Item.scss"
 import { useDrag, useDrop } from "react-dnd";
 import React, { useContext } from "react";
-import { joinClassNames } from "../../hooks/joinClassNames";
+import { joinClassNames } from "../../util/joinClassNames";
 import { Item } from "./types";
 import ItemControlsContainer from "./controls";
 import { BucketContext } from "./ItemBucket";
@@ -27,7 +27,7 @@ function DNDItem(props: { item: Item, children: JSX.Element }) {
             const dropResult: {id: any} = monitor.getDropResult();  // the bucket we dropped on
             // Cancelled/invalid drop || same bucket
             if(!dropResult || dropResult.id === bucketContext.bucket_id) return;
-            bucketContext.onRemove(item.id);
+            bucketContext.onRemove && bucketContext.onRemove(item.id);
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging()

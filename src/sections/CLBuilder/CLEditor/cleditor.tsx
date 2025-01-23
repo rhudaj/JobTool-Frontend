@@ -12,9 +12,9 @@ function CLEditor(props: {
 
     useEffect(()=> {
         setPgs([
-            "Roman Hudaj",
-            "Toronto, ON",
-            "rhudaj@uwaterloo.ca",
+            "First Last",
+            "City, State",
+            "username@email.come",
             "",
             new Date().toDateString(),
             "Dear Hiring Manager",

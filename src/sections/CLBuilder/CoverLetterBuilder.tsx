@@ -13,7 +13,7 @@ function CLBuilder(props: {}) {
 
     // ---------------- MODEL ----------------
 
-    const [CL, setCL] = useState<string[]>(null);
+    const [pgraps, setCL] = useState<string[]>(null);
     const [clInfo, setCLInfo] = useState<any>(null);
 
     const saveAsPDF = useComponent2PDF("cl-page");
@@ -60,7 +60,7 @@ function CLBuilder(props: {}) {
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
                     <PrintablePage page_id="cl-page">
-                        <CLEditor paragraphs={CL}/>
+                        <CLEditor paragraphs={pgraps}/>
                     </PrintablePage>
                     <InfoPad info={clInfo}/>
                 </SplitView>

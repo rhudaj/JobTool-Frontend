@@ -1,7 +1,7 @@
 import "./ItemBucket.scss";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import React, { useEffect } from "react";
-import { joinClassNames } from "../../hooks/joinClassNames";
+import { joinClassNames } from "../../util/joinClassNames";
 import { Item, DEFAULT_ITEM_TYPE } from "./types";
 import { useImmer } from "use-immer";
 import DNDItem from "./Item";
@@ -47,16 +47,16 @@ const useBucket = (initialValues: any[]) => {
     const [items, setItems] = useImmer<Item[]>(null);
 
     useEffect(()=>{
-        console.log('useBucket received new initialValues:', initialValues);
-        setItems(initialValues.map(v => ({
+        // console.log('useBucket received new initialValues:', initialValues);
+        setItems(initialValues?.map(v => ({
             id: objectHash.sha1(v),
             value: v,
         })))
     }, [initialValues])
 
-    useEffect(()=>{
-        console.log('useBucket items updated:', items);
-    }, [items])
+    // useEffect(()=>{
+    //     // console.log('useBucket items updated:', items);
+    // }, [items])
 
 
     // -----------------HELPERS-----------------
