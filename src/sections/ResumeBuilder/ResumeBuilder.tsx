@@ -16,6 +16,7 @@ import { joinClassNames } from "../../util/joinClassNames";
 import SubSection from "../../components/Section/SubSection";
 import PopupModal from "../../components/PopupModal/PopupModal";
 import TextEditDiv from "../../components/TextEditDiv/texteditdiv";
+import { useImmer } from "use-immer";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
@@ -27,13 +28,18 @@ const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
 // Manages any state/controls relating to the CV builder
 function useCVManager() {
     // ---------------- STATE (internal) ----------------
-
     const [named_cvs, set_named_cvs] = useState<NamedCV[]>(null);
     const [cvInfo, setCVInfo] = useState<any>([]);
     const [cur, set_cur] = useState<number>(null);
 
     useEffect(() => {
-        if (!USE_BACKEND) {
+        if(USE_BACKEND) {
+            BackendAPI.get<NamedCV[]>("all_cvs").then(cvs=>{
+                set_named_cvs(cvs.filter(cv => cv && cv.name && cv.data))
+            });
+            BackendAPI.get<any>("cv_info").then(setCVInfo);
+        }
+        else {
             const samps = [
                 "sample_resume1.json",
                 "sample_resume2.json",
@@ -41,11 +47,9 @@ function useCVManager() {
             ];
             const temp = [];
 
-            const fetchPromises = samps.map(
-                (name) =>
-                    fetch(`${SAMPLES_PATH}/CVs/${name}`)
-                        .then((r) => r.json())
-                        .then((data) => ({ name, data })) // return data with the name for later use
+            const fetchPromises = samps.map(name =>
+                fetch(`${SAMPLES_PATH}/CVs/${name}`)
+                .then(r => r.json())
             );
 
             // Wait for all fetches to finish
@@ -64,19 +68,6 @@ function useCVManager() {
             fetch(SAMPLES_PATH + "cv_info.json")
                 .then((r) => r.json())
                 .then(setCVInfo);
-        }
-        // USE SAVED FILES FROM BACKEND:
-        else {
-            // NAMED CVS:
-            BackendAPI.get<NamedCV[]>("all_cvs") // getCVs getCVinfo getCLinfo
-                .then((cvs) => {
-                    if (!cvs) return;
-                    // filter any corrupt data (TODO: this should not be necessary)
-                    cvs = cvs.filter((cv) => cv && cv.name && cv.data);
-                    set_named_cvs(cvs);
-                });
-            // CV-INFO:
-            BackendAPI.get<any>("cv_info").then(setCVInfo);
         }
     }, []);
 
@@ -115,8 +106,8 @@ function useCVManager() {
     const cvNames = () => named_cvs?.map((ncv) => ncv.name);
 
     const curName = () => named_cvs ? named_cvs[cur]?.name : null;
-
     const curData = () => named_cvs[cur]?.data;
+    const curTags = () => named_cvs ? named_cvs[cur]?.tags : null;
 
     const getCVInfo = () => cvInfo;
 
@@ -124,6 +115,7 @@ function useCVManager() {
         curIdx,
         cvNames,
         curName,
+        curTags,
         getCVInfo,
         curData,
         setCVInfo,
@@ -137,9 +129,11 @@ function useCVManager() {
  *                         SUB COMPONENTS                           *
 ------------------------------------------------------------------- */
 
-const TextItems = forwardRef((props: {}, ref: React.ForwardedRef<any>) => {
+const TextItems = forwardRef((props: {
+    initItems?: string[]
+}, ref: React.ForwardedRef<any>) => {
 
-    const [items, setItems] = useState<string[]>([]);
+    const [items, setItems] = useImmer<string[]>(props.initItems ?? []);
     const text_ref = useRef<HTMLDivElement>(null);
 
     useImperativeHandle(ref, () => ({
@@ -149,12 +143,24 @@ const TextItems = forwardRef((props: {}, ref: React.ForwardedRef<any>) => {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.key !== 'Enter') return; // only care ab
         e.preventDefault();
-        const text = text_ref.current.textContent.trim();
-        if(!text) return;
-        if(items.find(t=>t===text)) return;
-        setItems(prev=>[...prev, text]);
+        const new_item = text_ref.current.textContent.trim();
+        if(!new_item) return;
+        if(items.find(t=>t===new_item)) return;
+        setItems(draft=>{draft.push(new_item)});
         text_ref.current.innerHTML = "";
     };
+
+    const onDeleteItem = (idx: number) => {
+        setItems(draft=>{
+            draft.splice(idx, 1);
+        })
+    }
+
+    const Item = (txt: string, idx: number) => (
+        <span className="item" onDoubleClick={e=>onDeleteItem(idx)}>
+            {txt}
+        </span>
+    )
 
     return (
         <div className="text-items">
@@ -164,7 +170,7 @@ const TextItems = forwardRef((props: {}, ref: React.ForwardedRef<any>) => {
                 onKeyDown={handleKeyDown}
             />
             <div className="items-container">
-                {items.map(I=><span className="item">{I}</span>)}
+                {items.map(Item)}
             </div>
         </div>
     )
@@ -172,6 +178,7 @@ const TextItems = forwardRef((props: {}, ref: React.ForwardedRef<any>) => {
 
 const SaveForm = (props: {
     default_file_name: string,
+    default_tags: string[],
     onSave: (name: string, tags: string[]) => void,
     disabled?: boolean
 }) => {
@@ -207,7 +214,7 @@ const SaveForm = (props: {
                 {reason}
             </p>
             <p>Tags (optional):</p>
-            <TextItems ref={tags_ref}/>
+            <TextItems initItems={props.default_tags} ref={tags_ref}/>
 
             {/* Save Button */}
             <button type="submit" disabled={!isNameValid}>
@@ -316,6 +323,7 @@ function ResumeBuilder() {
                     <PopupModal label="Save">
                         <SaveForm
                             default_file_name={state?.curName() ?? ""}
+                            default_tags={state.curTags()}
                             onSave={() =>state.save2backend(editor_ref.current.getCV())}
                         />
                     </PopupModal>
