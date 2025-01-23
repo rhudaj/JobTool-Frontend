@@ -14,6 +14,8 @@ import CVEditor from "./CVEditor/cveditor";
 import * as util from "../../util/fileInOut";
 import { joinClassNames } from "../../util/joinClassNames";
 import SubSection from "../../components/Section/SubSection";
+import useToggle from "../../hooks/toggle";
+
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/"
@@ -27,7 +29,7 @@ function useCVManager() {
 
     // ---------------- STATE (internal) ----------------
 
-    const [named_cvs, set_named_cvs] = useState<{ name: string; data: CV }[]>(null);
+    const [named_cvs, set_named_cvs] = useState<NamedCV[]>(null);
     const [cvInfo, setCVInfo] = useState<any>([]);
     const [cur, set_cur] = useState<number>(null);
 
@@ -130,6 +132,23 @@ function useCVManager() {
  *                         SUB COMPONENTS                           *
 ------------------------------------------------------------------- */
 
+function PopupModal(props: {
+    children?: React.ReactNode
+}) {
+    const [isOpen, setIsOpen] = useToggle();
+    return (
+        <>
+            <button onClick={setIsOpen}>Export</button>
+            <dialog open={isOpen} id="modal" className={joinClassNames('modal', isOpen?'open':'')}>
+                <div className="modal-content">{props.children}</div>
+                <div className="modal-controls">
+                    <span className="modal-close" onClick={setIsOpen}>X</span>
+                </div>
+            </dialog>
+        </>
+    )
+}
+
 function SavedCVs(props: {
     cvNames: string[],
     curIdx: number,
@@ -165,10 +184,6 @@ function ResumeBuilder() {
     const editor_ref = useRef(null);
     const saveAsPDF = useComponent2PDF("cv-page")
 
-    const [log, warn, error] = useLogger("ResumeBuilder");
-
-    // ---------------- CONTROLS ----------------
-
     // ---------------- RENDER ----------------
 
     const Controls = () => (
@@ -185,8 +200,12 @@ function ResumeBuilder() {
                 </div>
             </SubSection>
             <SubSection heading="Export" id="ss-export">
-                <button onClick={()=>saveAsPDF(state.curName())}>PDF</button>
-                <button onClick={()=>util.downloadAsJson(editor_ref.current.getCV())}>JSON</button>
+                <PopupModal>
+                    <div style={{display: "flex", flexDirection: "column", gap: "20rem", alignItems: "center", height: "max-content"}}>
+                        <button onClick={()=>saveAsPDF(state.curName())}>PDF</button>
+                        <button onClick={()=>util.downloadAsJson(editor_ref.current.getCV())}>JSON</button>
+                    </div>
+                </PopupModal>
                 {USE_BACKEND && <button onClick={()=>state.save2backend(editor_ref.current.getCV())}>Save to Backend</button>}
             </SubSection>
         </div>

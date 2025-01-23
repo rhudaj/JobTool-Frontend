@@ -55,3 +55,47 @@
     button
         width: max-content
         padding: 5rem 10rem
+
+
+// EXAMPLE
+
+.modal
+    // CENTER OF SCREEN
+    position: absolute
+    top: 50%
+    left: 50%
+
+    // width: 450rem
+    height: max-content
+    min-width: 250rem
+
+    transform: translate(-50%, -50%) // to shift it back by half its width and height.
+
+    // STYLING
+
+    background-color: #585858
+
+    padding: 15rem
+    border: 2rem solid #1a1a1a
+    border-radius: 12rem
+
+    // CHILDREN LAYOUT
+
+    &.open
+        display: flex
+        flex-direction: row
+
+    & > .modal-content
+        padding: 15rem
+        flex: 1 0
+        height: max-content
+
+    & > .modal-controls
+        flex: 0 1
+        font-size: 18rem
+        height: max-content
+
+        & > .modal-close
+            &:hover
+                cursor: pointer
+                font-weight: bold
