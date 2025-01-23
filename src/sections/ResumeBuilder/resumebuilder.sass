@@ -57,45 +57,31 @@
         padding: 5rem 10rem
 
 
-// EXAMPLE
+// text-items
 
-.modal
-    // CENTER OF SCREEN
-    position: absolute
-    top: 50%
-    left: 50%
+.text-items
+    text-align: left
+    direction: ltr
 
-    // width: 450rem
+    width: 100%
     height: max-content
-    min-width: 250rem
 
-    transform: translate(-50%, -50%) // to shift it back by half its width and height.
+    display: flex
+    flex-direction: column
+    gap: 5rem
 
-    // STYLING
+    .text-input
+        padding: 5rem
+        width: 100%
+        background-color: white
 
-    background-color: #585858
+    .items-container
+        width: 100%
+        min-height: 50rem
+        border: 1px dashed black
 
-    padding: 15rem
-    border: 2rem solid #1a1a1a
-    border-radius: 12rem
+        padding: 5rem
 
-    // CHILDREN LAYOUT
-
-    &.open
-        display: flex
-        flex-direction: row
-
-    & > .modal-content
-        padding: 15rem
-        flex: 1 0
-        height: max-content
-
-    & > .modal-controls
-        flex: 0 1
-        font-size: 18rem
-        height: max-content
-
-        & > .modal-close
-            &:hover
-                cursor: pointer
-                font-weight: bold
+        .item
+            padding: 3rem
+            border: 1px dashed blue
