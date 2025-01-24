@@ -42,22 +42,17 @@ const nextGap = (itemIndex: number) => itemIndex + 1;
  * Bucket State Manager
  * @param values - initial values of the bucket
  */
-const useBucket = () => {
+const useBucket = (initVals: any[]) => {
 
-    const [values, setValues] = useState<any[]>(null);
     const [items, setItems] = useImmer<Item[]>(null);
 
     useEffect(()=>{
         console.log('useBucket: new values');
-        setItems(values?.map(v => ({
+        setItems(initVals?.map(v => ({
             id: objectHash.sha1(v),
             value: v,
         })))
-    }, [values])
-
-    // useEffect(()=>{
-    //     // console.log('useBucket items updated:', items);
-    // }, [items])
+    }, [initVals])
 
 
     // -----------------STATE CONTROL-----------------
@@ -108,7 +103,7 @@ const useBucket = () => {
         });
     };
 
-    return { items, setValues, getValues, addItem, addBlankItem, moveItem, removeItem, changeItemValue, getIdx };
+    return { items, getValues, addItem, addBlankItem, moveItem, removeItem, changeItemValue, getIdx };
 };
 
 
@@ -145,17 +140,11 @@ function ItemBucket(props: {
 }) {
     // ----------------- STATE -----------------
 
-    const bucket = useBucket();
+    const bucket = useBucket(props.values);
 
     const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
 
-    React.useEffect(()=>{
-        console.log(`ItemBucket ${props.id}: new props.values`)
-        bucket.setValues(props.values);
-    }, [props.values]);
-
     React.useEffect(() => {
-        // setTest(...)
         if (!bucket.items || !props.onUpdate) return;
         const newValues = bucket.getValues();
         if (JSON.stringify(newValues) == JSON.stringify(props.values)) return;  // needed, else maximum depth! TODO:
