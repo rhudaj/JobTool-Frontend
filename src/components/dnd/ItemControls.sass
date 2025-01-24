@@ -1,13 +1,16 @@
 .dnd-item-controls
     display: flex
     flex-direction: row
-    gap: .5em
 
     & > *   // any control option(s)
-        font-size: 7px
+
+        width: 1cqw
+        text-align: center
+
+        font-size: 1cqw
 
         border: 1rem solid black
-        border-radius: 3rem
+        // border-radius: 3rem
         cursor: 'pointer'
         padding: .1em
         opacity: 0.5
@@ -19,3 +22,6 @@
 
 .move-handle
     background-color: lightblue
+
+.add-item
+    background-color: lightgray

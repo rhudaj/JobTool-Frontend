@@ -3,7 +3,7 @@ import { useDrag, useDrop } from "react-dnd";
 import React, { useContext } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
 import { Item } from "./types";
-import ItemControlsContainer from "./controls";
+import ItemControlsContainer from "./ItemControls";
 import { BucketContext } from "./ItemBucket";
 
 // TODO: should be usable on its own (ie: has its own state) in the case you dont want a bucket.
@@ -83,7 +83,8 @@ function DNDItem(props: { item: Item, children: JSX.Element }) {
             </div>
             <ItemControlsContainer ref={ref}>
                 <div ref={drag} className="move-handle">M</div>
-                { bucketContext.onDelete && <div className="delete-button" onClick={()=>bucketContext.onDelete(props.item.id)}>X</div>}
+                { bucketContext.onDelete &&
+                <div className="delete-button" onClick={()=>bucketContext.onDelete(props.item.id)}>X</div>}
                 { bucketContext.onAddItem &&
                     <>
                     <div className="add-item" onClick={()=>bucketContext.onAddItem(props.item.id, true)}>↓</div>
