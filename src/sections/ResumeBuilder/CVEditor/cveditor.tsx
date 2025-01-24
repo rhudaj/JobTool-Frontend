@@ -4,6 +4,7 @@ import * as UI from "./cv_components"
 import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
 import ItemBucket from "../../../components/dnd/ItemBucket";
+import { BucketTypes } from "../../../components/dnd/types";
 
 // MAIN COMPONENT
 const CVEditor = forwardRef((
@@ -29,6 +30,8 @@ const CVEditor = forwardRef((
 	// -------------- VIEW --------------
 
 	if (!CV) return null;
+
+	const bt = BucketTypes["sections"];
 	return (
 		<div id="cv-editor">
 			<div id="full-name" key="name">{CV.header_info.name}</div>
@@ -37,21 +40,22 @@ const CVEditor = forwardRef((
 			</div>
 			<ItemBucket
 				id="sections-bucket"
-				values={CV.sections} // only worry about tracking the string names (assumes all unique)
-				isVertical={true}
-				item_type="section"
-				displayItemsClass="section"
+				values={CV.sections} 		// TODO: only worry about tracking the string names (assumes all unique)
+				isVertical={bt.isVertical}
+				item_type={bt.item_type}
+				displayItemsClass={bt.displayItemsClass}
 				onUpdate={new_vals => {
 					setCV(cur => { cur.sections = new_vals })
 				}}
 			>
-				{CV.sections?.map((sec, i) => {
-					console.log("CVEditor: running CV.sections?.map")
-					// TODO: make this a BucketType as well
-					return <UI.SectionUI key={i} obj={sec} onUpdate={new_obj => {
-						setCV(cur => { cur.sections[i] = new_obj })
-					}}/>
-				})}
+				{CV.sections?.map((sec: any, i: number) =>
+					bt.DisplayItem({
+						obj: sec,
+						onUpdate: (newSec:any) => {
+							setCV(cur => { cur.sections[i] = newSec })
+						},
+					})
+				)}
 			</ItemBucket>
 		</div>
 	);

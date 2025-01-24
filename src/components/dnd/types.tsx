@@ -1,4 +1,4 @@
-import { ExperienceUI, SummaryUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
+import { ExperienceUI, SectionUI, SummaryUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
 import "./types.scss";
 
 const DEFAULT_ITEM_TYPE = "DRAG-ITEM";
@@ -38,6 +38,12 @@ const BucketTypes: { [key: string]: BucketType } = {
         isVertical: true,
         displayItemsClass: "text-item-list",
         DisplayItem: (props: {obj: string}) => <div className="text-item">{props.obj}</div>
+    },
+    "sections": {
+        item_type: "section",
+        isVertical: true,
+        displayItemsClass: "section",
+        DisplayItem: SectionUI
     }
 };
 
