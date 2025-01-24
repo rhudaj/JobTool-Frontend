@@ -1,7 +1,7 @@
 import "./resumebuilder.sass";
 import { useEffect, useState, useRef } from "react";
 import Section from "../../components/Section/Section";
-import { NamedCV } from "job-tool-shared-types";
+import { CV, NamedCV } from "job-tool-shared-types";
 import BackendAPI from "../../backend_api";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
@@ -35,7 +35,7 @@ function useCVManager() {
     useEffect(() => {
         if(USE_BACKEND) {
             BackendAPI.get<NamedCV[]>("all_cvs").then(cvs=>{
-                set_named_cvs(cvs.filter(cv => cv && cv.name && cv.data))
+                set_named_cvs(cvs?.filter(cv => cv && cv.name && cv.data))
             });
             BackendAPI.get<any>("cv_info").then(setCVInfo);
         }
@@ -91,8 +91,8 @@ function useCVManager() {
         set_cur(idx);
     };
 
-    const save2backend = (data: NamedCV) => {
-        BackendAPI.post<NamedCV, null>("saveCV", data);
+    const save2backend = (ncv: NamedCV) => {
+        BackendAPI.post<NamedCV, null>("saveCV", ncv);
     };
 
     const importFromJson = (named_cv: NamedCV) => {
@@ -102,13 +102,10 @@ function useCVManager() {
     // GETTERS:
 
     const curIdx = () => cur;
-
     const cvNames = () => named_cvs?.map((ncv) => ncv.name);
-
     const curName = () => named_cvs ? named_cvs[cur]?.name : null;
     const curData = () => named_cvs[cur]?.data;
     const curTags = () => named_cvs ? named_cvs[cur]?.tags : null;
-
     const getCVInfo = () => cvInfo;
 
     return {
@@ -216,7 +213,7 @@ function ResumeBuilder() {
     const editor_ref = useRef(null);
     const saveAsPDF = useComponent2PDF("cv-page");
 
-    // ---------------- RENDER ----------------
+    // ---------------- VIEW ----------------
 
     const Controls = () => (
         <div id="resume-builder-controls">
@@ -277,7 +274,13 @@ function ResumeBuilder() {
                         <SaveForm
                             default_file_name={state?.curName() ?? ""}
                             default_tags={state.curTags()}
-                            onSave={() =>state.save2backend(editor_ref.current.getCV())}
+                            onSave={(newName: string, newTags: string[]) => {
+                                state.save2backend({
+                                    name: newName,
+                                    tags: newTags,
+                                    data: editor_ref.current.getCV()
+                                })
+                            }}
                         />
                     </PopupModal>
                 )}

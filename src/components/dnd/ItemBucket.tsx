@@ -1,6 +1,6 @@
 import "./ItemBucket.scss";
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
 import { Item, DEFAULT_ITEM_TYPE } from "./types";
 import { useImmer } from "use-immer";
@@ -42,28 +42,27 @@ const nextGap = (itemIndex: number) => itemIndex + 1;
  * Bucket State Manager
  * @param values - initial values of the bucket
  */
-const useBucket = (initialValues: any[]) => {
+const useBucket = () => {
 
+    const [values, setValues] = useState<any[]>(null);
     const [items, setItems] = useImmer<Item[]>(null);
 
     useEffect(()=>{
-        // console.log('useBucket received new initialValues:', initialValues);
-        setItems(initialValues?.map(v => ({
+        console.log('useBucket: new values');
+        setItems(values?.map(v => ({
             id: objectHash.sha1(v),
             value: v,
         })))
-    }, [initialValues])
+    }, [values])
 
     // useEffect(()=>{
     //     // console.log('useBucket items updated:', items);
     // }, [items])
 
 
-    // -----------------HELPERS-----------------
+    // -----------------STATE CONTROL-----------------
 
     const getIdx = (id: any) => items.findIndex(I => I.id === id);
-
-    // -----------------STATE MODIFIERS-----------------
 
     const getValues = () => {
         return items?.map((I) => I.value);
@@ -109,7 +108,7 @@ const useBucket = (initialValues: any[]) => {
         });
     };
 
-    return { items, getValues, addItem, addBlankItem, moveItem, removeItem, changeItemValue, getIdx };
+    return { items, setValues, getValues, addItem, addBlankItem, moveItem, removeItem, changeItemValue, getIdx };
 };
 
 
@@ -146,17 +145,20 @@ function ItemBucket(props: {
 }) {
     // ----------------- STATE -----------------
 
-    const bucket = useBucket(props.values);
-
-    const [test, setTest] = React.useState(0);      // TODO: this is a workaround since component is not re-rendering when bucket.items changes.
+    const bucket = useBucket();
 
     const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
 
+    React.useEffect(()=>{
+        console.log(`ItemBucket ${props.id}: new props.values`)
+        bucket.setValues(props.values);
+    }, [props.values]);
+
     React.useEffect(() => {
-        setTest(Math.random());
+        // setTest(...)
         if (!bucket.items || !props.onUpdate) return;
         const newValues = bucket.getValues();
-        if (JSON.stringify(newValues) == JSON.stringify(props.values)) return;  // needed, else maximum depth! TODO: don't want to have to do this...
+        if (JSON.stringify(newValues) == JSON.stringify(props.values)) return;  // needed, else maximum depth! TODO:
         props.onUpdate(newValues); // && items != bucket.items
     }, [bucket.items]);
 
@@ -252,7 +254,7 @@ function ItemBucket(props: {
     );
 
     return (
-        <div key={test} ref={dropRef} className={classes} onMouseLeave={()=>setHoveredGap(undefined)}>
+        <div ref={dropRef} className={classes} onMouseLeave={()=>setHoveredGap(undefined)}>
             <div className={props.displayItemsClass}>
                 {bucket.items.map((I: Item, i: number) => (
                     <>

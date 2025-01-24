@@ -16,27 +16,19 @@ const CVEditor = forwardRef((
 	const [CV, setCV] = useImmer<CV>(null);
 
 	useEffect(() => {
+		console.log("CVEditor\n\tnew props.cv: ", props.cv)
+		// CHECK: props.cv has the correct updates => CV has the correct updates
 		setCV(props.cv);
 	}, [props.cv]);
-
-	useEffect(() => {
-		console.log("CVEditor, New CV")
-	}, [CV]);
-
 
 	// give parent access to CV
 	useImperativeHandle(ref, () => ({
 		getCV: () => { return CV }
 	}));
 
-	// -------------- VIEW (setup) --------------
-
-	if (!CV) {
-		return null;
-	}
-
 	// -------------- VIEW --------------
 
+	if (!CV) return null;
 	return (
 		<div id="cv-editor">
 			<div id="full-name" key="name">{CV.header_info.name}</div>
@@ -50,20 +42,16 @@ const CVEditor = forwardRef((
 				item_type="section"
 				displayItemsClass="section"
 				onUpdate={new_vals => {
-					setCV(draft => {
-						draft.sections = new_vals
-					})
+					setCV(cur => { cur.sections = new_vals })
 				}}
 			>
-				{
-					CV.sections?.map((sec, i) => (
-						<UI.SectionUI key={i} obj={sec} onUpdate={new_obj => {
-							setCV(draft => {
-								draft.sections[i] = new_obj;
-							})
-						}}/>
-					))
-				}
+				{CV.sections?.map((sec, i) => {
+					console.log("CVEditor: running CV.sections?.map")
+					// TODO: make this a BucketType as well
+					return <UI.SectionUI key={i} obj={sec} onUpdate={new_obj => {
+						setCV(cur => { cur.sections[i] = new_obj })
+					}}/>
+				})}
 			</ItemBucket>
 		</div>
 	);

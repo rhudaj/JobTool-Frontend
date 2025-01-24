@@ -6,54 +6,51 @@ import ItemBucket from "../../../components/dnd/ItemBucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 import { BucketTypes } from "../../../components/dnd/types";
-import { useImmer } from "use-immer";
-import { useEffect } from "react";
 
 function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
-
-	const [sec, setSec] = useImmer(props.obj);
-
-	useEffect(()=>{
-		props.onUpdate(sec);
-	}, [sec]);
 
 	const formatHeader = (head: string) => (
 		head.toUpperCase()
 	);
 
-	const bt = BucketTypes[sec.item_type];
+	if(!props.obj) return null;
+
+	const bt = BucketTypes[props.obj.item_type];
 
 	return (
 		<div className="section" >
 			<div className="sec-head">
-				<p>{formatHeader(sec.name)}</p>
+				<p>{formatHeader(props.obj.name)}</p>
 				<hr />
 			</div>
-			<div id={`sec-${sec.name}`} className="sec-content">
+			<div id={`sec-${props.obj.name}`} className="sec-content">
 				<ItemBucket
-					id={sec.name}
-					values={sec.content}
+					id={props.obj.name}
+					values={props.obj.content}
 					item_type={bt.item_type}
 					isVertical={bt.isVertical}
 					displayItemsClass={bt.displayItemsClass}
 					onUpdate={newVal =>{
-						setSec(draft=>{
-							draft.content = newVal;
-						})
+						const new_sec = {
+							...props.obj,
+							content: newVal
+						}
+						props.onUpdate(new_sec);
 					}}
 				>
-					{
-						sec.content?.map((item, i) => (
-							bt.DisplayItem({
-								obj: item,
-								onUpdate: newVal => {
-									setSec(draft=>{
-										draft.content[i] = newVal;
-									})
+					{props.obj.content?.map((item: any, i: number) =>
+						bt.DisplayItem({
+							obj: item,
+							onUpdate: (newVal: any) => {
+								const new_content = [...props.obj.content];
+								new_content[i] = newVal;
+								const new_sec = {
+									...props.obj,
+									content: new_content
 								}
-							})
-						))
-					}
+							}
+						})
+					)}
 				</ItemBucket>
 			</div>
 		</div>
@@ -64,8 +61,6 @@ function SummaryUI(props: {
 	obj: any,		// summary object
 	onUpdate?: any	// summary object => void
 }) {
-
-	console.log("SummaryUI render: ", props.obj);
 
 	const handleUpdate = (key: string, newVal: any) => {
 		props.onUpdate({...props.obj, [key]: newVal});
@@ -96,9 +91,7 @@ function ExperienceUI(props: {
 		props.onUpdate({ ...props.obj, [field]: val });
 	};
 
-	if (!props?.obj?.title) {
-		return null;
-	}
+	if (!props?.obj?.title) return null;
 	return (
 		<div className="experience">
 			{/* ROW 1 */}
