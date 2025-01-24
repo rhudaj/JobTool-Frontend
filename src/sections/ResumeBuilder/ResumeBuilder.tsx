@@ -1,7 +1,7 @@
 import "./resumebuilder.sass";
-import { useEffect, useState, useRef, forwardRef, useImperativeHandle } from "react";
+import { useEffect, useState, useRef } from "react";
 import Section from "../../components/Section/Section";
-import { CV, NamedCV } from "job-tool-shared-types";
+import { NamedCV } from "job-tool-shared-types";
 import BackendAPI from "../../backend_api";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
@@ -16,7 +16,6 @@ import { joinClassNames } from "../../util/joinClassNames";
 import SubSection from "../../components/Section/SubSection";
 import PopupModal from "../../components/PopupModal/PopupModal";
 import TextEditDiv from "../../components/TextEditDiv/texteditdiv";
-import { useImmer } from "use-immer";
 import TextItems from "../../components/TextItems/TextItems";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";

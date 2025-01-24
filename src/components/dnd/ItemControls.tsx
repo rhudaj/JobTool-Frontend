@@ -2,12 +2,6 @@ import useToggle from '../../hooks/toggle';
 import './ItemControls.sass';
 import React from "react";
 
-/*
-This event will be dispatched by a child when it becomes active (hovered),
-and it will bubble up to the parent elements. The parent elements will
-listen for this event and deactivate their own controls accordingly.
-*/
-
 /**
  * A button that will hover over some reference element and
  * notify the parent to delete it when clicked.
@@ -42,8 +36,10 @@ const ItemControlsContainer = React.forwardRef<HTMLElement, any>((
             });
             setRefHovered(true);
             document.addEventListener("mousemove", handleMouseMove);
-            // Only want the most nested item's controls to be active:
-            ev.stopPropagation(); // Prevent bubbling to parent containers
+            // Only want the most nested item's controls to be active
+            ref.current.dispatchEvent(
+                new CustomEvent("nested-hover", { bubbles: true }) // bubbles up to the parent elements
+            );
         };
 
         // We can't just wait for mouse leave because the controls are beyond the parents bounds.
@@ -62,11 +58,20 @@ const ItemControlsContainer = React.forwardRef<HTMLElement, any>((
             }
         };
 
+        const handleNestedHover = (ev: Event) => {
+            if (ev.target === parent_el) return; // Ignore events dispatched by itself
+            // deactivate controls:
+            setRefHovered(false);
+            setIsHovered(false);
+        };
+
         parent_el.addEventListener('mouseenter', handleMouseEnter);
+        parent_el.addEventListener("nested-hover", handleNestedHover); // Listen for child hover events
 
         // Cleanup event listeners on unmount
         return () => {
             parent_el.removeEventListener('mouseenter', handleMouseEnter);
+            parent_el.removeEventListener("nested-hover", handleNestedHover);
         };
     }, [ref]);
 
