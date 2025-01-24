@@ -86,8 +86,8 @@ function DNDItem(props: { item: Item, children: JSX.Element }) {
                 { bucketContext.onDelete && <div className="delete-button" onClick={()=>bucketContext.onDelete(props.item.id)}>X</div>}
                 { bucketContext.onAddItem &&
                     <>
-                        <div className="add-item" onClick={()=>bucketContext.onAddItem(props.item.id, true)}>↓</div>
-                        <div className="add-item" onClick={()=>bucketContext.onAddItem(props.item.id, false)}>↑</div>
+                    <div className="add-item" onClick={()=>bucketContext.onAddItem(props.item.id, true)}>↓</div>
+                    <div className="add-item" onClick={()=>bucketContext.onAddItem(props.item.id, false)}>↑</div>
                     </>
                 }
             </ItemControlsContainer>
