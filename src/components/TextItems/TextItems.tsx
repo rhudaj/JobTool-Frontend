@@ -1,13 +1,15 @@
 import "./textitems.sass"
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { useImmer } from "use-immer";
 
 const TextItems = forwardRef((props: {
     initItems?: string[]
 }, ref: React.ForwardedRef<any>) => {
 
-    const [items, setItems] = useImmer<string[]>(props.initItems ?? []);
+    const [items, setItems] = useImmer<string[]>([]);
     const text_ref = useRef<HTMLDivElement>(null);
+
+    useEffect(()=>setItems(props.initItems), [props.initItems]);
 
     useImperativeHandle(ref, () => ({
         get() { return items; }
@@ -34,6 +36,8 @@ const TextItems = forwardRef((props: {
             {txt}
         </span>
     )
+
+    if (!items) return null;
 
     return (
         <div className="text-items">

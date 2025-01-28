@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 function Section(props: {
     id: string;
     heading: string;
-    children: ReactElement | ReactElement[];
+    children: React.ReactNode;
 }) {
     return (
         <div className={`AppSection`} id={props.id}>

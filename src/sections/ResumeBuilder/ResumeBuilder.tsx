@@ -138,16 +138,20 @@ function useCVManager() {
 ------------------------------------------------------------------- */
 
 const SaveForm = (props: {
-    default_file_name: string,
-    default_tags: string[],
+    name: string,
+    tags: string[],
     onSave: (name: string, tags: string[]) => void,
     disabled?: boolean
 }) => {
 
-    const [name, setName] = useState(props.default_file_name);
+    const [name, setName] = useState(null);
+    const [tags, setTags] = useState(null);
     const tags_ref = useRef(null);
     const [isNameValid, setIsNameValid] = useState(true);
     const [reason, setReason] = useState("File exists. Will overwrite!");
+
+    useEffect(()=>setName(props.name), [props.name]);
+    useEffect(()=>setTags(props.tags), [props.tags]);
 
     // Handle name input
     const handleNameChange = (newName: string) => {
@@ -156,7 +160,7 @@ const SaveForm = (props: {
         setIsNameValid(isValid);
         setReason(
             !isValid ? "Invalid file name!" :
-            (newName === props.default_file_name) ? "File exists. Will overwrite!" : ""
+            (newName === name) ? "File exists. Will overwrite!" : ""
         );
     };
 
@@ -168,19 +172,16 @@ const SaveForm = (props: {
 
     return (
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "5rem" }}>
-            {/* File Name Input */}
             <p>File Name:</p>
             <TextEditDiv tv={name} onUpdate={handleNameChange}/>
             <p style={{ color: isNameValid?"grey":"black"}}>
                 {reason}
             </p>
-            <p>Tags (optional):</p>
-            <TextItems initItems={props.default_tags} ref={tags_ref}/>
 
-            {/* Save Button */}
-            <button type="submit" disabled={!isNameValid}>
-                Save
-            </button>
+            <p>Tags (optional):</p>
+            <TextItems initItems={tags} ref={tags_ref}/>
+
+            <button type="submit" disabled={!isNameValid}>Save</button>
         </form>
     );
 };
@@ -248,8 +249,8 @@ function ResumeBuilder() {
         (
             <PopupModal ref={save_modal}>
                 <SaveForm
-                    default_file_name={state?.curName() ?? ""}
-                    default_tags={state.curTags()}
+                    name={state.curName()}
+                    tags={state.curTags()}
                     onSave={(newName: string, newTags: string[]) => {
                         state.save2backend({
                             name: newName,
@@ -313,7 +314,7 @@ function ResumeBuilder() {
 
     return (
             <Section id="section-cv" heading="Resume Builder">
-                <>{popup_modals}</>
+                {popup_modals}
                 <div>
                     <div className="resume-builder-controls">
                         <div className={settingN===1?"selected":""} onClick={()=>setSettingN(prev=>prev===1?null:1)}>File</div>
