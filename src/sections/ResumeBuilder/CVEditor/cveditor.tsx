@@ -41,9 +41,7 @@ const CVEditor = forwardRef((
 			<ItemBucket
 				id="sections-bucket"
 				values={CV.sections} 		// TODO: only worry about tracking the string names (assumes all unique)
-				isVertical={bt.isVertical}
-				item_type={bt.item_type}
-				displayItemsClass={bt.displayItemsClass}
+				type={bt}
 				addItemDisabled
 				onUpdate={new_vals => {
 					setCV(cur => { cur.sections = new_vals })

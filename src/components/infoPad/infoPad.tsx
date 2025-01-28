@@ -46,9 +46,7 @@ function InfoPad(props: { info: any} ) {
                     key={i}
                     id={bucket.id}
                     values={bucket.values}
-                    item_type={bt.item_type}
-                    isVertical={bt.isVertical}
-                    displayItemsClass={bt.displayItemsClass}
+                    type={bt}
                     deleteDisabled replaceDisabled dropDisabled deleteOnMoveDisabled addItemDisabled
                 >
                     { bucket.values.map((val: any)=>bt.DisplayItem({obj: val})) }

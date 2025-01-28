@@ -1,4 +1,5 @@
 import { ExperienceUI, SectionUI, SummaryUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
+import TextEditDiv from "../TextEditDiv/texteditdiv";
 import "./types.scss";
 
 const DEFAULT_ITEM_TYPE = "DRAG-ITEM";
@@ -9,9 +10,9 @@ interface Item {
 };
 
 interface BucketType {
-    item_type: string,
-    isVertical: boolean,
-    DisplayItem: (props: any) => JSX.Element,
+    item_type?: string,
+    isVertical?: boolean,
+    DisplayItem?: (props: any) => JSX.Element,
     displayItemsClass?: string
 };
 
@@ -32,6 +33,13 @@ const BucketTypes: { [key: string]: BucketType } = {
         isVertical: true,
         displayItemsClass:"experiences",
         DisplayItem: ExperienceUI
+    },
+    "exp-points": {
+        displayItemsClass: "exp-points",
+        isVertical: true,
+        DisplayItem: (props: {obj: string, onUpdate: any}) => (
+            <li><TextEditDiv tv={props.obj} onUpdate={props.onUpdate} /></li>
+        )
     },
     "cl-info-pad": {
         item_type: "cl-item",

@@ -26,9 +26,12 @@ function CLEditor(props: {
         <ItemBucket
             id="cl-paragraphs"
             values={pgs}
-            isVertical={true}
-            displayItemsClass="cl-editor"
-            item_type="cl-item"
+            type={{
+                isVertical: true,
+                displayItemsClass: "cl-editor",
+                item_type: "cl-item",
+                DisplayItem: ()=><></>
+            }}
             onUpdate={newVals => setPgs(newVals)}
         >
             {

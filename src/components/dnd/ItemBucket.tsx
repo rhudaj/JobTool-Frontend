@@ -2,7 +2,7 @@ import "./ItemBucket.scss";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import React, { useEffect, useState } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
-import { Item, DEFAULT_ITEM_TYPE } from "./types";
+import { Item, DEFAULT_ITEM_TYPE, BucketType } from "./types";
 import { useImmer } from "use-immer";
 import DNDItem from "./Item";
 import objectHash from "object-hash";
@@ -118,6 +118,7 @@ interface BucketItemContext {
     onRemove?: (dragId: any) => void;
 };
 
+
 /**
  * Bucket of DND Items component
  * @param props
@@ -129,9 +130,7 @@ function ItemBucket(props: {
     id: any;
     values: any[];
     children: JSX.Element[];
-    isVertical: boolean;
-    displayItemsClass?: string;
-    item_type?: string;
+    type: BucketType,
     onUpdate?: (newValues: any[]) => void;
     deleteDisabled?: boolean;
     replaceDisabled?: boolean;
@@ -159,7 +158,7 @@ function ItemBucket(props: {
         // if (props.dropDisabled) return; // TODO: bring this check outside.
 
         // Wether its "past half" depends on orientation of the bucket
-        const isPastHalf = props.isVertical ? isBelow : isRight;
+        const isPastHalf = props.type.isVertical ? isBelow : isRight;
 
         // Find the index of the item being hovered over:
         const hoveredIndex = bucket.getIdx(hoverId);
@@ -180,12 +179,13 @@ function ItemBucket(props: {
 
     const [{ isHovered }, dropRef] = useDrop(
         () => ({
-            accept: props.item_type ?? DEFAULT_ITEM_TYPE,
+            accept: props.type.item_type ?? DEFAULT_ITEM_TYPE,
             canDrop: () => !props.dropDisabled,
             drop: (
                 dropItem: Item,
                 monitor: DropTargetMonitor<Item, unknown>
             ) => {
+
                 // An item was dropped on the bucket (or a nested drop target).
 
                 if (bucket.items.length === 0) {
@@ -245,13 +245,13 @@ function ItemBucket(props: {
 
     return (
         <div ref={dropRef} className={classes} onMouseLeave={()=>setHoveredGap(undefined)}>
-            <div className={props.displayItemsClass}>
+            <div className={props.type.displayItemsClass}>
                 {bucket.items.map((I: Item, i: number) => (
                     <>
                         { i === 0 && <DropGap isActive={hoveredGap === prevGap(i)} /> }
                         <BucketContext.Provider value={{
                             bucket_id: props.id,
-                            item_type: props.item_type ?? DEFAULT_ITEM_TYPE,
+                            item_type: props.type.item_type ?? DEFAULT_ITEM_TYPE,
                             disableReplace: props.replaceDisabled,
                             onDelete: !props.deleteDisabled && bucket.removeItem,
                             onAddItem: !props.addItemDisabled && bucket.addBlankItem,

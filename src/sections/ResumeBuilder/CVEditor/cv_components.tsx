@@ -6,6 +6,7 @@ import ItemBucket from "../../../components/dnd/ItemBucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 import { BucketTypes } from "../../../components/dnd/types";
+import { useImmer } from "use-immer";
 
 function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 
@@ -27,9 +28,7 @@ function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 				<ItemBucket
 					id={props.obj.name}
 					values={props.obj.content}
-					item_type={bt.item_type}
-					isVertical={bt.isVertical}
-					displayItemsClass={bt.displayItemsClass}
+					type={bt}
 					onUpdate={newVal =>{
 						const new_sec = {
 							...props.obj,
@@ -91,7 +90,9 @@ function ExperienceUI(props: {
 		props.onUpdate({ ...props.obj, [field]: val });
 	};
 
-	if (!props?.obj?.title) return null;
+	const bt = BucketTypes["exp-points"];
+
+	if (!props.obj) return null;
 	return (
 		<div className="experience">
 			{/* ROW 1 */}
@@ -119,23 +120,18 @@ function ExperienceUI(props: {
 					<ItemBucket
 						id={`${props.obj.title}-bucket`}
 						values={props.obj.description}
-						onUpdate={newPoints => {
-							handleUpdate('description', newPoints);
-						}}
-						isVertical={true}
-						replaceDisabled
-						displayItemsClass="exp-points"
-						deleteOnMoveDisabled
+						onUpdate={newPoints => handleUpdate('description', newPoints)}
+						type={bt}
+						replaceDisabled deleteOnMoveDisabled
 					>
-						{ props.obj.description.map((descrItem, i) => (
-							<li key={i}>
-								<TextEditDiv tv={descrItem} onUpdate={val => {
-									const newPoints = [...props.obj.description];
-									newPoints[i] = val;
-									handleUpdate('description', newPoints);
-								}} />
-							</li>
-						)) }
+						{ props.obj.description.map((descrItem, i) => bt.DisplayItem({
+							obj: descrItem,
+							onUpdate: (val: string) => {
+								const newPoints = [...props.obj.description];
+								newPoints[i] = val;
+								handleUpdate('description', newPoints);
+							}
+						}))}
 					</ItemBucket>
 				</ul>
 			</div>
