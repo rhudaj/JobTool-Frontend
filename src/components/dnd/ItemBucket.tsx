@@ -2,10 +2,9 @@ import "./ItemBucket.scss";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import React, { useEffect } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
-import { Item, DEFAULT_ITEM_TYPE, BucketTypes } from "./types";
+import { Item, DEFAULT_ITEM_TYPE, BucketTypes, Bucket } from "./types";
 import { useImmer } from "use-immer";
 import DNDItem from "./Item";
-import objectHash from "object-hash";
 
 /* Empty all values in an object (recursively) */
 const emptyObject = (obj: any): any => {
@@ -42,18 +41,11 @@ const nextGap = (itemIndex: number) => itemIndex + 1;
  * Bucket State Manager
  * @param values - initial values of the bucket
  */
-const useBucket = (initVals: any[]) => {
+const useBucket = (initVals: Item[]) => {
 
     const [items, setItems] = useImmer<Item[]>(null);
 
-    useEffect(()=>{
-        console.log('useBucket: new values');
-        setItems(initVals?.map(v => ({
-            id: objectHash.sha1(v),
-            value: v,
-        })))
-    }, [initVals])
-
+    useEffect(()=>setItems(initVals), [initVals])
 
     // -----------------STATE CONTROL-----------------
 
@@ -106,7 +98,6 @@ const useBucket = (initVals: any[]) => {
     return { items, getValues, addItem, addBlankItem, moveItem, removeItem, changeItemValue, getIdx };
 };
 
-
 // Provided to the children of a bucket (<DNDItem>'s)
 interface BucketItemContext {
     bucket_id: string,
@@ -118,13 +109,11 @@ interface BucketItemContext {
     onRemove?: (dragId: any) => void;
 };
 
-
 interface BucketProps {
-    id: any,
+    bucket: Bucket,
     type?: string, // by default, same as ID
-    values: any[],
     onItemChange?: (index: number, newItem: any) => void, // Callback for item updates
-    onUpdate?: (newValues: any[]) => void,
+    onUpdate?: (newItems: Item[]) => void,
     deleteDisabled?: boolean,
     replaceDisabled?: boolean,
     dropDisabled?: boolean,
@@ -143,18 +132,16 @@ function ItemBucket(props: BucketProps) {
 
     // ----------------- STATE -----------------
 
-    const bucket = useBucket(props.values);
-
+    const bucket = useBucket(props.bucket.items);
     const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
-
-    const type = BucketTypes[props.type ?? props.id];
 
     React.useEffect(() => {
         if (!bucket.items || !props.onUpdate) return;
-        const newValues = bucket.getValues();
-        if (JSON.stringify(newValues) == JSON.stringify(props.values)) return;  // needed, else maximum depth! TODO:
-        props.onUpdate(newValues); // && items != bucket.items
+        if (JSON.stringify(bucket.items) == JSON.stringify(props.bucket.items)) return;  // needed, else maximum depth! TODO:
+        props.onUpdate(bucket.items);
     }, [bucket.items]);
+
+    const type = BucketTypes[props.type ?? props.bucket.id];
 
     // ----------------- DND RELATED -----------------
 
@@ -227,7 +214,7 @@ function ItemBucket(props: BucketProps) {
                 if (hoveredGap !== undefined) setHoveredGap(undefined);
 
                 // (optional) returned item will be the 'dropResult' and available in 'endDrag'
-                return { id: props.id };
+                return { id: props.bucket.id };
             },
             collect: (monitor) => ({
                 isHovered: !props.dropDisabled && monitor.isOver(),
@@ -261,7 +248,7 @@ function ItemBucket(props: BucketProps) {
                         <>
                             { i === 0 && <DropGap isActive={hoveredGap === prevGap(i)} /> }
                             <BucketContext.Provider value={{
-                                bucket_id: props.id,
+                                bucket_id: props.bucket.id,
                                 item_type: type.item_type ?? DEFAULT_ITEM_TYPE,
                                 disableReplace: props.replaceDisabled,
                                 onDelete: !props.deleteDisabled         && bucket.removeItem,

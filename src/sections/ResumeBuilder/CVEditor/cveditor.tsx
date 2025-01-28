@@ -1,9 +1,10 @@
 import "./cveditor.sass";
-import { CV } from "job-tool-shared-types";
+import { CV, CVSection } from "job-tool-shared-types";
 import * as UI from "./cv_components"
-import React, { forwardRef, useEffect, useImperativeHandle } from "react";
+import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
 import ItemBucket from "../../../components/dnd/ItemBucket";
+import { Item } from "../../../components/dnd/types";
 
 
 export interface CVEditorHandle {
@@ -11,7 +12,7 @@ export interface CVEditorHandle {
 }
 
 // MAIN COMPONENT
-const CVEditor = forwardRef<CVEditorHandle, { cv: CV }>(({ cv }, ref) => {
+const CVEditor = forwardRef<CVEditorHandle, { cv: CV, sec2Content: (cvsec: CVSection) => any }>(({ cv, sec2Content }, ref) => {
 
 	// -------------- MODEL --------------
 
@@ -24,8 +25,8 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV }>(({ cv }, ref) => {
 		getCV: () => { return CV }
 	}));
 
-	const handleObjChange = (new_vals: any) => {
-		setCV(cur => { cur.sections = new_vals })
+	const handleItemsChange = (newItems: Item[]) => {
+		setCV(cur => { cur.sections = newItems.map(I=>I.value) })
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {
@@ -43,10 +44,13 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV }>(({ cv }, ref) => {
 				{CV.header_info?.links?.map((l,i) => <UI.LinkUI key={i} {...l} /> )}
 			</div>
 			<ItemBucket
-				id="sections"
-				values={CV.sections}
+				bucket={{
+					id:"sections",
+					items: CV.sections.map((sec: CVSection)=>({id: sec.name, value: sec2Content(sec)}))
+				}}
+				type="sections"
 				onItemChange={handleItemChange}
-				onUpdate={handleObjChange}
+				onUpdate={handleItemsChange}
 				addItemDisabled
 			/>
 		</div>

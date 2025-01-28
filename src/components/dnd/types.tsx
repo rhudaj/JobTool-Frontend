@@ -23,12 +23,6 @@ interface BucketType {
 };
 
 const BucketTypes: { [key: string]: BucketType } = {
-    "info-pad-text-list": {
-        item_type: "text",
-        isVertical: false,
-        displayItemsClass: "text-item-list",
-        DisplayItem: (props: {obj: string}) => <div className="text-item">{props.obj}</div>
-    },
     "summary": {
         item_type: "summary",
         isVertical: true,
@@ -68,10 +62,7 @@ const BucketTypes: { [key: string]: BucketType } = {
 };
 
 const InfoPadMap = {
-    "languages":    "info-pad-text-list",
-    "technologies": "info-pad-text-list",
-    "courses":      "info-pad-text-list",
-    "summaries":    "info-pad-text-list",
+    "summary":      "summary",
     "projects":     "experiences",
     "experience":   "experiences",
     "education":    "experiences",

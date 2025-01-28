@@ -1,34 +1,33 @@
 import "./cveditor.sass";
-import { Experience, Link, MonthYear, DateRange } from "job-tool-shared-types";
+import { Experience, Link, MonthYear, DateRange, CVSection } from "job-tool-shared-types";
 import TextEditDiv from "../../../components/TextEditDiv/texteditdiv";
 import { joinClassNames } from "../../../util/joinClassNames";
 import ItemBucket from "../../../components/dnd/ItemBucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
+import { Item } from "../../../components/dnd/types";
 
-function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
+function SectionUI(props: { obj: CVSection, onUpdate: (newObj: any) => void }) {
 
 	const formatHeader = (s: string) => s.toUpperCase();
 
-	if(!props.obj) return null;
-
-	const handleObjChange = (newVal: any) =>{
-		const new_sec = {
+	const handleItemsChange = (newItems: Item[]) =>{
+		props.onUpdate({
 			...props.obj,
-			content: newVal
-		}
-		props.onUpdate(new_sec);
-	}
+			item_ids: newItems.map(I=>I.id)
+		});
+	};
 
 	const handleItemChange = (i: number, newVal: any) => {
-		const new_content = [...props.obj.content];
-		new_content[i] = newVal;
-		const new_sec = {
+		const new_ids = [...props.obj.item_ids];
+		new_ids[i] = newVal;
+		props.onUpdate({
 			...props.obj,
-			content: new_content
-		}
-		props.onUpdate(new_sec);
+			item_ids: new_ids
+		});
 	}
+
+	if(!props.obj) return null;
 
 	return (
 		<div className="section" >
@@ -38,21 +37,24 @@ function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 			</div>
 			<div id={`sec-${props.obj.name}`} className="sec-content">
 				<ItemBucket
-					id={props.obj.name}
-					values={props.obj.content}
-					type={props.obj.item_type}
+					bucket={{
+						id: props.obj.name,
+						items: props.obj.item_ids.map(item_id=>({
+							id: item_id,
+							value: item_id
+						}))
+					}}
+					// type={props.obj.bucket_type}
+					type="info-pad-text-list"
 					onItemChange={handleItemChange}
-					onUpdate={handleObjChange}
+					onUpdate={handleItemsChange}
 				/>
 			</div>
 		</div>
 	)
 };
 
-function SummaryUI(props: {
-	obj: any,		// summary object
-	onUpdate?: any	// summary object => void
-}) {
+function SummaryUI(props: { obj: any, onUpdate?: (newObj: any) => void }) {
 
 	const handleUpdate = (key: string, newVal: any) => {
 		props.onUpdate({...props.obj, [key]: newVal});
@@ -114,14 +116,14 @@ function ExperienceUI(props: {
 			{/* ROW 2 */}
 			<div className="exp-content">
 				<ul>
-					<ItemBucket
+					{/* <ItemBucket
 						id={`${props.obj.title}-bucket`}
 						type={"exp-points"}
 						values={props.obj.description}
 						onItemChange={handleItemChange}
 						onUpdate={newPoints => handleUpdate('description', newPoints)}
 						replaceDisabled deleteOnMoveDisabled
-					/>
+					/> */}
 				</ul>
 			</div>
 		</div>

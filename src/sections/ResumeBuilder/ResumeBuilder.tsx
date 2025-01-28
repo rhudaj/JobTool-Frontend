@@ -1,11 +1,11 @@
 import "./resumebuilder.sass";
 import { useEffect, useState, useRef } from "react";
 import Section from "../../components/Section/Section";
-import { NamedCV } from "job-tool-shared-types";
+import { CVSection, NamedCV } from "job-tool-shared-types";
 import BackendAPI from "../../backend_api";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
-import InfoPad from "../../components/infoPad/infoPad";
+import InfoPad, { CVInfo } from "../../components/infoPad/infoPad";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import useLogger from "../../hooks/logger";
@@ -14,7 +14,7 @@ import CVEditor, { CVEditorHandle } from "./CVEditor/cveditor";
 import * as util from "../../util/fileInOut";
 import { joinClassNames } from "../../util/joinClassNames";
 import SubSection from "../../components/Section/SubSection";
-import { PopupModal, PopupModalHandle } from "../../components/PopupModal/PopupModal";
+import { PopupModal } from "../../components/PopupModal/PopupModal";
 import TextEditDiv from "../../components/TextEditDiv/texteditdiv";
 import TextItems from "../../components/TextItems/TextItems";
 
@@ -29,7 +29,7 @@ const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
 function useCVManager() {
     // ---------------- STATE (internal) ----------------
     const [named_cvs, set_named_cvs] = useState<NamedCV[]>(null);
-    const [cvInfo, setCVInfo] = useState<any>([]);
+    const [cvInfo, setCVInfo] = useState<CVInfo>(null);
     const [cur, set_cur] = useState<number>(null);
 
     useEffect(() => {
@@ -37,7 +37,7 @@ function useCVManager() {
             BackendAPI.get<NamedCV[]>("all_cvs").then(cvs=>{
                 set_named_cvs(cvs?.filter(cv => cv && cv.name && cv.data))
             });
-            BackendAPI.get<any>("cv_info").then(setCVInfo);
+            BackendAPI.get<CVInfo>("cv_info").then(setCVInfo);
         }
         else {
             const samps = [
@@ -81,7 +81,22 @@ function useCVManager() {
 
     // ---------------- CONTROLS (what user sees) ----------------
 
-    // CONTROLS:
+    // other
+
+    // TODO: this is a workaround
+    const sec2Content = (cvsec: CVSection) => {
+        const sec = cvInfo[cvsec.name];
+        const sec_items = cvsec.item_ids.map((itemId:string)=>{
+            const [groupId, nameId] = itemId.split("/", 1);
+            const obj = sec[groupId][nameId];
+            return { id: itemId, value: obj };
+        })
+        return {
+            name: cvsec.name,
+            bucket_type: cvsec.bucket_type,
+            content: sec_items,
+        }
+    };
 
     // setters
 
@@ -109,7 +124,7 @@ function useCVManager() {
         set_cur(0);
     };
 
-    // GETTERS:
+    // getters
 
     const curIdx = () => cur;
     const cvNames = () => named_cvs?.map((ncv) => ncv.name);
@@ -129,7 +144,8 @@ function useCVManager() {
         importFromJson,
         changeCV,
         save2backend,
-        deleteCur
+        deleteCur,
+        sec2Content
     };
 }
 
@@ -280,7 +296,7 @@ function ResumeBuilder() {
                 }}>Yes</button>
             </PopupModal>
         )
-    ]
+    ];
 
     const settings = [
         ( // FILE:
@@ -313,33 +329,36 @@ function ResumeBuilder() {
     ];
 
     return (
-            <Section id="section-cv" heading="Resume Builder">
-                {popup_modals}
-                <div>
-                    <div className="resume-builder-controls">
-                        <div className={settingN===1?"selected":""} onClick={()=>setSettingN(prev=>prev===1?null:1)}>File</div>
-                        <div className={settingN===0?"selected":""} onClick={()=>setSettingN(prev=>prev===0?null:0)}>Select</div>
-                    </div>
-                    { settingN!==null && settings[settingN] }
+        <Section id="section-cv" heading="Resume Builder">
+            {/* ------------ SETTINGS ------------ */}
+            {popup_modals}
+            <div>
+                <div className="resume-builder-controls">
+                    <div className={settingN===1?"selected":""} onClick={()=>setSettingN(prev=>prev===1?null:1)}>File</div>
+                    <div className={settingN===0?"selected":""} onClick={()=>setSettingN(prev=>prev===0?null:0)}>Select</div>
                 </div>
+                { settingN!==null && settings[settingN] }
+            </div>
 
-                <div id="display-info">
-                    <div><span className="descr">Name:</span> {state.curName()}</div>
-                    <div><span className="descr">Tags:</span> {state.curTags()?.join(", ")}</div>
-                </div>
+            {/* ------------ CUR CV INFO ------------ */}
+            <div id="display-info">
+                <div><span className="descr">Name:</span> {state.curName()}</div>
+                <div><span className="descr">Tags:</span> {state.curTags()?.join(", ")}</div>
+            </div>
 
-                <DndProvider backend={HTML5Backend}>
-                    <SplitView>
-                        {/* <PrintablePage page_id="cv-page">
-                            {state.cvNames() && (
-                                <CVEditor cv={state.curData()} ref={editor_ref} />
-                            )}
-                        </PrintablePage> */}
-                        <div>TESTING</div>
-                        <InfoPad info={state.getCVInfo()} />
-                    </SplitView>
-                </DndProvider>
-            </Section>
+             {/* ------------ CV EDITOR ------------ */}
+            <DndProvider backend={HTML5Backend}>
+                <SplitView>
+                    {/* <PrintablePage page_id="cv-page">
+                        {state.cvNames() && (
+                            <CVEditor cv={state.curData()} sec2Content={state.sec2Content} ref={editor_ref} />
+                        )}
+                    </PrintablePage> */}
+                    <div>TESTING</div>
+                    <InfoPad info={state.getCVInfo()} />
+                </SplitView>
+            </DndProvider>
+        </Section>
     );
 }
 

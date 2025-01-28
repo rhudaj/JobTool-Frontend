@@ -5,7 +5,7 @@ import React from "react";
 import { InfoPadMap } from '../dnd/types';
 import { Item, Bucket } from '../dnd/types';
 
-interface CVInfo {
+export interface CVInfo {
     [ secName: string ]: {                  // section name
         [ groupName: string ]: {         // e.g. experience/project id
             [ itemName: string ]: any;   // e.g. id: experience content
@@ -17,7 +17,7 @@ const Info2Buckets = (info: CVInfo): Bucket[] => {
     const sections = Object.entries(info);
     const buckets = [];
     sections.forEach(([secName, secGroups])=>{
-        const bucket: {id: string, items: Item[] } = { id: secName, items: []};
+        const bucket = { id: secName, items: []};
         const named_groups = Object.entries(secGroups);
         named_groups.forEach(([groupName, groupItems])=>{
             const named_items = Object.entries(groupItems);
@@ -33,7 +33,6 @@ const Info2Buckets = (info: CVInfo): Bucket[] => {
     return buckets;
 };
 
-
 function InfoPad(props: { info: CVInfo } ) {
 
     const log = useLogger("InfoPad");
@@ -45,7 +44,9 @@ function InfoPad(props: { info: CVInfo } ) {
     // Convert into [{id: string, values: any[]}]
     React.useEffect(() => {
         if (!props.info) return;
-        setInfoBuckets(Info2Buckets(props.info))
+        setInfoBuckets(
+            Info2Buckets(props.info)
+        )
     }, [props.info]);
 
 
@@ -65,7 +66,7 @@ function InfoPad(props: { info: CVInfo } ) {
         return (
             <div className="info-pad-sec" key={i}>
                 <h2>{bucket.id.toUpperCase()}</h2>
-                <ItemBucket key={i} id={bucket.id} type={InfoPadMap[bucket.id]} values={bucket.items.map(I=>I.value)}   // TODO: pass items
+                <ItemBucket key={i} bucket={bucket} type={InfoPadMap[bucket.id]}
                     deleteDisabled replaceDisabled dropDisabled deleteOnMoveDisabled addItemDisabled
                 />
             </div>

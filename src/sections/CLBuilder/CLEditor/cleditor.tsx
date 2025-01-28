@@ -28,12 +28,13 @@ function CLEditor(props: {
     };
 
     return (
-        <ItemBucket
-            id="cl-paragraphs"
-            values={pgs}
-            onItemChange={handleItemChange}
-            onUpdate={setPgs}
-        />
+        <></>
+        // <ItemBucket
+        //     id="cl-paragraphs"
+        //     values={pgs}
+        //     onItemChange={handleItemChange}
+        //     onUpdate={setPgs}
+        // />
     );
 }
 
