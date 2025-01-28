@@ -3,9 +3,8 @@ import "./splitview.sass"
 import { joinClassNames } from "../../util/joinClassNames";
 
 function SplitView(props: {
-    children: [ReactElement, ReactElement];
+    children: [ReactElement, ReactElement]
 }) {
-
     const bounds_ref = useRef(null);
     const[ WRatio, SetWRatio ] = useState(50);
     const [ hidden, setHidden ] = useState([false, false])
@@ -18,8 +17,11 @@ function SplitView(props: {
 
         const onMouseMove = (e: MouseEvent) => {
             const deltaX = e.clientX - startX;
-            const newWRatio = Math.min(99, Math.max(1, startWRatio + (deltaX / window.innerWidth) * 100));
-            SetWRatio(newWRatio);
+
+            SetWRatio(Math.min(
+                99,
+                Math.max(1, startWRatio + (deltaX / window.innerWidth) * 100)
+            ));
 
             if( e.clientX >= bounds.right ) {
                 setHidden([false, true])
@@ -51,15 +53,9 @@ function SplitView(props: {
 
     return (
         <div className="split-view" ref={bounds_ref}>
-            {!hidden[0] &&
-            <div className="view-left" style={L_STYLE}>
-                {props.children[0]}
-            </div>}
+            {!hidden[0] && <div className="view left" style={L_STYLE}>{props.children[0]}</div>}
             <div className="width-drag" onMouseDown={onMouseDown}>||</div>
-            {!hidden[1] &&
-            <div className={joinClassNames("view-right",hidden[1]?"hidden":"")} style={R_STYLE}>
-            {props.children[1]}
-            </div>}
+            {!hidden[1] && <div className="view right" style={R_STYLE}>{props.children[1]}</div>}
         </div>
     );
 };

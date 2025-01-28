@@ -1,23 +1,64 @@
-#resume-builder-controls
+#section-cv
+    & > .section-content
+        font-size: 16rem
+
+.resume-builder-controls
     font-size: 16rem
 
     display: flex
-    flex-direction: column
-    gap: 10rem
+    flex-direction: row
+
+    font-size: 16rem
 
     & > *
-        display: flex
-        flex-direction: column
-        gap: 5rem
+        padding: 5rem
+        border: 1rem solid black
+        &.selected
+            background-color:#707070
 
-    button
-        padding: 3rem
-        width: 50rem
+#file-controls
+    font-size: 16rem
+    display: flex
+    flex-direction: column
+    & > *
+        width: min-content
+        white-space: nowrap
+
+
+#display-info
+    display: flex
+    gap: 3em
+
+    border: 1rem solid black
+    padding: 20rem
+    font-size: 20rem
+
+    color: #2a2972
+    .descr
+        color: white
+
 
 #ss-named-cvs
-    padding: 0 100rem
+    display: flex
+    gap: 30rem
+
+    #named-cvs-controls
+        display: flex
+        flex-direction: column
+        justify-content: space-around
+        & > *
+            background-color: #2a2a2a
+            color: #cecece
+            width: 40rem
+            text-align: center
+            height: min-content
+            &:hover
+                background-color: #2a2a2a
+                color: #e4e4e4
+                cursor: pointer
 
 .cv-thumnail-container
+    width: 100%
     display: flex
     gap: 20rem
     overflow-x: scroll
