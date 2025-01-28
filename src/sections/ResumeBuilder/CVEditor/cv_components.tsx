@@ -47,12 +47,9 @@ function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 			</div>
 		</div>
 	)
-};
+}
 
-function SummaryUI(props: {
-	obj: any,		// summary object
-	onUpdate?: any	// summary object => void
-}) {
+function SummaryUI(props: { obj: any, onUpdate?: (newObj: any) => void }) {
 
 	const handleUpdate = (key: string, newVal: any) => {
 		props.onUpdate({...props.obj, [key]: newVal});
@@ -73,10 +70,7 @@ function SummaryUI(props: {
 	)
 }
 
-function ExperienceUI(props: {
-	obj: Experience,
-	onUpdate?: (newObj: Experience) => void;
-}) {
+function ExperienceUI(props: { obj: Experience, onUpdate?: (newObj: Experience) => void }) {
 
 	const handleUpdate = (field: keyof Experience, val: any) => {
 		if(!props.onUpdate) return;
@@ -100,7 +94,7 @@ function ExperienceUI(props: {
 						<TextEditDiv className="title" tv={props.obj.title} onUpdate={val => handleUpdate('title', val)} />
 						{ props.obj.link && <LinkUI {...props.obj.link} /> }
 					</div>
-					<DateUI dateRange={props.obj.date} onUpdate={val => handleUpdate('date', val)} />
+					<DateUI obj={props.obj.date} onUpdate={val => handleUpdate('date', val)} />
 				</div>
 				{/* ROW 2 */}
 				<div>
@@ -126,12 +120,9 @@ function ExperienceUI(props: {
 			</div>
 		</div>
 	);
-};
+}
 
-function DateUI(props: {
-	dateRange: DateRange,
-	onUpdate?: any
-}) {
+function DateUI(props: { obj: DateRange, onUpdate?: any }) {
 
 	const DELIM = " - ";
 	const PLACEHOLDER = "Present"
@@ -167,7 +158,7 @@ function DateUI(props: {
 	return (
 		<TextEditDiv
 			className="date-range"
-			tv={strFromDateRange(props.dateRange)}
+			tv={strFromDateRange(props.obj)}
 			onUpdate={newVal => dateRangeFromStr(newVal)}
 		/>
 	)
@@ -182,7 +173,7 @@ function LinkUI(props: Link) {
 			</a>
 		</div>
 	);
-};
+}
 
 function DelimitedList(props: {
 	items: string[],
@@ -206,6 +197,6 @@ function DelimitedList(props: {
 			<TextEditDiv tv={props.items.join(props.delimiter)} onUpdate={onUpdate} />
 		</div>
 	);
-};
+}
 
 export { SectionUI, SummaryUI, ExperienceUI, DateUI, LinkUI, DelimitedList }

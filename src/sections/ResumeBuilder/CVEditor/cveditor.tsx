@@ -1,7 +1,7 @@
 import "./cveditor.sass";
 import { CV } from "job-tool-shared-types";
 import * as UI from "./cv_components"
-import React, { forwardRef, useEffect, useImperativeHandle } from "react";
+import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
 import ItemBucket from "../../../components/dnd/ItemBucket";
 
