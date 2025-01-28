@@ -5,27 +5,28 @@ import { joinClassNames } from "../../../util/joinClassNames";
 import ItemBucket from "../../../components/dnd/ItemBucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
-import { Item } from "../../../components/dnd/types";
 
-function SectionUI(props: { obj: CVSection, onUpdate: (newObj: any) => void }) {
+function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 
 	const formatHeader = (s: string) => s.toUpperCase();
 
-	const handleItemsChange = (newItems: Item[]) =>{
-		props.onUpdate({
-			...props.obj,
-			item_ids: newItems.map(I=>I.id)
-		});
-	};
+	// const handleItemsChange = (newItems: Item[]) =>{
+	// 	props.onUpdate({
+	// 		...props.obj,
+	// 		item_ids: newItems.map(I=>I.id)
+	// 	});
+	// };
 
-	const handleItemChange = (i: number, newVal: any) => {
-		const new_ids = [...props.obj.item_ids];
-		new_ids[i] = newVal;
-		props.onUpdate({
-			...props.obj,
-			item_ids: new_ids
-		});
-	}
+	// const handleItemChange = (i: number, newVal: any) => {
+	// 	const new_ids = [...props.obj.item_ids];
+	// 	new_ids[i] = newVal;
+	// 	props.onUpdate({
+	// 		...props.obj,
+	// 		item_ids: new_ids
+	// 	});
+	// }
+
+	console.log("SectionUI: sec = ", props.obj);
 
 	if(!props.obj) return null;
 
@@ -39,15 +40,11 @@ function SectionUI(props: { obj: CVSection, onUpdate: (newObj: any) => void }) {
 				<ItemBucket
 					bucket={{
 						id: props.obj.name,
-						items: props.obj.item_ids.map(item_id=>({
-							id: item_id,
-							value: item_id
-						}))
+						items: props.obj.content
 					}}
-					// type={props.obj.bucket_type}
-					type="info-pad-text-list"
-					onItemChange={handleItemChange}
-					onUpdate={handleItemsChange}
+					type={props.obj.bucket_type}
+					// onItemChange={handleItemChange}
+					// onUpdate={handleItemsChange}
 				/>
 			</div>
 		</div>
@@ -116,14 +113,19 @@ function ExperienceUI(props: {
 			{/* ROW 2 */}
 			<div className="exp-content">
 				<ul>
-					{/* <ItemBucket
-						id={`${props.obj.title}-bucket`}
+					<ItemBucket
+						bucket={{
+							id: `${props.obj.title}-bucket`,
+							items: props.obj.description.map((s,i)=>({
+								id: `${props.obj.title}-bp-${i}`,
+								value: s
+							}))
+						}}
 						type={"exp-points"}
-						values={props.obj.description}
 						onItemChange={handleItemChange}
 						onUpdate={newPoints => handleUpdate('description', newPoints)}
 						replaceDisabled deleteOnMoveDisabled
-					/> */}
+					/>
 				</ul>
 			</div>
 		</div>

@@ -85,17 +85,21 @@ function useCVManager() {
 
     // TODO: this is a workaround
     const sec2Content = (cvsec: CVSection) => {
+        if(!cvInfo) return;
         const sec = cvInfo[cvsec.name];
         const sec_items = cvsec.item_ids.map((itemId:string)=>{
-            const [groupId, nameId] = itemId.split("/", 1);
+            const [groupId, nameId] = itemId.split("/", 2);
+            // console.log(`itemId => ${groupId} & ${nameId}`)
             const obj = sec[groupId][nameId];
             return { id: itemId, value: obj };
         })
-        return {
+        const content = {
             name: cvsec.name,
             bucket_type: cvsec.bucket_type,
             content: sec_items,
         }
+        // console.log("sec2Content: ", cvsec, content)
+        return content
     };
 
     // setters
@@ -349,12 +353,12 @@ function ResumeBuilder() {
              {/* ------------ CV EDITOR ------------ */}
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
-                    {/* <PrintablePage page_id="cv-page">
+                    <PrintablePage page_id="cv-page">
                         {state.cvNames() && (
                             <CVEditor cv={state.curData()} sec2Content={state.sec2Content} ref={editor_ref} />
                         )}
-                    </PrintablePage> */}
-                    <div>TESTING</div>
+                    </PrintablePage>
+                    {/* <div>TESTING</div> */}
                     <InfoPad info={state.getCVInfo()} />
                 </SplitView>
             </DndProvider>
