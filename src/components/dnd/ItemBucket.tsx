@@ -137,6 +137,7 @@ function ItemBucket(props: {
     replaceDisabled?: boolean;
     dropDisabled?: boolean;
     deleteOnMoveDisabled?: boolean;
+    addItemDisabled?: boolean;
 }) {
     // ----------------- STATE -----------------
 
@@ -253,7 +254,7 @@ function ItemBucket(props: {
                             item_type: props.item_type ?? DEFAULT_ITEM_TYPE,
                             disableReplace: props.replaceDisabled,
                             onDelete: !props.deleteDisabled && bucket.removeItem,
-                            onAddItem: bucket.addBlankItem,
+                            onAddItem: !props.addItemDisabled && bucket.addBlankItem,
                             onHover: !props.dropDisabled && onItemHover,
                             onRemove: !props.deleteOnMoveDisabled && bucket.removeItem,
                         }}>

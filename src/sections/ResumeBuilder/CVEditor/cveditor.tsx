@@ -44,6 +44,7 @@ const CVEditor = forwardRef((
 				isVertical={bt.isVertical}
 				item_type={bt.item_type}
 				displayItemsClass={bt.displayItemsClass}
+				addItemDisabled
 				onUpdate={new_vals => {
 					setCV(cur => { cur.sections = new_vals })
 				}}

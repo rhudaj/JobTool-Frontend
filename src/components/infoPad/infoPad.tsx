@@ -49,7 +49,7 @@ function InfoPad(props: { info: any} ) {
                     item_type={bt.item_type}
                     isVertical={bt.isVertical}
                     displayItemsClass={bt.displayItemsClass}
-                    deleteDisabled replaceDisabled dropDisabled deleteOnMoveDisabled
+                    deleteDisabled replaceDisabled dropDisabled deleteOnMoveDisabled addItemDisabled
                 >
                     { bucket.values.map((val: any)=>bt.DisplayItem({obj: val})) }
                 </ItemBucket>
