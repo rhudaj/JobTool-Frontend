@@ -43,12 +43,11 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV }>(({ cv }, ref) => {
 				{CV.header_info?.links?.map((l,i) => <UI.LinkUI key={i} {...l} /> )}
 			</div>
 			<ItemBucket
-				id="sections-bucket"
+				id="sections"
 				values={CV.sections}
-				type={"sections"}
 				onItemChange={handleItemChange}
-				addItemDisabled
 				onUpdate={handleObjChange}
+				addItemDisabled
 			/>
 		</div>
 	);
