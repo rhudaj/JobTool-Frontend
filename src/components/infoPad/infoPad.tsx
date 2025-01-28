@@ -2,7 +2,7 @@ import './infoPad.scss';
 import  useLogger  from '../../hooks/logger';
 import ItemBucket from '../dnd/ItemBucket';
 import React from "react";
-import { BucketTypes, InfoPadMap } from '../dnd/types';
+import { InfoPadMap } from '../dnd/types';
 
 function InfoPad(props: { info: any} ) {
 
@@ -37,17 +37,10 @@ function InfoPad(props: { info: any} ) {
      * otherwise, BucketTypes[CVInfoPadMap[bucket.id]] will throw an error.
      */
     const InfoPadComponents = infoBuckets.map((bucket, i: number) => {
-        const type_for_bucket = InfoPadMap[bucket.id];
-        const bt = BucketTypes[type_for_bucket];
         return (
             <div className="info-pad-sec" key={i}>
                 <h2>{bucket.id.toUpperCase()}</h2>
-                <ItemBucket
-                    key={i}
-                    id={bucket.id}
-                    values={bucket.values}
-                    type={bt}
-                    DisplayItem={bt.DisplayItem}
+                <ItemBucket key={i} id={bucket.id} type={InfoPadMap[bucket.id]} values={bucket.values}
                     deleteDisabled replaceDisabled dropDisabled deleteOnMoveDisabled addItemDisabled
                 />
             </div>

@@ -12,7 +12,7 @@ interface Item {
 interface BucketType {
     item_type?: string,
     isVertical?: boolean,
-    DisplayItem?: (props: any) => JSX.Element,
+    DisplayItem: (props: { obj: any, onUpdate?: any }) => JSX.Element,
     displayItemsClass?: string
 };
 

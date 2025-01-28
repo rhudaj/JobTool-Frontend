@@ -4,7 +4,6 @@ import * as UI from "./cv_components"
 import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
 import ItemBucket from "../../../components/dnd/ItemBucket";
-import { BucketTypes } from "../../../components/dnd/types";
 
 // MAIN COMPONENT
 const CVEditor = forwardRef((
@@ -27,11 +26,18 @@ const CVEditor = forwardRef((
 		getCV: () => { return CV }
 	}));
 
+	const handleObjChange = (new_vals: any) => {
+		setCV(cur => { cur.sections = new_vals })
+	};
+
+	const handleItemChange = (i: number, newVal: any) => {
+		setCV(cur => { cur.sections[i] = newVal })
+	};
+
 	// -------------- VIEW --------------
 
 	if (!CV) return null;
 
-	const bt = BucketTypes["sections"];
 	return (
 		<div id="cv-editor">
 			<div id="full-name" key="name">{CV.header_info.name}</div>
@@ -40,16 +46,11 @@ const CVEditor = forwardRef((
 			</div>
 			<ItemBucket
 				id="sections-bucket"
-				values={CV.sections} 		// TODO: only worry about tracking the string names (assumes all unique)
-				type={bt}
-				DisplayItem={bt.DisplayItem}
-				onItemChange={(i: number, newVal: any) => {
-					setCV(cur => { cur.sections[i] = newVal })
-				}}
+				values={CV.sections}
+				type={"sections"}
+				onItemChange={handleItemChange}
 				addItemDisabled
-				onUpdate={new_vals => {
-					setCV(cur => { cur.sections = new_vals })
-				}}
+				onUpdate={handleObjChange}
 			/>
 		</div>
 	);

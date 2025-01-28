@@ -1,9 +1,7 @@
 import "./cleditor.sass"
 import { useEffect } from "react";
-import TextEditDiv from "../../../components/TextEditDiv/texteditdiv";
 import ItemBucket from "../../../components/dnd/ItemBucket";
 import { useImmer } from "use-immer";
-import { BucketTypes } from "../../../components/dnd/types";
 
 function CLEditor(props: {
     paragraphs: string[],
@@ -23,20 +21,18 @@ function CLEditor(props: {
         ]);
     }, [props.paragraphs]);
 
-    const bt = BucketTypes["cl-paragraphs"]
+    const handleItemChange = (i: number, newVal: any) => {
+        setPgs(draft => {
+            draft[i] = newVal;
+        })
+    };
 
     return (
         <ItemBucket
             id="cl-paragraphs"
             values={pgs}
-            type={bt}
-            DisplayItem={bt.DisplayItem}
-            onItemChange={(i, newVal) => {
-                setPgs(draft => {
-                    draft[i] = newVal;
-                })
-            }}
-            onUpdate={newVals => setPgs(newVals)}
+            onItemChange={handleItemChange}
+            onUpdate={setPgs}
         />
     );
 }

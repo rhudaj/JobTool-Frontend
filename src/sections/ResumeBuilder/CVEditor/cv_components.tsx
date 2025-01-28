@@ -5,23 +5,29 @@ import { joinClassNames } from "../../../util/joinClassNames";
 import ItemBucket from "../../../components/dnd/ItemBucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
-import { BucketTypes } from "../../../components/dnd/types";
-import { useImmer } from "use-immer";
 
 function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 
-	const formatHeader = (head: string) => (
-		// head.toUpperCase()
-		""
-	);
+	const formatHeader = (s: string) => s.toUpperCase();
 
-	const bt = BucketTypes[props.obj.item_type];
+	if(!props.obj) return null;
 
-	console.log("bt: ", bt, ", props.obj.item_type: ", props.obj.item_type);
+	const handleObjChange = (newVal: any) =>{
+		const new_sec = {
+			...props.obj,
+			content: newVal
+		}
+		props.onUpdate(new_sec);
+	}
 
-
-	if(!props.obj || !bt?.DisplayItem) {
-		return null;
+	const handleItemChange = (i: number, newVal: any) => {
+		const new_content = [...props.obj.content];
+		new_content[i] = newVal;
+		const new_sec = {
+			...props.obj,
+			content: new_content
+		}
+		props.onUpdate(new_sec);
 	}
 
 	return (
@@ -34,23 +40,9 @@ function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 				<ItemBucket
 					id={props.obj.name}
 					values={props.obj.content}
-					type={bt}
-					DisplayItem={bt.DisplayItem}
-					onItemChange={(i: number, newVal: any) => {
-						const new_content = [...props.obj.content];
-						new_content[i] = newVal;
-						const new_sec = {
-							...props.obj,
-							content: new_content
-						}
-					}}
-					onUpdate={newVal =>{
-						const new_sec = {
-							...props.obj,
-							content: newVal
-						}
-						props.onUpdate(new_sec);
-					}}
+					type={props.obj.item_type}
+					onItemChange={handleItemChange}
+					onUpdate={handleObjChange}
 				/>
 			</div>
 		</div>
@@ -91,7 +83,11 @@ function ExperienceUI(props: {
 		props.onUpdate({ ...props.obj, [field]: val });
 	};
 
-	const bt = BucketTypes["exp-points"];
+	const handleItemChange = (i: number, newVal: any) => {
+		const newPoints = [...props.obj.description];
+		newPoints[i] = newVal;
+		handleUpdate('description', newPoints);
+	};
 
 	if (!props.obj) return null;
 	return (
@@ -120,14 +116,9 @@ function ExperienceUI(props: {
 				<ul>
 					<ItemBucket
 						id={`${props.obj.title}-bucket`}
+						type={"exp-points"}
 						values={props.obj.description}
-						type={bt}
-						DisplayItem={bt.DisplayItem}
-						onItemChange={(i: number, newVal: any) => {
-							const newPoints = [...props.obj.description];
-							newPoints[i] = newVal;
-							handleUpdate('description', newPoints);
-						}}
+						onItemChange={handleItemChange}
 						onUpdate={newPoints => handleUpdate('description', newPoints)}
 						replaceDisabled deleteOnMoveDisabled
 					/>
