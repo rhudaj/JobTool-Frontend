@@ -330,11 +330,12 @@ function ResumeBuilder() {
 
                 <DndProvider backend={HTML5Backend}>
                     <SplitView>
-                        <PrintablePage page_id="cv-page">
+                        {/* <PrintablePage page_id="cv-page">
                             {state.cvNames() && (
                                 <CVEditor cv={state.curData()} ref={editor_ref} />
                             )}
-                        </PrintablePage>
+                        </PrintablePage> */}
+                        <div>TESTING</div>
                         <InfoPad info={state.getCVInfo()} />
                     </SplitView>
                 </DndProvider>

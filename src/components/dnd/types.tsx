@@ -9,6 +9,12 @@ interface Item {
     value: any;		// can't be a JSX element. Anything else is fine.
 };
 
+
+interface Bucket {
+    id: any;
+    items: Item[];		// can't be a JSX element. Anything else is fine.
+};
+
 interface BucketType {
     item_type?: string,
     isVertical?: boolean,
@@ -62,16 +68,14 @@ const BucketTypes: { [key: string]: BucketType } = {
 };
 
 const InfoPadMap = {
-    // CV
     "languages":    "info-pad-text-list",
     "technologies": "info-pad-text-list",
     "courses":      "info-pad-text-list",
     "summaries":    "info-pad-text-list",
     "projects":     "experiences",
-    "experience": "experiences",
-    "education": "experiences",
-    // CL
-    "paragraphs":  "cl-info-pad",
+    "experience":   "experiences",
+    "education":    "experiences",
+    "paragraphs":   "cl-info-pad",
 }
 
-export { Item, BucketType, DEFAULT_ITEM_TYPE, BucketTypes, InfoPadMap };
+export { Item, Bucket, BucketType, DEFAULT_ITEM_TYPE, BucketTypes, InfoPadMap };

@@ -3,24 +3,49 @@ import  useLogger  from '../../hooks/logger';
 import ItemBucket from '../dnd/ItemBucket';
 import React from "react";
 import { InfoPadMap } from '../dnd/types';
+import { Item, Bucket } from '../dnd/types';
 
-function InfoPad(props: { info: any} ) {
+interface CVInfo {
+    [ secName: string ]: {                  // section name
+        [ groupName: string ]: {         // e.g. experience/project id
+            [ itemName: string ]: any;   // e.g. id: experience content
+        }
+    }
+}
+
+const Info2Buckets = (info: CVInfo): Bucket[] => {
+    const sections = Object.entries(info);
+    const buckets = [];
+    sections.forEach(([secName, secGroups])=>{
+        const bucket: {id: string, items: Item[] } = { id: secName, items: []};
+        const named_groups = Object.entries(secGroups);
+        named_groups.forEach(([groupName, groupItems])=>{
+            const named_items = Object.entries(groupItems);
+            named_items.forEach(([itemName, content])=>{
+                bucket.items.push({
+                    id: `${groupName}/${itemName}`,
+                    value: content
+                });
+            })
+        })
+        buckets.push(bucket);
+    })
+    return buckets;
+};
+
+
+function InfoPad(props: { info: CVInfo } ) {
 
     const log = useLogger("InfoPad");
 
     // ----------------- STATE -----------------
 
-    const [infoBuckets, setInfoBuckets] = React.useState([]);
+    const [infoBuckets, setInfoBuckets] = React.useState<Bucket[]>([]);
 
     // Convert into [{id: string, values: any[]}]
     React.useEffect(() => {
         if (!props.info) return;
-        setInfoBuckets(
-            Object.entries(props.info).map(entry => ({
-                id: entry[0],       // field name
-                values: entry[1]    // value
-            }))
-        )
+        setInfoBuckets(Info2Buckets(props.info))
     }, [props.info]);
 
 
@@ -40,7 +65,7 @@ function InfoPad(props: { info: any} ) {
         return (
             <div className="info-pad-sec" key={i}>
                 <h2>{bucket.id.toUpperCase()}</h2>
-                <ItemBucket key={i} id={bucket.id} type={InfoPadMap[bucket.id]} values={bucket.values}
+                <ItemBucket key={i} id={bucket.id} type={InfoPadMap[bucket.id]} values={bucket.items.map(I=>I.value)}   // TODO: pass items
                     deleteDisabled replaceDisabled dropDisabled deleteOnMoveDisabled addItemDisabled
                 />
             </div>
