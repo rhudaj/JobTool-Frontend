@@ -10,7 +10,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import useLogger from "../../hooks/logger";
 import SplitView from "../../components/SplitView/splitview";
-import CVEditor from "./CVEditor/cveditor";
+import CVEditor, { CVEditorHandle } from "./CVEditor/cveditor";
 import * as util from "../../util/fileInOut";
 import { joinClassNames } from "../../util/joinClassNames";
 import SubSection from "../../components/Section/SubSection";
@@ -220,7 +220,7 @@ function ResumeBuilder() {
     // ---------------- STATE ----------------
 
     const state = useCVManager();
-    const editor_ref = useRef(null);
+    const editor_ref = useRef<CVEditorHandle>(null);
     const [settingN, setSettingN] = useState(null); // null => none, 0 => SavedCVs, 1 => file settings
     const saveAsPDF = useComponent2PDF("cv-page");
 

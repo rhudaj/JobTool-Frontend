@@ -5,21 +5,19 @@ import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
 import ItemBucket from "../../../components/dnd/ItemBucket";
 
+
+export interface CVEditorHandle {
+	getCV: () => CV;
+}
+
 // MAIN COMPONENT
-const CVEditor = forwardRef((
-	props: { cv: CV },
-	ref: React.ForwardedRef<any>
-) => {
+const CVEditor = forwardRef<CVEditorHandle, { cv: CV }>(({ cv }, ref) => {
 
 	// -------------- MODEL --------------
 
 	const [CV, setCV] = useImmer<CV>(null);
 
-	useEffect(() => {
-		console.log("CVEditor\n\tnew props.cv: ", props.cv)
-		// CHECK: props.cv has the correct updates => CV has the correct updates
-		setCV(props.cv);
-	}, [props.cv]);
+	useEffect(() => setCV(cv), [cv]);
 
 	// give parent access to CV
 	useImperativeHandle(ref, () => ({
