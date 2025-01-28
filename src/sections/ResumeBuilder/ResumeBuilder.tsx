@@ -89,17 +89,14 @@ function useCVManager() {
         const sec = cvInfo[cvsec.name];
         const sec_items = cvsec.item_ids.map((itemId:string)=>{
             const [groupId, nameId] = itemId.split("/", 2);
-            // console.log(`itemId => ${groupId} & ${nameId}`)
             const obj = sec[groupId][nameId];
             return { id: itemId, value: obj };
         })
-        const content = {
+        return {
             name: cvsec.name,
             bucket_type: cvsec.bucket_type,
             content: sec_items,
         }
-        // console.log("sec2Content: ", cvsec, content)
-        return content
     };
 
     // setters
