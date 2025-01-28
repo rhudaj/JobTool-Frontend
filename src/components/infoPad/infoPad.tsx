@@ -47,10 +47,9 @@ function InfoPad(props: { info: any} ) {
                     id={bucket.id}
                     values={bucket.values}
                     type={bt}
+                    DisplayItem={bt.DisplayItem}
                     deleteDisabled replaceDisabled dropDisabled deleteOnMoveDisabled addItemDisabled
-                >
-                    { bucket.values.map((val: any)=>bt.DisplayItem({obj: val})) }
-                </ItemBucket>
+                />
             </div>
         );
     });

@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import TextEditDiv from "../../../components/TextEditDiv/texteditdiv";
 import ItemBucket from "../../../components/dnd/ItemBucket";
 import { useImmer } from "use-immer";
+import { BucketTypes } from "../../../components/dnd/types";
 
 function CLEditor(props: {
     paragraphs: string[],
@@ -22,28 +23,21 @@ function CLEditor(props: {
         ]);
     }, [props.paragraphs]);
 
+    const bt = BucketTypes["cl-paragraphs"]
+
     return (
         <ItemBucket
             id="cl-paragraphs"
             values={pgs}
-            type={{
-                isVertical: true,
-                displayItemsClass: "cl-editor",
-                item_type: "cl-item",
-                DisplayItem: ()=><></>
+            type={bt}
+            DisplayItem={bt.DisplayItem}
+            onItemChange={(i, newVal) => {
+                setPgs(draft => {
+                    draft[i] = newVal;
+                })
             }}
             onUpdate={newVals => setPgs(newVals)}
-        >
-            {
-                pgs?.map((p: string, i: number)=>(
-                    <TextEditDiv key={i} id={`cl-row-${i}`} tv={p} onUpdate={newVal => {
-                        setPgs(draft => {
-                            draft[i] = newVal;
-                        })
-                    }}/>
-                ))
-            }
-        </ItemBucket>
+        />
     );
 }
 

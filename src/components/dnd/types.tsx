@@ -52,6 +52,12 @@ const BucketTypes: { [key: string]: BucketType } = {
         isVertical: true,
         displayItemsClass: "section",
         DisplayItem: SectionUI
+    },
+    "cl-paragraphs": {
+        isVertical: true,
+        displayItemsClass: "cl-editor",
+        item_type: "cl-item",
+        DisplayItem: (props: { obj: string, onUpdate: any })=> <TextEditDiv tv={props.obj} onUpdate={props.onUpdate}/>
     }
 };
 

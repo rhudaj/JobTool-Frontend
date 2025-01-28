@@ -11,12 +11,18 @@ import { useImmer } from "use-immer";
 function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 
 	const formatHeader = (head: string) => (
-		head.toUpperCase()
+		// head.toUpperCase()
+		""
 	);
 
-	if(!props.obj) return null;
-
 	const bt = BucketTypes[props.obj.item_type];
+
+	console.log("bt: ", bt, ", props.obj.item_type: ", props.obj.item_type);
+
+
+	if(!props.obj || !bt?.DisplayItem) {
+		return null;
+	}
 
 	return (
 		<div className="section" >
@@ -29,6 +35,15 @@ function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 					id={props.obj.name}
 					values={props.obj.content}
 					type={bt}
+					DisplayItem={bt.DisplayItem}
+					onItemChange={(i: number, newVal: any) => {
+						const new_content = [...props.obj.content];
+						new_content[i] = newVal;
+						const new_sec = {
+							...props.obj,
+							content: new_content
+						}
+					}}
 					onUpdate={newVal =>{
 						const new_sec = {
 							...props.obj,
@@ -36,21 +51,7 @@ function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 						}
 						props.onUpdate(new_sec);
 					}}
-				>
-					{props.obj.content?.map((item: any, i: number) =>
-						bt.DisplayItem({
-							obj: item,
-							onUpdate: (newVal: any) => {
-								const new_content = [...props.obj.content];
-								new_content[i] = newVal;
-								const new_sec = {
-									...props.obj,
-									content: new_content
-								}
-							}
-						})
-					)}
-				</ItemBucket>
+				/>
 			</div>
 		</div>
 	)
@@ -120,19 +121,16 @@ function ExperienceUI(props: {
 					<ItemBucket
 						id={`${props.obj.title}-bucket`}
 						values={props.obj.description}
-						onUpdate={newPoints => handleUpdate('description', newPoints)}
 						type={bt}
+						DisplayItem={bt.DisplayItem}
+						onItemChange={(i: number, newVal: any) => {
+							const newPoints = [...props.obj.description];
+							newPoints[i] = newVal;
+							handleUpdate('description', newPoints);
+						}}
+						onUpdate={newPoints => handleUpdate('description', newPoints)}
 						replaceDisabled deleteOnMoveDisabled
-					>
-						{ props.obj.description.map((descrItem, i) => bt.DisplayItem({
-							obj: descrItem,
-							onUpdate: (val: string) => {
-								const newPoints = [...props.obj.description];
-								newPoints[i] = val;
-								handleUpdate('description', newPoints);
-							}
-						}))}
-					</ItemBucket>
+					/>
 				</ul>
 			</div>
 		</div>

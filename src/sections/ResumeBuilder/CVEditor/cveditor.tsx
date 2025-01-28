@@ -42,20 +42,15 @@ const CVEditor = forwardRef((
 				id="sections-bucket"
 				values={CV.sections} 		// TODO: only worry about tracking the string names (assumes all unique)
 				type={bt}
+				DisplayItem={bt.DisplayItem}
+				onItemChange={(i: number, newVal: any) => {
+					setCV(cur => { cur.sections[i] = newVal })
+				}}
 				addItemDisabled
 				onUpdate={new_vals => {
 					setCV(cur => { cur.sections = new_vals })
 				}}
-			>
-				{CV.sections?.map((sec: any, i: number) =>
-					bt.DisplayItem({
-						obj: sec,
-						onUpdate: (newSec:any) => {
-							setCV(cur => { cur.sections[i] = newSec })
-						},
-					})
-				)}
-			</ItemBucket>
+			/>
 		</div>
 	);
 });

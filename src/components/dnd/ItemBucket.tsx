@@ -119,6 +119,21 @@ interface BucketItemContext {
 };
 
 
+interface BucketProps {
+    id: any,
+    values: any[],
+    type: BucketType,
+    DisplayItem: (props: { obj: any; onUpdate: any }) => JSX.Element,
+    onItemChange?: (index: number, newItem: any) => void, // Callback for item updates
+    onUpdate?: (newValues: any[]) => void,
+    deleteDisabled?: boolean,
+    replaceDisabled?: boolean,
+    dropDisabled?: boolean,
+    deleteOnMoveDisabled?: boolean,
+    addItemDisabled?: boolean,
+}
+
+
 /**
  * Bucket of DND Items component
  * @param props
@@ -126,18 +141,7 @@ interface BucketItemContext {
  * TODO: hover and drop only works when over an item, not if there is empty space at the bottom of all items
  * TODO: controls should be put here next to each item (since they only make sense if the item is in a bucker)
  */
-function ItemBucket(props: {
-    id: any;
-    values: any[];
-    children: JSX.Element[];
-    type: BucketType,
-    onUpdate?: (newValues: any[]) => void;
-    deleteDisabled?: boolean;
-    replaceDisabled?: boolean;
-    dropDisabled?: boolean;
-    deleteOnMoveDisabled?: boolean;
-    addItemDisabled?: boolean;
-}) {
+function ItemBucket(props: BucketProps) {
     // ----------------- STATE -----------------
 
     const bucket = useBucket(props.values);
@@ -246,23 +250,32 @@ function ItemBucket(props: {
     return (
         <div ref={dropRef} className={classes} onMouseLeave={()=>setHoveredGap(undefined)}>
             <div className={props.type.displayItemsClass}>
-                {bucket.items.map((I: Item, i: number) => (
-                    <>
-                        { i === 0 && <DropGap isActive={hoveredGap === prevGap(i)} /> }
-                        <BucketContext.Provider value={{
-                            bucket_id: props.id,
-                            item_type: props.type.item_type ?? DEFAULT_ITEM_TYPE,
-                            disableReplace: props.replaceDisabled,
-                            onDelete: !props.deleteDisabled && bucket.removeItem,
-                            onAddItem: !props.addItemDisabled && bucket.addBlankItem,
-                            onHover: !props.dropDisabled && onItemHover,
-                            onRemove: !props.deleteOnMoveDisabled && bucket.removeItem,
-                        }}>
-                            <DNDItem key={i} item={I} children={props.children[i]}/>
-                        </BucketContext.Provider>
-                        <DropGap isActive={hoveredGap === nextGap(i)} />
-                    </>
-                ))}
+                {bucket.items.map((I: Item, i: number) => {
+
+                    const handleUpdate = (newVal: any) => {
+                        if(props.onItemChange) props.onItemChange(i, newVal); // Notify parent of the change
+                    };
+
+                    return (
+                        <>
+                            { i === 0 && <DropGap isActive={hoveredGap === prevGap(i)} /> }
+                            <BucketContext.Provider value={{
+                                bucket_id: props.id,
+                                item_type: props.type.item_type ?? DEFAULT_ITEM_TYPE,
+                                disableReplace: props.replaceDisabled,
+                                onDelete: !props.deleteDisabled && bucket.removeItem,
+                                onAddItem: !props.addItemDisabled && bucket.addBlankItem,
+                                onHover: !props.dropDisabled && onItemHover,
+                                onRemove: !props.deleteOnMoveDisabled && bucket.removeItem,
+                            }}>
+                                <DNDItem key={i} item={I}>
+                                    {props.DisplayItem({obj: I.value, onUpdate: handleUpdate})}
+                                </DNDItem>
+                            </BucketContext.Provider>
+                            <DropGap isActive={hoveredGap === nextGap(i)} />
+                        </>
+                    )
+                })}
             </div>
         </div>
     );
