@@ -5,39 +5,24 @@ import { joinClassNames } from "../../../util/joinClassNames";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
-import { BucketType, BucketTypes, DynamicComponent } from "../../../components/dnd/types";
+import { Item } from "../../../components/dnd/types";
 
 function SectionUI(props: {
-	obj: {
-		name: string,
-		bucket_type?: string,
-		content: any[]
-	};
-	onUpdate: (newObj: any) => void;
+	obj: CVSection;
+	children: any[];
+	onUpdate?: (newObj: CVSection) => void;
 }) {
 
 	const formatHeader = (s: string) => s.toUpperCase();
 
-	// const handleItemsChange = (newItems: Item[]) =>{
-	// 	props.onUpdate({
-	// 		...props.obj,
-	// 		item_ids: newItems.map(I=>I.id)
-	// 	});
-	// };
-
-	// const handleItemChange = (i: number, newVal: any) => {
-	// 	const new_ids = [...props.obj.item_ids];
-	// 	new_ids[i] = newVal;
-	// 	props.onUpdate({
-	// 		...props.obj,
-	// 		item_ids: new_ids
-	// 	});
-	// }
-
-	console.log("SectionUI: sec = ", props.obj);
+	const handleBucketUpdate = (newItems: Item<string>[]) =>{
+		props.onUpdate?.({
+			...props.obj,
+			item_ids: newItems.map(I=>I.value)
+		});
+	};
 
 	if(!props.obj) return null;
-
 	return (
 		<div className="section" >
 			<div className="sec-head">
@@ -48,27 +33,28 @@ function SectionUI(props: {
 				<ItemBucket
 					bucket={{
 						id: props.obj.name,
-						items: props.obj.content
+						items: props.obj.item_ids.map((iid,i)=>({
+							id: `${props.obj.name}-${i}`,
+							value: iid
+						}))
 					}}
 					type={props.obj.bucket_type}
-					// onUpdate={handleItemsChange}
+					onUpdate={handleBucketUpdate}
 				>
-					{props.obj.content.map((item: any, i: number) => (
-						<DynamicComponent type={props.obj.bucket_type}
-							onUpdate={()=>{}}
-							obj={item}
-						/>
-					))}
+					{props.children}
 				</ItemBucket>
 			</div>
 		</div>
 	)
 };
 
-function SummaryUI(props: { obj: any, onUpdate?: (newObj: any) => void }) {
+function SummaryUI(props: {
+	obj: any,
+	onUpdate?: (newObj: any) => void
+}) {
 
 	const handleUpdate = (key: string, newVal: any) => {
-		props.onUpdate({...props.obj, [key]: newVal});
+		props.onUpdate?.({...props.obj, [key]: newVal});
 	};
 
 	return (
@@ -92,8 +78,7 @@ function ExperienceUI(props: {
 }) {
 
 	const handleUpdate = (field: keyof Experience, val: any) => {
-		if(!props.onUpdate) return;
-		props.onUpdate({ ...props.obj, [field]: val });
+		props.onUpdate?.({ ...props.obj, [field]: val });
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {
@@ -129,17 +114,20 @@ function ExperienceUI(props: {
 				<ul>
 					<ItemBucket
 						bucket={{
-							id: `${props.obj.title}-bucket`,
-							items: props.obj.description.map((s,i)=>({
-								id: `${props.obj.title}-bp-${i}`,
-								value: s
+							id: 	`${props.obj.title}-bucket`,
+							items: props.obj.description.map((item: string, i: number)=>({
+								id: `${props.obj.title}-bp${i}`,
+								value: item
 							}))
 						}}
 						type={"exp-points"}
-						onItemChange={handleItemChange}
 						onUpdate={newPoints => handleUpdate('description', newPoints)}
 						replaceDisabled deleteOnMoveDisabled
-					/>
+					>
+						{props.obj.description.map((item: string, i: number)=>(
+							<li><TextEditDiv tv={item} onUpdate={newVal=>handleItemChange(i, newVal)} /></li>
+						))}
+					</ItemBucket>
 				</ul>
 			</div>
 		</div>

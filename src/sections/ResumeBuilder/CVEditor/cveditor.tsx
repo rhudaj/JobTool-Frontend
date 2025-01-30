@@ -4,15 +4,15 @@ import * as UI from "./cv_components"
 import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
 import ItemBucket from "../../../components/dnd/Bucket";
-import { Item } from "../../../components/dnd/types";
-
+import { DynamicComponent, Item } from "../../../components/dnd/types";
+import { CVInfo } from "../../../components/infoPad/infoPad";
 
 export interface CVEditorHandle {
 	getCV: () => CV;
 }
 
 // MAIN COMPONENT
-const CVEditor = forwardRef<CVEditorHandle, { cv: CV, sec2Content: (cvsec: CVSection) => any }>(({ cv, sec2Content }, ref) => {
+const CVEditor = forwardRef<CVEditorHandle, { cv: CV, itemFromId: (secId: string, itemId: string)=>any }>(({ cv, itemFromId }, ref) => {
 
 	// -------------- MODEL --------------
 
@@ -35,13 +35,14 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV, sec2Content: (cvsec: CVSec
 
 	// -------------- VIEW --------------
 
-	if (!CV) return null;
+	if (!itemFromId || !CV) return null;
 	return (
 		<div id="cv-editor">
 			<div id="full-name" key="name">{CV.header_info.name}</div>
 			<div id="link-list">
 				{CV.header_info?.links?.map((l,i) => <UI.LinkUI key={i} {...l} /> )}
 			</div>
+			{/* SECTION BUCKET --------------------------------------*/}
 			<ItemBucket
 				bucket={{
 					id: "sections",
@@ -51,8 +52,29 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV, sec2Content: (cvsec: CVSec
 				onUpdate={handleItemsChange}
 				addItemDisabled
 			>
-				{CV.sections.map((S: CVSection)=>(
-					<UI.SectionUI obj={S} onUpdate={(newSec: CVSection)=>{}}/>
+				{/* SECTIONS -------------------------------------- */}
+				{CV.sections.map((S: CVSection, i: number)=>(
+					<UI.SectionUI
+						key={i}
+						obj={S}
+						onUpdate={(newObj: CVSection)=>{
+							console.log(`section ${S.name} updated: `, newObj);
+							setCV(cur_cv=>{
+								cur_cv.sections[i] = newObj;
+							})
+						}}
+					>
+						{/* SECTION ITEMS  -------------------------------------- */}
+						{S.item_ids.map((iid: string, i: number) => (
+							<DynamicComponent
+								type={S.bucket_type}
+								props={{
+									obj: itemFromId(S.name, iid),
+									// onUpdate: ...
+								}}
+							/>
+						))}
+					</UI.SectionUI>
 				))}
 			</ItemBucket>
 		</div>

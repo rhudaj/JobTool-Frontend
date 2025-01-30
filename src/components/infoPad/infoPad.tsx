@@ -3,7 +3,7 @@ import  useLogger  from '../../hooks/logger';
 import React from "react";
 import { InfoPadMap } from '../dnd/types';
 import { Item, Bucket } from '../dnd/types';
-import VersionedItemUI from './versionScroll';
+import VersionedItemUI, { VersionedItem } from './versionScroll';
 
 export interface CVInfo {
     [ secName: string ]: {                  // section name
@@ -11,12 +11,6 @@ export interface CVInfo {
             [ itemName: string ]: any;   // e.g. id: experience content
         }
     }
-}
-
-export interface VersionedItem<T=any> {
-    id: string,
-    item_type: string,
-    versions: Item<T>[],
 }
 
 const Info2Buckets = (info: CVInfo): Bucket<VersionedItem<any>>[] => {

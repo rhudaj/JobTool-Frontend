@@ -37,7 +37,14 @@ function useCVManager() {
             BackendAPI.get<NamedCV[]>("all_cvs").then(cvs=>{
                 set_named_cvs(cvs?.filter(cv => cv && cv.name && cv.data))
             });
-            BackendAPI.get<CVInfo>("cv_info").then(setCVInfo);
+            BackendAPI.get<CVInfo>("cv_info").then(cv_info=>{
+                if(cv_info) {
+                    log(`got cv_info from backend`)
+                    setCVInfo(cv_info);
+                } else {
+                    log(`NO cv_info from backend`)
+                }
+            });
         }
         else {
             const samps = [
@@ -83,21 +90,14 @@ function useCVManager() {
 
     // other
 
-    // TODO: this is a workaround
-    const sec2Content = (cvsec: CVSection) => {
-        if(!cvInfo) return;
-        const sec = cvInfo[cvsec.name];
-        const sec_items = cvsec.item_ids.map((itemId:string)=>{
-            const [groupId, nameId] = itemId.split("/", 2);
-            const obj = sec[groupId][nameId];
-            return { id: itemId, value: obj };
-        })
-        return {
-            name: cvsec.name,
-            bucket_type: cvsec.bucket_type,
-            content: sec_items,
-        }
-    };
+	// Extract the data from `cv_info` using the specified id
+	const itemFromId = (sec_id: string, item_id: string): any => {
+        if(!cvInfo)     return;
+		const [groupId, itemId] = item_id.split("/", 2);
+		if(!groupId) 	return
+		else if(itemId) return cvInfo[sec_id][groupId][itemId];
+		else 			return cvInfo[sec_id][groupId]; // most likely 'default'
+	};
 
     // setters
 
@@ -146,7 +146,7 @@ function useCVManager() {
         changeCV,
         save2backend,
         deleteCur,
-        sec2Content
+        itemFromId
     };
 }
 
@@ -352,7 +352,7 @@ function ResumeBuilder() {
                 <SplitView>
                     <PrintablePage page_id="cv-page">
                         {state.cvNames() && (
-                            <CVEditor cv={state.curData()} sec2Content={state.sec2Content} ref={editor_ref} />
+                            <CVEditor cv={state.curData()} itemFromId={state.getCVInfo() ? state.itemFromId : null} ref={editor_ref} />
                         )}
                     </PrintablePage>
                     {/* <div>TESTING</div> */}

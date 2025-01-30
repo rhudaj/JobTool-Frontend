@@ -127,9 +127,9 @@ function ItemBucket(props: BucketProps) {
     const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
 
     React.useEffect(() => {
-        if (!bucket.items || !props.onUpdate) return;
+        if (!bucket.items) return;
         if (JSON.stringify(bucket.items) == JSON.stringify(props.bucket.items)) return;  // needed, else maximum depth! TODO:
-        props.onUpdate(bucket.items);
+        props.onUpdate?.(bucket.items);
     }, [bucket.items]);
 
     const type = BucketTypes[props.type ?? props.bucket.id];
