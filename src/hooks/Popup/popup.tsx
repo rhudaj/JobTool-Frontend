@@ -23,9 +23,9 @@ const PopupUI = ({ onClose, children }: PopupProps) => {
 
     return createPortal(
         <div className="popup-overlay">
-            <div className="popup-content">
+            <div className="popup-div">
                 <button className="popup-close" onClick={onClose}>✖</button>
-                {children}
+                <div className="popup-content">{children}</div>
             </div>
         </div>,
         document.body

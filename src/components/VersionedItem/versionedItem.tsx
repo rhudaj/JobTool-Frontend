@@ -1,11 +1,10 @@
 import './versionedItem.sass'
-import { useEffect, useMemo, useRef, useState } from "react";
-import { BucketType, BucketTypes, DynamicComponent, InfoPadMap, Item } from "../dnd/types";
+import { useEffect, useMemo, useState } from "react";
+import { BucketType, BucketTypes, DynamicComponent, Item } from "../dnd/types";
 import { StandaloneDragItem } from '../dnd/BucketItem';
-import { PopupModal } from '../PopupModal/PopupModal';
 import TextEditDiv from '../TextEditDiv/texteditdiv';
-import useToggle from '../../hooks/toggle';
 import { usePopup } from '../../hooks/Popup/popup';
+import { useImmer } from 'use-immer';
 
 export interface VersionedItem<T=any> {
     id: string,
@@ -17,6 +16,7 @@ export interface VersionedItem<T=any> {
 function EditItem(props: {
     startingItem: Item<any>;
     item_type: string;
+    onSave: (newItem: Item<any>) => void;
 }) {
 
     const [id, setId] = useState(null);
@@ -28,10 +28,11 @@ function EditItem(props: {
     return (
         <div className='item-edit'>
             <div className='name-edit'>
-                <p>Name:</p>
+                <h3>Name:</h3>
                 <TextEditDiv tv={id} onUpdate={setId}/>
             </div>
             <div className='content-edit'>
+                <h3>Content:</h3>
                 <DynamicComponent type={props.item_type} props={{
                     obj: value,
                     onUpdate: (newVal: any) => {
@@ -40,6 +41,7 @@ function EditItem(props: {
                     }
                 }}/>
             </div>
+            <button onClick={()=>props.onSave({id: id, value: value})}>Save</button>
         </div>
     );
 };
@@ -59,16 +61,33 @@ export function VersionedItemUI(props: {
 
     // ----------------- STATE -----------------
 
-    const [versions, setVersions] = useState<Item<any>[]>(null);
+    const [versions, setVersions] = useImmer<Item<any>[]>(null);
     const [cur, setCur] = useState(0);
-    useEffect(()=> setVersions(props.obj.versions), [props.obj.versions]);
     const displayItem = useMemo(()=> BucketTypes[props.obj.item_type].DisplayItem, [props.obj.item_type]);
     const editPopup = usePopup();
+
+    useEffect(()=> setVersions(props.obj.versions), [props.obj.versions]);
+
+    // Alert parent when state changes
+    useEffect(()=>{
+        if(!versions) return;
+        props.onUpdate({
+            ...props.obj,
+            versions: versions
+        })
+    }, [versions])
 
     // ----------------- CONTROLS -----------------
 
     const switchVersion = () => {
         setCur(prev => (prev === versions.length-1) ? 0 : prev+1)
+    };
+
+    const addNew = (newItem: Item) => {
+        setVersions(cur=>{
+            cur.push(newItem)
+        })
+        setCur(versions.length-1);
     };
 
     const openEditPopup = () => {
@@ -77,7 +96,15 @@ export function VersionedItemUI(props: {
         copy.id += "_copy";
         // Open the popup
         editPopup.open(
-            <EditItem startingItem={copy} item_type={props.obj.item_type}/>
+            <EditItem
+                startingItem={copy}
+                item_type={props.obj.item_type}
+                onSave={(newItem: Item)=>{
+                    addNew(newItem);
+                    editPopup.close();
+                    console.log("added a new item version!");
+                }}
+            />
         )
     };
 

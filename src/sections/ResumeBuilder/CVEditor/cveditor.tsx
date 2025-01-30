@@ -28,10 +28,6 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV, itemFromId: (secId: string
 		setCV(cur => { cur.sections = newItems.map(I=>I.value) })
 	};
 
-	const handleItemChange = (i: number, newVal: any) => {
-		setCV(cur => { cur.sections[i] = newVal })
-	};
-
 	// -------------- VIEW --------------
 
 	if (!itemFromId || !CV) return null;
@@ -69,7 +65,7 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV, itemFromId: (secId: string
 								type={S.bucket_type}
 								props={{
 									obj: itemFromId(S.name, iid),
-									// onUpdate: ...
+									// don't care ab updates to individual items
 								}}
 							/>
 						))}

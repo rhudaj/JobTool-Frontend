@@ -1,9 +1,9 @@
 import './infoPad.sass';
-import  useLogger  from '../../hooks/logger';
-import React from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 import { InfoPadMap } from '../dnd/types';
 import { Item, Bucket } from '../dnd/types';
 import { VersionedItemUI, VersionedItem } from "../VersionedItem/versionedItem"
+import { useImmer } from 'use-immer';
 
 export interface CVInfo {
     [ secName: string ]: {                  // section name
@@ -13,73 +13,105 @@ export interface CVInfo {
     }
 }
 
-const Info2Buckets = (info: CVInfo): Bucket<VersionedItem<any>>[] => {
-    const sections = Object.entries(info);
-    const buckets = [];
-    sections.forEach(([secName, secGroups])=>{
-        const bucket = { id: secName, items: []};
-        const named_groups = Object.entries(secGroups);
-        named_groups.forEach(([groupName, groupItems])=>{
-            const items = Object.entries(groupItems);
-            const versioned_item: VersionedItem<any> = {
-                id: groupName,
-                item_type: InfoPadMap[secName],
-                versions: items.map(([id, value])=>({
-                    id: id,
-                    value: value
-                } as Item))
-            };
-            // since buckets need to hold items:
-            bucket.items.push({
-                id: groupName,
-                value: versioned_item
-            } as Item);
-        })
-        buckets.push(bucket);
-    })
-    return buckets;
+const Info2Sections = (info: CVInfo): {secName: string, items: VersionedItem[]}[] => (
+    Object.entries(info)
+    .map( ([ secName, secGroups ]) => ({
+        secName: secName,
+        items: Object.entries(secGroups).map(([ groupName, groupItems ]) => ({
+            id: groupName,
+            item_type: InfoPadMap[secName],
+            versions: Object.entries(groupItems).map(([id, value])=>({
+                id: id,
+                value: value
+            } as Item))
+        } as VersionedItem))
+    }))
+);
+
+const Sections2Info = (sections: { secName: string; items: VersionedItem<any>[] }[]): CVInfo => {
+    const info: CVInfo = {};
+
+    sections.forEach(({ secName, items }) => {
+        if (!info[secName]) {
+            info[secName] = {};
+        }
+
+        items.forEach(versionedItem => {
+            const groupName = versionedItem.id;
+
+            if (!info[secName][groupName]) {
+                info[secName][groupName] = {};
+            }
+
+            versionedItem.versions.forEach(version => {
+                info[secName][groupName][version.id] = version.value;
+            });
+        });
+    });
+
+    return info;
 };
 
-function InfoPad(props: { info: CVInfo } ) {
 
-    const log = useLogger("InfoPad");
+
+export interface InfoPadHandle {
+	get: () => CVInfo;
+}
+
+// MAIN COMPONENT
+const InfoPad = forwardRef<InfoPadHandle, { info: CVInfo }>(({ info }, ref) => {
 
     // ----------------- STATE -----------------
 
-    const [infoBuckets, setInfoBuckets] = React.useState<Bucket<VersionedItem>[]>([]);
+    const [cvInfo, setCVInfo] = useImmer<CVInfo>(null);
+    const [sections, setSections] = useImmer(null);
 
     React.useEffect(() => {
-        if (!props.info) return;
-        setInfoBuckets(
-            Info2Buckets(props.info)
-        )
-    }, [props.info]);
+        if (!info) return;
+        setCVInfo(info);
+    }, [info]);
 
+    React.useEffect(()=>{
+        if (!cvInfo) return;
+        setSections(Info2Sections(cvInfo));
+    }, [cvInfo])
 
-    // ----------------- RENDER -----------------
+    React.useEffect(()=>{
+        if(!sections) return;
+        setCVInfo(Sections2Info(sections));
+    }, [sections])
 
-    if (infoBuckets.length === 0) {
-        log("No cv_info passed in props");
-        return <div id="info-pad">no info found</div>;
-    }
+    // give parent access to CV
+    useImperativeHandle(ref, () => ({
+        get: () => { return cvInfo  }
+    }));
 
-    // ----------------- RENDER -----------------
+    // ----------------- VIEW -----------------
 
-    if(infoBuckets?.length === 0) return <div id="info-pad">no cv-info found</div>;
+    if (!cvInfo || !sections) return <div id="info-pad">no CV info found</div>;
+
     return (
         <div id="info-pad">
-            {infoBuckets.map((bucket: Bucket<VersionedItem<any>>, i: number) => (
-                <div className="info-pad-section" key={i}>
-                    <h2>{bucket.id.toUpperCase()}</h2>
+            {sections.map((sec, sec_idx: number) => (
+                <div className="info-pad-section" key={sec_idx}>
+                    <h2>{sec.secName.toUpperCase()}</h2>
                     <div className='section-items'>
-                        {bucket.items.map((I, i) =>
-                            <VersionedItemUI key={i} obj={I.value} />
+                        {sec.items.map((I: VersionedItem, item_idx) =>
+                            <VersionedItemUI
+                                key={item_idx}
+                                obj={I}
+                                onUpdate={((newVI: VersionedItem) => {
+                                    setSections(cur=>{
+                                        cur[sec_idx].items[item_idx] = newVI;
+                                    })
+                                })}
+                            />
                         )}
                     </div>
                 </div>
             ))}
         </div>
     )
-};
+});
 
 export default InfoPad;

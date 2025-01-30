@@ -5,7 +5,7 @@ import { NamedCV } from "job-tool-shared-types";
 import BackendAPI from "../../backend_api";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
-import InfoPad, { CVInfo } from "../../components/infoPad/infoPad";
+import InfoPad, { CVInfo, InfoPadHandle } from "../../components/infoPad/infoPad";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import useLogger from "../../hooks/logger";
@@ -17,6 +17,7 @@ import SubSection from "../../components/Section/SubSection";
 import { PopupModal } from "../../components/PopupModal/PopupModal";
 import TextEditDiv from "../../components/TextEditDiv/texteditdiv";
 import TextItems from "../../components/TextItems/TextItems";
+import { usePopup } from "../../hooks/Popup/popup";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
@@ -50,6 +51,10 @@ function useCVInfo() {
         }
     };
 
+    const save2backend = () => {
+        BackendAPI.post<CVInfo, null>("saveCVInfo", cvInfo);
+    };
+
     const get = () => cvInfo;
 
     // Extract the data from `cv_info` using the specified id
@@ -65,7 +70,8 @@ function useCVInfo() {
         fetchData,
         get,
         itemFromId,
-        setCVInfo
+        setCVInfo,
+        save2backend
     }
 };
 
@@ -240,21 +246,23 @@ function SavedCVs(props: {
  *                         ROOT COMPONENT                           *
 ------------------------------------------------------------------- */
 function ResumeBuilder() {
-    
+
     // ---------------- STATE ----------------
 
     const cvsState = useCVs();
     const cvInfoState = useCVInfo();
 
     const editor_ref = useRef<CVEditorHandle>(null);
+    const infoPad_ref = useRef<InfoPadHandle>(null);
+
     const [settingN, setSettingN] = useState(null); // null => none, 0 => SavedCVs, 1 => file settings
     const saveAsPDF = useComponent2PDF("cv-page");
 
     // references to popup modal elements
-    const export_modal = useRef(null)
-    const save_modal = useRef(null)
-    const import_modal = useRef(null);
-    const delete_modal = useRef(null);
+    const exportPopup = usePopup();
+    const savePopup = usePopup();
+    const importPopup = usePopup();
+    const deletePopup = usePopup();
 
     // Fetch data on mount
     useEffect(()=>{
@@ -264,63 +272,61 @@ function ResumeBuilder() {
 
     // ---------------- VIEW ----------------
 
-    const popup_modals = [
-        (
-            <PopupModal ref={export_modal}>
-                <div className="export-popup">
-                    <button onClick={() => {
-                        saveAsPDF(cvsState.curCV()?.name);
-                        export_modal.current.close();
-                    }}>PDF</button>
-                    <button onClick={()=>{
-                        util.downloadAsJson(editor_ref.current.getCV());
-                        export_modal.current.close();
-                    }}>JSON</button>
-                </div>
-            </PopupModal>
+    const popup_content = {
+        export: (
+            <div className="popup-content export-popup">
+                <h2>Export As</h2>
+                <button onClick={() => {
+                    saveAsPDF(cvsState.curCV()?.name);
+                    exportPopup.close();
+                }}>PDF</button>
+                <button onClick={()=>{
+                    const cv = editor_ref.current.getCV();
+                    if(cv) util.downloadAsJson(cv);
+                    exportPopup.close();
+                }}>JSON</button>
+            </div>
         ),
-        (
-            <PopupModal ref={save_modal}>
-                <SaveForm
-                    name={cvsState.curCV()?.name}
-                    tags={cvsState.curCV()?.tags}
-                    onSave={(newName: string, newTags: string[]) => {
-                        cvsState.save2backend({
-                            name: newName,
-                            tags: newTags,
-                            data: editor_ref.current.getCV()
-                        });
-                        save_modal.current.close();
-                    }}
-                />
-            </PopupModal>
+        save: (
+            <SaveForm
+                name={cvsState.curCV()?.name}
+                tags={cvsState.curCV()?.tags}
+                onSave={(newName: string, newTags: string[]) => {
+                    cvsState.save2backend({
+                        name: newName,
+                        tags: newTags,
+                        data: editor_ref.current.getCV()
+                    });
+                    savePopup.close();
+                }}
+            />
         ),
-        (
-            <PopupModal ref={import_modal}>
+        import: (
+            <div className="popup-content">
                 <p>New Resume from JSON:</p>
                 <input type="file" accept=".json" onChange={e => {
                     util.jsonFileImport(e, cvsState.importFromJson);
-                    import_modal.current.close();
+                    importPopup.close();
                 }}/>
-            </PopupModal>
+            </div>
         ),
-        (
-            <PopupModal ref={delete_modal}>
+        delete: (
+            <div className="popup-content">
                 <p>Are you sure you want to delete?</p>
                 <button onClick={()=>{
                     cvsState.deleteCur();
-                    delete_modal.current.close()
+                    deletePopup.close()
                 }}>Yes</button>
-            </PopupModal>
+            </div>
         )
-    ];
+    };
 
     const settings = [
         ( // FILE:
             <SubSection id="ss-named-cvs" heading="My Resumes">
                 <div id="named-cvs-controls">
-                    <div onClick={()=>import_modal.current.open()}>+</div>
-                    <div onClick={()=>delete_modal.current.open()}>-</div>
+                    <div onClick={()=>importPopup.open(popup_content.import)}>+</div>
+                    <div onClick={()=>deletePopup.open(popup_content.delete)}>-</div>
                 </div>
                 <SavedCVs
                     cvNames={cvsState.cvNames()}
@@ -339,8 +345,13 @@ function ResumeBuilder() {
                         )}
                     />
                 </div>
-                <div onClick={()=>export_modal.current.open()}>Export</div>
-                {USE_BACKEND && <div onClick={()=>save_modal.current.open()}>Save</div>}
+                <div onClick={()=>exportPopup.open(popup_content.export)}>Export</div>
+                {USE_BACKEND && <div onClick={()=>savePopup.open(popup_content.save)}>Save Current CV</div>}
+                {USE_BACKEND && <div onClick={()=>{
+                    const cur_cv_info: CVInfo = infoPad_ref.current.get();
+                    cvInfoState.setCVInfo(cur_cv_info);
+                    cvInfoState.save2backend();
+                }}>Save CV Info</div>}
             </div>
         )
     ];
@@ -349,7 +360,7 @@ function ResumeBuilder() {
     return (
         <Section id="section-cv" heading="Resume Builder">
             {/* ------------ SETTINGS ------------ */}
-            {popup_modals}
+            {[exportPopup.PopupComponent, savePopup.PopupComponent, importPopup.PopupComponent, deletePopup.PopupComponent]}
             <div>
                 <div className="resume-builder-controls">
                     <div className={settingN===1?"selected":""} onClick={()=>setSettingN(prev=>prev===1?null:1)}>File</div>
@@ -371,7 +382,7 @@ function ResumeBuilder() {
                         <CVEditor cv={cvsState.curCV()?.data} itemFromId={cvInfoState.itemFromId} ref={editor_ref} />
                     </PrintablePage>
                     {/* <div>TESTING</div> */}
-                    <InfoPad info={cvInfoState.get()} />
+                    <InfoPad ref={infoPad_ref} info={cvInfoState.get()} />
                 </SplitView>
             </DndProvider>
         </Section>
