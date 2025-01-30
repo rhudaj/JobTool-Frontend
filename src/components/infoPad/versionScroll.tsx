@@ -11,6 +11,7 @@ export default function VersionedItemUI(props: {
     const [versions, setVersions] = useState<Item<any>[]>(null);
     const [cur, setCur] = useState(0);
 
+    // Get the display item type
     const displayItem = useMemo(()=>
         BucketTypes[props.obj.item_type].DisplayItem
     , [props.obj.item_type]);
@@ -33,3 +34,4 @@ export default function VersionedItemUI(props: {
         </div>
     )
 };
+

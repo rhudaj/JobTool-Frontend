@@ -1,6 +1,6 @@
 import "./cleditor.sass"
 import { useEffect } from "react";
-import ItemBucket from "../../../components/dnd/ItemBucket";
+import ItemBucket from "../../../components/dnd/Bucket";
 import { useImmer } from "use-immer";
 
 function CLEditor(props: {

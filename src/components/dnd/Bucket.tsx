@@ -1,10 +1,10 @@
-import "./ItemBucket.scss";
+import "./Bucket.scss";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import React, { useEffect } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
 import { Item, DEFAULT_ITEM_TYPE, BucketTypes, Bucket, DynamicComponent } from "./types";
 import { useImmer } from "use-immer";
-import DNDItem from "./Item";
+import BucketItem from "./BucketItem";
 
 /* Empty all values in an object (recursively) */
 const emptyObject = (obj: any): any => {
@@ -256,9 +256,15 @@ function ItemBucket(props: BucketProps) {
                                 onHover: !props.dropDisabled            && onItemHover,
                                 onRemove: !props.deleteOnMoveDisabled   && bucket.removeItem,
                             }}>
-                                <DNDItem key={i} item={I}>
-                                    <DynamicComponent type={props.type} props={{obj: I.value, onUpdate: handleUpdate}}/>
-                                </DNDItem>
+                                <BucketItem key={i} item={I}>
+                                    <DynamicComponent
+                                        type={props.type}
+                                        props={{
+                                            obj: I.value,
+                                            onUpdate: handleUpdate
+                                        }}
+                                    />
+                                </BucketItem>
                             </BucketContext.Provider>
                             <DropGap isActive={hoveredGap === nextGap(i)} />
                         </>

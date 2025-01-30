@@ -1,13 +1,12 @@
-import "./Item.scss"
+import "./BucketItem.scss"
 import { useDrag, useDrop } from "react-dnd";
 import React, { useContext } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
 import { Item } from "./types";
 import ItemControlsContainer from "./ItemControls";
-import { BucketContext } from "./ItemBucket";
+import { BucketContext } from "./Bucket";
 
-// TODO: should be usable on its own (ie: has its own state) in the case you dont want a bucket.
-function DNDItem(props: { item: Item, children: JSX.Element }) {
+export default function BucketItem(props: { item: Item, children: JSX.Element }) {
 
     const bucketContext = useContext(BucketContext);
 
@@ -96,4 +95,52 @@ function DNDItem(props: { item: Item, children: JSX.Element }) {
     );
 };
 
-export default DNDItem;
+// Drag only, can't be Dropped on. Only has Move Controls
+export function StandaloneItem(props: {
+    item: Item,
+    item_type: string,
+    children: JSX.Element,
+}) {
+
+    // -------------------- STATE ---------------------
+
+    const ref = React.useRef(null);
+
+    // -----------------DRAG FUNCTIONALITY-----------------
+
+    const [{isDragging}, drag, preview] = useDrag(() => ({
+        type: props.item_type,
+        canDrag: true,
+        item: () => {
+            return props.item; 			// sent to the drop target when dropped.
+        },
+        end: (item: Item, monitor) => {
+            const dropResult = monitor.getDropResult();  // the bucket we dropped on
+            if(!dropResult) return;             // Cancelled/invalid drop
+        },
+        collect: (monitor) => ({
+            isDragging: monitor.isDragging()
+        }),
+        }), [props.item]
+    );
+
+    preview(ref);     // Inject the dnd props into the reference
+
+    // -----------------RENDER-----------------
+
+    const classNames = joinClassNames(
+        "dnd-item-wrapper",
+        isDragging ? "dragging" : "",
+    );
+
+    return (
+        <>
+            <div ref={ref} className={classNames}>
+                {props.children}
+            </div>
+            <ItemControlsContainer ref={ref}>
+                <div ref={drag} className="move-handle">M</div>
+            </ItemControlsContainer>
+        </>
+    );
+};

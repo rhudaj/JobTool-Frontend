@@ -2,7 +2,7 @@ import "./cveditor.sass";
 import { Experience, Link, MonthYear, DateRange, CVSection } from "job-tool-shared-types";
 import TextEditDiv from "../../../components/TextEditDiv/texteditdiv";
 import { joinClassNames } from "../../../util/joinClassNames";
-import ItemBucket from "../../../components/dnd/ItemBucket";
+import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 

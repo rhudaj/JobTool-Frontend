@@ -3,7 +3,7 @@ import { CV, CVSection } from "job-tool-shared-types";
 import * as UI from "./cv_components"
 import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
-import ItemBucket from "../../../components/dnd/ItemBucket";
+import ItemBucket from "../../../components/dnd/Bucket";
 import { Item } from "../../../components/dnd/types";
 
 
