@@ -79,18 +79,18 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
         <>
             <div ref={ref} className={classNames}>
                 {props.children}
+                <ItemControlsContainer ref={ref}>
+                    <div ref={drag} className="move-handle">M</div>
+                    { bucketContext.onDelete &&
+                    <div className="delete-button" onClick={()=>bucketContext.onDelete(props.item.id)}>X</div>}
+                    { bucketContext.onAddItem &&
+                        <>
+                        <div className="add-item" onClick={()=>bucketContext.onAddItem(props.item.id, true)}>↓</div>
+                        <div className="add-item" onClick={()=>bucketContext.onAddItem(props.item.id, false)}>↑</div>
+                        </>
+                    }
+                </ItemControlsContainer>
             </div>
-            <ItemControlsContainer ref={ref}>
-                <div ref={drag} className="move-handle">M</div>
-                { bucketContext.onDelete &&
-                <div className="delete-button" onClick={()=>bucketContext.onDelete(props.item.id)}>X</div>}
-                { bucketContext.onAddItem &&
-                    <>
-                    <div className="add-item" onClick={()=>bucketContext.onAddItem(props.item.id, true)}>↓</div>
-                    <div className="add-item" onClick={()=>bucketContext.onAddItem(props.item.id, false)}>↑</div>
-                    </>
-                }
-            </ItemControlsContainer>
         </>
     );
 };

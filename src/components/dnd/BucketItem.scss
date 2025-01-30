@@ -13,6 +13,8 @@
 
 .dnd-item-wrapper {
 
+    position: relative;
+
     & .dragging:active {
         opacity: 0.1;
     }
