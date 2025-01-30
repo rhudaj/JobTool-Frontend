@@ -5,7 +5,6 @@ import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { DynamicComponent, Item } from "../../../components/dnd/types";
-import { CVInfo } from "../../../components/infoPad/infoPad";
 
 export interface CVEditorHandle {
 	getCV: () => CV;
@@ -38,6 +37,7 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV, itemFromId: (secId: string
 	if (!itemFromId || !CV) return null;
 	return (
 		<div id="cv-editor">
+			{/* HEADER INFO --------------------------------------*/}
 			<div id="full-name" key="name">{CV.header_info.name}</div>
 			<div id="link-list">
 				{CV.header_info?.links?.map((l,i) => <UI.LinkUI key={i} {...l} /> )}
@@ -58,7 +58,6 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV, itemFromId: (secId: string
 						key={i}
 						obj={S}
 						onUpdate={(newObj: CVSection)=>{
-							console.log(`section ${S.name} updated: `, newObj);
 							setCV(cur_cv=>{
 								cur_cv.sections[i] = newObj;
 							})

@@ -1,7 +1,7 @@
 import "./resumebuilder.sass";
 import { useEffect, useState, useRef } from "react";
 import Section from "../../components/Section/Section";
-import { CVSection, NamedCV } from "job-tool-shared-types";
+import { NamedCV } from "job-tool-shared-types";
 import BackendAPI from "../../backend_api";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
@@ -25,18 +25,15 @@ const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
  *                       CV STATE MANAGER                           *
 ------------------------------------------------------------------- */
 
-// Manages any state/controls relating to the CV builder
-function useCVManager() {
-    // ---------------- STATE (internal) ----------------
-    const [named_cvs, set_named_cvs] = useState<NamedCV[]>(null);
-    const [cvInfo, setCVInfo] = useState<CVInfo>(null);
-    const [cur, set_cur] = useState<number>(null);
+function useCVInfo() {
 
-    useEffect(() => {
+    const [cvInfo, setCVInfo] = useState<CVInfo>(null);
+
+    const log = useLogger("useCVInfo");
+
+    // FETCH the data:
+    const fetchData = () => {
         if(USE_BACKEND) {
-            BackendAPI.get<NamedCV[]>("all_cvs").then(cvs=>{
-                set_named_cvs(cvs?.filter(cv => cv && cv.name && cv.data))
-            });
             BackendAPI.get<CVInfo>("cv_info").then(cv_info=>{
                 if(cv_info) {
                     log(`got cv_info from backend`)
@@ -44,6 +41,59 @@ function useCVManager() {
                 } else {
                     log(`NO cv_info from backend`)
                 }
+            });
+        } else {
+            // from the /public folder
+            fetch(SAMPLES_PATH + "cv_info.json")
+                .then(r => r.json())
+                .then(setCVInfo);
+        }
+    };
+
+    const get = () => cvInfo;
+
+    // Extract the data from `cv_info` using the specified id
+	const itemFromId = (sec_id: string, item_id: string): any => {
+        if(!cvInfo)     return;
+		const [groupId, itemId] = item_id.split("/", 2);
+		if(!groupId) 	return
+		else if(itemId) return cvInfo[sec_id][groupId][itemId];
+		else 			return cvInfo[sec_id][groupId]; // most likely 'default'
+	};
+
+    return {
+        fetchData,
+        get,
+        itemFromId,
+        setCVInfo
+    }
+};
+
+// Manages any state/controls relating to the CV builder
+function useCVs() {
+
+    // -------------------- STATE  --------------------
+
+    const [named_cvs, set_named_cvs] = useState<NamedCV[]>(null);
+    const [cur, set_cur] = useState<number>(null);
+
+    useEffect(() => {
+        if (!named_cvs || named_cvs.length === 0) return;
+        log(`Got ${named_cvs.length} CVs from backend`);
+        set_cur(0);
+    }, [named_cvs]);
+
+    const log = useLogger("ResumeBuilder");
+
+    // ---------------- CONTROLS (what user sees) ----------------
+
+    // setters
+
+    const fetchData = () => {
+        if(USE_BACKEND) {
+            BackendAPI.get<NamedCV[]>("all_cvs").then(cvs=>{
+                const valid_cvs = cvs?.filter(cv => cv && cv.name && cv.data);
+                if(valid_cvs) set_named_cvs(valid_cvs)
             });
         }
         else {
@@ -70,36 +120,8 @@ function useCVManager() {
                 });
 
             set_named_cvs(temp);
-
-            // CV-INFO:
-            fetch(SAMPLES_PATH + "cv_info.json")
-                .then((r) => r.json())
-                .then(setCVInfo);
         }
-    }, []);
-
-    useEffect(() => {
-        if (!named_cvs || named_cvs.length === 0) return;
-        log(`Got ${named_cvs.length} CVs from backend`);
-        set_cur(0);
-    }, [named_cvs]);
-
-    const log = useLogger("ResumeBuilder");
-
-    // ---------------- CONTROLS (what user sees) ----------------
-
-    // other
-
-	// Extract the data from `cv_info` using the specified id
-	const itemFromId = (sec_id: string, item_id: string): any => {
-        if(!cvInfo)     return;
-		const [groupId, itemId] = item_id.split("/", 2);
-		if(!groupId) 	return
-		else if(itemId) return cvInfo[sec_id][groupId][itemId];
-		else 			return cvInfo[sec_id][groupId]; // most likely 'default'
-	};
-
-    // setters
+    };
 
     const changeCV = (name: string) => {
         const idx = named_cvs.findIndex((cv) => cv.name === name);
@@ -132,22 +154,9 @@ function useCVManager() {
     const curName = () => named_cvs ? named_cvs[cur]?.name : null;
     const curData = () => named_cvs[cur]?.data;
     const curTags = () => named_cvs ? named_cvs[cur]?.tags : null;
-    const getCVInfo = () => cvInfo;
 
-    return {
-        curIdx,
-        cvNames,
-        curName,
-        curTags,
-        getCVInfo,
-        curData,
-        setCVInfo,
-        importFromJson,
-        changeCV,
-        save2backend,
-        deleteCur,
-        itemFromId
-    };
+    return { fetchData, curIdx, cvNames, curName, curTags, curData,
+        importFromJson, changeCV, save2backend, deleteCur };
 }
 
 /* ------------------------------------------------------------------
@@ -236,15 +245,24 @@ function SavedCVs(props: {
 function ResumeBuilder() {
     // ---------------- STATE ----------------
 
-    const state = useCVManager();
+    const cvsState = useCVs();
+    const cvInfoState = useCVInfo();
+
     const editor_ref = useRef<CVEditorHandle>(null);
     const [settingN, setSettingN] = useState(null); // null => none, 0 => SavedCVs, 1 => file settings
     const saveAsPDF = useComponent2PDF("cv-page");
 
+    // references to popup modal elements
     const export_modal = useRef(null)
     const save_modal = useRef(null)
     const import_modal = useRef(null);
     const delete_modal = useRef(null);
+
+    // Fetch data on mount
+    useEffect(()=>{
+        cvsState.fetchData();
+        cvInfoState.fetchData();
+    }, [])
 
     // ---------------- VIEW ----------------
 
@@ -253,7 +271,7 @@ function ResumeBuilder() {
             <PopupModal ref={export_modal}>
                 <div className="export-popup">
                     <button onClick={() => {
-                        saveAsPDF(state.curName());
+                        saveAsPDF(cvsState.curName());
                         export_modal.current.close();
                     }}>PDF</button>
                     <button onClick={()=>{
@@ -266,10 +284,10 @@ function ResumeBuilder() {
         (
             <PopupModal ref={save_modal}>
                 <SaveForm
-                    name={state.curName()}
-                    tags={state.curTags()}
+                    name={cvsState.curName()}
+                    tags={cvsState.curTags()}
                     onSave={(newName: string, newTags: string[]) => {
-                        state.save2backend({
+                        cvsState.save2backend({
                             name: newName,
                             tags: newTags,
                             data: editor_ref.current.getCV()
@@ -283,7 +301,7 @@ function ResumeBuilder() {
             <PopupModal ref={import_modal}>
                 <p>New Resume from JSON:</p>
                 <input type="file" accept=".json" onChange={e => {
-                    util.jsonFileImport(e, state.importFromJson);
+                    util.jsonFileImport(e, cvsState.importFromJson);
                     import_modal.current.close();
                 }}/>
             </PopupModal>
@@ -292,7 +310,7 @@ function ResumeBuilder() {
             <PopupModal ref={delete_modal}>
                 <p>Are you sure you want to delete?</p>
                 <button onClick={()=>{
-                    state.deleteCur();
+                    cvsState.deleteCur();
                     delete_modal.current.close()
                 }}>Yes</button>
             </PopupModal>
@@ -307,9 +325,9 @@ function ResumeBuilder() {
                     <div onClick={()=>delete_modal.current.open()}>-</div>
                 </div>
                 <SavedCVs
-                    cvNames={state.cvNames()}
-                    curIdx={state.curIdx()}
-                    onChange={state.changeCV}
+                    cvNames={cvsState.cvNames()}
+                    curIdx={cvsState.curIdx()}
+                    onChange={cvsState.changeCV}
                 />
             </SubSection>
         ),
@@ -319,7 +337,7 @@ function ResumeBuilder() {
                     <p>New Saved Items from JSON:</p>
                     <input type="file" accept=".json" onChange={(ev) =>
                         util.jsonFileImport(ev, ({ name, data }) =>
-                            state.setCVInfo(data)
+                            cvInfoState.setCVInfo(data)
                         )}
                     />
                 </div>
@@ -329,6 +347,7 @@ function ResumeBuilder() {
         )
     ];
 
+    if (!cvsState.cvNames() || !cvInfoState.get()) return null;
     return (
         <Section id="section-cv" heading="Resume Builder">
             {/* ------------ SETTINGS ------------ */}
@@ -343,20 +362,18 @@ function ResumeBuilder() {
 
             {/* ------------ CUR CV INFO ------------ */}
             <div id="display-info">
-                <div><span className="descr">Name:</span> {state.curName()}</div>
-                <div><span className="descr">Tags:</span> {state.curTags()?.join(", ")}</div>
+                <div><span className="descr">Name:</span> {cvsState.curName()}</div>
+                <div><span className="descr">Tags:</span> {cvsState.curTags()?.join(", ")}</div>
             </div>
 
              {/* ------------ CV EDITOR ------------ */}
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
                     <PrintablePage page_id="cv-page">
-                        {state.cvNames() && (
-                            <CVEditor cv={state.curData()} itemFromId={state.getCVInfo() ? state.itemFromId : null} ref={editor_ref} />
-                        )}
+                        <CVEditor cv={cvsState.curData()} itemFromId={cvInfoState.itemFromId} ref={editor_ref} />
                     </PrintablePage>
                     {/* <div>TESTING</div> */}
-                    <InfoPad info={state.getCVInfo()} />
+                    <InfoPad info={cvInfoState.get()} />
                 </SplitView>
             </DndProvider>
         </Section>
