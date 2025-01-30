@@ -2,7 +2,7 @@ import './infoPad.scss';
 import  useLogger  from '../../hooks/logger';
 import ItemBucket from '../dnd/ItemBucket';
 import React from "react";
-import { InfoPadMap } from '../dnd/types';
+import { BucketTypes, InfoPadMap } from '../dnd/types';
 import { Item, Bucket } from '../dnd/types';
 
 export interface CVInfo {
@@ -15,6 +15,7 @@ export interface CVInfo {
 
 export interface VersionedItem<T=any> {
     id: string,
+    item_type: string,
     versions: Item<T>[],
 }
 
@@ -25,16 +26,20 @@ const Info2Buckets = (info: CVInfo): Bucket<VersionedItem<any>>[] => {
         const bucket = { id: secName, items: []};
         const named_groups = Object.entries(secGroups);
         named_groups.forEach(([groupName, groupItems])=>{
-            const named_items = Object.entries(groupItems);
-            const item_arr: Item[] = named_items.map(([itemName, content])=>({
-                    id: `${groupName}/${itemName}`,
-                    value: content
-            }));
-            const versioned_item: VersionedItem = {
+            const items = Object.entries(groupItems);
+            const versioned_item: VersionedItem<any> = {
                 id: groupName,
-                versions: item_arr
+                item_type: InfoPadMap[secName],
+                versions: items.map(([id, value])=>({
+                    id: id,
+                    value: value
+                } as Item))
             };
-            bucket.items.push(versioned_item);
+            // since buckets need to hold items:
+            bucket.items.push({
+                id: groupName,
+                value: versioned_item
+            } as Item);
         })
         buckets.push(bucket);
     })
@@ -47,7 +52,7 @@ function InfoPad(props: { info: CVInfo } ) {
 
     // ----------------- STATE -----------------
 
-    const [infoBuckets, setInfoBuckets] = React.useState<Bucket[]>([]);
+    const [infoBuckets, setInfoBuckets] = React.useState<Bucket<VersionedItem>[]>([]);
 
     // Convert into [{id: string, values: any[]}]
     React.useEffect(() => {
@@ -65,16 +70,16 @@ function InfoPad(props: { info: CVInfo } ) {
         return <div id="info-pad">no cv-info found</div>;
     }
 
-    /** TODO: improve annoying dependency
-     * As of now, when you add a new item to /public/cv_info.json or /public/cl_info.json
-     * you also have to define a bucket type.
-     * otherwise, BucketTypes[CVInfoPadMap[bucket.id]] will throw an error.
-     */
-    const InfoPadComponents = infoBuckets.map((bucket, i: number) => {
+    console.log("infoBuckets: ", infoBuckets);
+
+    const InfoPadComponents = infoBuckets.map((bucket: Bucket<VersionedItem<any>>, i: number) => {
         return (
             <div className="info-pad-sec" key={i}>
                 <h2>{bucket.id.toUpperCase()}</h2>
-                <ItemBucket key={i} bucket={bucket} type={InfoPadMap[bucket.id]}
+                <ItemBucket
+                    key={i}
+                    bucket={bucket}
+                    type={"versioned_items"}
                     deleteDisabled replaceDisabled dropDisabled deleteOnMoveDisabled addItemDisabled
                 />
             </div>

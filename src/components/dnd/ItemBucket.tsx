@@ -2,7 +2,7 @@ import "./ItemBucket.scss";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import React, { useEffect } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
-import { Item, DEFAULT_ITEM_TYPE, BucketTypes, Bucket } from "./types";
+import { Item, DEFAULT_ITEM_TYPE, BucketTypes, Bucket, DynamicComponent } from "./types";
 import { useImmer } from "use-immer";
 import DNDItem from "./Item";
 
@@ -241,7 +241,7 @@ function ItemBucket(props: BucketProps) {
                 {bucket.items.map((I: Item, i: number) => {
 
                     const handleUpdate = (newVal: any) => {
-                        if(props.onItemChange) props.onItemChange(i, newVal); // Notify parent of the change
+                        props.onItemChange?.(i, newVal); // Notify parent of the change
                     };
 
                     return (
@@ -257,7 +257,7 @@ function ItemBucket(props: BucketProps) {
                                 onRemove: !props.deleteOnMoveDisabled   && bucket.removeItem,
                             }}>
                                 <DNDItem key={i} item={I}>
-                                    {type.DisplayItem({obj: I.value, onUpdate: handleUpdate})}
+                                    <DynamicComponent type={props.type} props={{obj: I.value, onUpdate: handleUpdate}}/>
                                 </DNDItem>
                             </BucketContext.Provider>
                             <DropGap isActive={hoveredGap === nextGap(i)} />

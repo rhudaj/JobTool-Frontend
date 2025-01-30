@@ -22,6 +22,17 @@ interface BucketType {
     displayItemsClass?: string
 };
 
+
+/**
+ * The DynamicComponent function dynamically
+ * selects which component to render, but in a stable way
+ * No hooks are conditionally called! The component itself
+ * is chosen before rendering, keeping React’s hooks order intact. */
+function DynamicComponent({ type, props }) {
+    const Component = BucketTypes[type].DisplayItem; // THE KEY LINE!
+    return <Component {...props} />;
+}
+
 const BucketTypes: { [key: string]: BucketType } = {
     "summary": {
         item_type: "summary",
@@ -74,4 +85,4 @@ const InfoPadMap = {
     "paragraphs":   "cl-info-pad",
 }
 
-export { Item, Bucket, BucketType, DEFAULT_ITEM_TYPE, BucketTypes, InfoPadMap };
+export { Item, Bucket, BucketType, DynamicComponent, DEFAULT_ITEM_TYPE, BucketTypes, InfoPadMap };
