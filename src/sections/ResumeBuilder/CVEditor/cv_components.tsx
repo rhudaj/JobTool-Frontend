@@ -1,12 +1,20 @@
 import "./cveditor.sass";
-import { Experience, Link, MonthYear, DateRange, CVSection } from "job-tool-shared-types";
+import { Experience, Link, MonthYear, DateRange, CVSection, CV } from "job-tool-shared-types";
 import TextEditDiv from "../../../components/TextEditDiv/texteditdiv";
 import { joinClassNames } from "../../../util/joinClassNames";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
+import { BucketType, BucketTypes, DynamicComponent } from "../../../components/dnd/types";
 
-function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
+function SectionUI(props: {
+	obj: {
+		name: string,
+		bucket_type?: string,
+		content: any[]
+	};
+	onUpdate: (newObj: any) => void;
+}) {
 
 	const formatHeader = (s: string) => s.toUpperCase();
 
@@ -43,9 +51,15 @@ function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
 						items: props.obj.content
 					}}
 					type={props.obj.bucket_type}
-					// onItemChange={handleItemChange}
 					// onUpdate={handleItemsChange}
-				/>
+				>
+					{props.obj.content.map((item: any, i: number) => (
+						<DynamicComponent type={props.obj.bucket_type}
+							onUpdate={()=>{}}
+							obj={item}
+						/>
+					))}
+				</ItemBucket>
 			</div>
 		</div>
 	)

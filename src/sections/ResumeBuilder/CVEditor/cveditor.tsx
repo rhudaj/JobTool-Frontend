@@ -36,7 +36,6 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV, sec2Content: (cvsec: CVSec
 	// -------------- VIEW --------------
 
 	if (!CV) return null;
-
 	return (
 		<div id="cv-editor">
 			<div id="full-name" key="name">{CV.header_info.name}</div>
@@ -45,14 +44,17 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV, sec2Content: (cvsec: CVSec
 			</div>
 			<ItemBucket
 				bucket={{
-					id:"sections",
-					items: CV.sections.map((sec: CVSection)=>({id: sec.name, value: sec2Content(sec)}))
+					id: "sections",
+					items: CV.sections.map((S: CVSection)=>({id: S.name, value: S} as Item<CVSection>))
 				}}
 				type="sections"
-				onItemChange={handleItemChange}
 				onUpdate={handleItemsChange}
 				addItemDisabled
-			/>
+			>
+				{CV.sections.map((S: CVSection)=>(
+					<UI.SectionUI obj={S} onUpdate={(newSec: CVSection)=>{}}/>
+				))}
+			</ItemBucket>
 		</div>
 	);
 });

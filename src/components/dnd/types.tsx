@@ -1,3 +1,4 @@
+import { CVSection } from "job-tool-shared-types";
 import { ExperienceUI, SectionUI, SummaryUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
 import VersionedItemUI from "../infoPad/versionScroll";
 import TextEditDiv from "../TextEditDiv/texteditdiv";
@@ -18,10 +19,9 @@ interface Bucket<T=any> {
 interface BucketType {
     item_type?: string,
     isVertical?: boolean,
-    DisplayItem: (props: { obj: any, onUpdate?: any }) => JSX.Element,
+    DisplayItem?: (props: { obj: any, onUpdate?: any }) => JSX.Element,
     displayItemsClass?: string
 };
-
 
 /**
  * The DynamicComponent function dynamically
@@ -74,6 +74,16 @@ const BucketTypes: { [key: string]: BucketType } = {
         item_type: "versioned_item",
         isVertical: true,
         DisplayItem: VersionedItemUI,
+    },
+    "sections2": {
+        item_type: "section",
+        isVertical: true,
+        DisplayItem: (props: {obj: CVSection}) => (
+            <div>
+                <div className="text-item">{props.obj.name}</div>
+                <ul>{props.obj.item_ids.map(iid=><li>{iid}</li>)}</ul>
+            </div>
+        )
     }
 };
 

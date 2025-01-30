@@ -2,7 +2,7 @@ import "./Bucket.scss";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import React, { useEffect } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
-import { Item, DEFAULT_ITEM_TYPE, BucketTypes, Bucket, DynamicComponent } from "./types";
+import { Item, DEFAULT_ITEM_TYPE, BucketTypes, Bucket } from "./types";
 import { useImmer } from "use-immer";
 import BucketItem from "./BucketItem";
 
@@ -34,8 +34,6 @@ function DropGap(props: { isActive: boolean }) {
 // Helpers to get the get the gap index from the item index
 const prevGap = (itemIndex: number) => itemIndex;
 const nextGap = (itemIndex: number) => itemIndex + 1;
-
-// TODO: Item { idx: int, bucket: string, value: any }
 
 /**
  * Bucket State Manager
@@ -111,9 +109,9 @@ interface BucketItemContext {
 
 interface BucketProps {
     bucket: Bucket,
+    children: JSX.Element[],  // the bucket data d.n.n corresponding to the displayed items.
     type?: string, // by default, same as ID
-    onItemChange?: (index: number, newItem: any) => void, // Callback for item updates
-    onUpdate?: (newItems: Item[]) => void,
+    onUpdate?: (newItems: Item[]) => void, // when the `Bucket` data changes.
     deleteDisabled?: boolean,
     replaceDisabled?: boolean,
     dropDisabled?: boolean,
@@ -121,13 +119,6 @@ interface BucketProps {
     addItemDisabled?: boolean,
 };
 
-/**
- * Bucket of DND Items component
- * @param props
- * @returns
- * TODO: hover and drop only works when over an item, not if there is empty space at the bottom of all items
- * TODO: controls should be put here next to each item (since they only make sense if the item is in a bucker)
- */
 function ItemBucket(props: BucketProps) {
 
     // ----------------- STATE -----------------
@@ -226,23 +217,14 @@ function ItemBucket(props: BucketProps) {
 
     // -----------------RENDER-----------------
 
-    if (!bucket.items) {
-        return null
-    }
+    if (!bucket.items || props.children.length !== bucket.items.length) return null
 
-    const classes = joinClassNames(
-        "bucket-wrapper",
-        isHovered ? "hover" : ""
-    );
+    const classes = joinClassNames('bucket-wrapper', isHovered?'hover':'');
 
     return (
         <div ref={dropRef} className={classes} onMouseLeave={()=>setHoveredGap(undefined)}>
             <div className={type.displayItemsClass}>
                 {bucket.items.map((I: Item, i: number) => {
-
-                    const handleUpdate = (newVal: any) => {
-                        props.onItemChange?.(i, newVal); // Notify parent of the change
-                    };
 
                     return (
                         <>
@@ -257,13 +239,7 @@ function ItemBucket(props: BucketProps) {
                                 onRemove: !props.deleteOnMoveDisabled   && bucket.removeItem,
                             }}>
                                 <BucketItem key={i} item={I}>
-                                    <DynamicComponent
-                                        type={props.type}
-                                        props={{
-                                            obj: I.value,
-                                            onUpdate: handleUpdate
-                                        }}
-                                    />
+                                    {props.children[i]}
                                 </BucketItem>
                             </BucketContext.Provider>
                             <DropGap isActive={hoveredGap === nextGap(i)} />
