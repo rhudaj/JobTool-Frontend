@@ -96,7 +96,7 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
 };
 
 // Drag only, can't be Dropped on. Only has Move Controls
-export function StandaloneItem(props: {
+export function StandaloneDragItem(props: {
     item: Item,
     item_type: string,
     children: JSX.Element,
@@ -129,7 +129,7 @@ export function StandaloneItem(props: {
     // -----------------RENDER-----------------
 
     const classNames = joinClassNames(
-        "dnd-item-wrapper",
+        "standalone-drag-item-wrapper",
         isDragging ? "dragging" : "",
     );
 

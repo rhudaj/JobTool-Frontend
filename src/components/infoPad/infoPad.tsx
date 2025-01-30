@@ -1,9 +1,9 @@
 import './infoPad.scss';
 import  useLogger  from '../../hooks/logger';
-import ItemBucket from '../dnd/Bucket';
 import React from "react";
-import { BucketTypes, InfoPadMap } from '../dnd/types';
+import { InfoPadMap } from '../dnd/types';
 import { Item, Bucket } from '../dnd/types';
+import VersionedItemUI from './versionScroll';
 
 export interface CVInfo {
     [ secName: string ]: {                  // section name
@@ -54,7 +54,6 @@ function InfoPad(props: { info: CVInfo } ) {
 
     const [infoBuckets, setInfoBuckets] = React.useState<Bucket<VersionedItem>[]>([]);
 
-    // Convert into [{id: string, values: any[]}]
     React.useEffect(() => {
         if (!props.info) return;
         setInfoBuckets(
@@ -67,21 +66,15 @@ function InfoPad(props: { info: CVInfo } ) {
 
     if (infoBuckets.length === 0) {
         log("No cv_info passed in props");
-        return <div id="info-pad">no cv-info found</div>;
+        return <div id="info-pad">no info found</div>;
     }
 
-    console.log("infoBuckets: ", infoBuckets);
-
     const InfoPadComponents = infoBuckets.map((bucket: Bucket<VersionedItem<any>>, i: number) => {
+        // Each 'bucket' DS gets mapped to a list of draggable items
         return (
             <div className="info-pad-sec" key={i}>
                 <h2>{bucket.id.toUpperCase()}</h2>
-                <ItemBucket
-                    key={i}
-                    bucket={bucket}
-                    type={"versioned_items"}
-                    deleteDisabled replaceDisabled dropDisabled deleteOnMoveDisabled addItemDisabled
-                />
+                {bucket.items.map((I, i) => <VersionedItemUI key={i} obj={I.value} />)}
             </div>
         );
     });

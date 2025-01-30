@@ -30,10 +30,10 @@ const ItemControlsContainer = React.forwardRef<HTMLElement, any>((
 
         const handleMouseEnter = (ev: MouseEvent) => {
             const Bounds = parent_el.getBoundingClientRect(); // is this necessary again?
-            setPosition({
-                top: Bounds.top + window.scrollY,
-                left: Bounds.left + window.scrollX,
-            });
+            // setPosition({
+            //     top: Bounds.top + window.scrollY,
+            //     left: Bounds.left + window.scrollX,
+            // });
             setRefHovered(true);
             document.addEventListener("mousemove", handleMouseMove);
             // Only want the most nested item's controls to be active
