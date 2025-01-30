@@ -2,10 +2,16 @@
 
 .standalone-drag-item-wrapper {
     position: relative;
+    & > .move-handle {
+        position: absolute;
+        width: min-content;
+        padding: 1rem;
+        top: -20rem;
+        left: -20rem;
+    }
 }
 
 .dnd-item-wrapper {
-    position: relative;
 
     & .dragging:active {
         opacity: 0.1;
