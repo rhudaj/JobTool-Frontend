@@ -151,12 +151,9 @@ function useCVs() {
 
     const curIdx = () => cur;
     const cvNames = () => named_cvs?.map((ncv) => ncv.name);
-    const curName = () => named_cvs ? named_cvs[cur]?.name : null;
-    const curData = () => named_cvs[cur]?.data;
-    const curTags = () => named_cvs ? named_cvs[cur]?.tags : null;
+    const curCV = () => named_cvs ? named_cvs[cur] : null;
 
-    return { fetchData, curIdx, cvNames, curName, curTags, curData,
-        importFromJson, changeCV, save2backend, deleteCur };
+    return { fetchData, curIdx, cvNames, curCV, importFromJson, changeCV, save2backend, deleteCur };
 }
 
 /* ------------------------------------------------------------------
@@ -271,7 +268,7 @@ function ResumeBuilder() {
             <PopupModal ref={export_modal}>
                 <div className="export-popup">
                     <button onClick={() => {
-                        saveAsPDF(cvsState.curName());
+                        saveAsPDF(cvsState.curCV()?.name);
                         export_modal.current.close();
                     }}>PDF</button>
                     <button onClick={()=>{
@@ -284,8 +281,8 @@ function ResumeBuilder() {
         (
             <PopupModal ref={save_modal}>
                 <SaveForm
-                    name={cvsState.curName()}
-                    tags={cvsState.curTags()}
+                    name={cvsState.curCV()?.name}
+                    tags={cvsState.curCV()?.tags}
                     onSave={(newName: string, newTags: string[]) => {
                         cvsState.save2backend({
                             name: newName,
@@ -362,15 +359,15 @@ function ResumeBuilder() {
 
             {/* ------------ CUR CV INFO ------------ */}
             <div id="display-info">
-                <div><span className="descr">Name:</span> {cvsState.curName()}</div>
-                <div><span className="descr">Tags:</span> {cvsState.curTags()?.join(", ")}</div>
+                <div><span className="descr">Name:</span> {cvsState.curCV().name}</div>
+                <div><span className="descr">Tags:</span> {cvsState.curCV()?.tags?.join(", ")}</div>
             </div>
 
              {/* ------------ CV EDITOR ------------ */}
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
                     <PrintablePage page_id="cv-page">
-                        <CVEditor cv={cvsState.curData()} itemFromId={cvInfoState.itemFromId} ref={editor_ref} />
+                        <CVEditor cv={cvsState.curCV()?.data} itemFromId={cvInfoState.itemFromId} ref={editor_ref} />
                     </PrintablePage>
                     {/* <div>TESTING</div> */}
                     <InfoPad info={cvInfoState.get()} />
