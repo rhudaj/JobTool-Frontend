@@ -1,18 +1,18 @@
 import { ExperienceUI, SectionUI, SummaryUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
+import VersionedItemUI from "../infoPad/versionScroll";
 import TextEditDiv from "../TextEditDiv/texteditdiv";
 import "./types.scss";
 
 const DEFAULT_ITEM_TYPE = "DRAG-ITEM";
 
-interface Item {
+interface Item<T=any>{
     id: any;
-    value: any;		// can't be a JSX element. Anything else is fine.
+    value: T;		// can't be a JSX element. Anything else is fine.
 };
 
-
-interface Bucket {
+interface Bucket<T=any> {
     id: any;
-    items: Item[];		// can't be a JSX element. Anything else is fine.
+    items: Item<T>[];		// can't be a JSX element. Anything else is fine.
 };
 
 interface BucketType {
@@ -58,6 +58,11 @@ const BucketTypes: { [key: string]: BucketType } = {
         displayItemsClass: "cl-editor",
         item_type: "cl-item",
         DisplayItem: (props: { obj: string, onUpdate: any })=> <TextEditDiv tv={props.obj} onUpdate={props.onUpdate}/>
+    },
+    "versioned_items": {
+        item_type: "versioned_item",
+        isVertical: true,
+        DisplayItem: VersionedItemUI,
     }
 };
 
