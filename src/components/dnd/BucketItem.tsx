@@ -135,7 +135,9 @@ export function StandaloneDragItem(props: {
 
     return (
         <div ref={ref} className={classNames}>
-            <div ref={drag} className="move-handle">M</div>
+            <ItemControlsContainer ref={ref}>
+                <div ref={drag} className="move-handle">M</div>
+            </ItemControlsContainer>
             {props.children}
         </div>
     );
