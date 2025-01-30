@@ -1,9 +1,9 @@
-import './infoPad.scss';
+import './infoPad.sass';
 import  useLogger  from '../../hooks/logger';
 import React from "react";
 import { InfoPadMap } from '../dnd/types';
 import { Item, Bucket } from '../dnd/types';
-import VersionedItemUI, { VersionedItem } from './versionScroll';
+import { VersionedItemUI, VersionedItem } from "../VersionedItem/versionedItem"
 
 export interface CVInfo {
     [ secName: string ]: {                  // section name
@@ -63,22 +63,23 @@ function InfoPad(props: { info: CVInfo } ) {
         return <div id="info-pad">no info found</div>;
     }
 
-    const InfoPadComponents = infoBuckets.map((bucket: Bucket<VersionedItem<any>>, i: number) => {
-        // Each 'bucket' DS gets mapped to a list of draggable items
-        return (
-            <div className="info-pad-sec" key={i}>
-                <h2>{bucket.id.toUpperCase()}</h2>
-                {bucket.items.map((I, i) => <VersionedItemUI key={i} obj={I.value} />)}
-            </div>
-        );
-    });
-
     // ----------------- RENDER -----------------
 
-    if(infoBuckets.length === 0)
-        return <div id="info-pad">no cv-info found</div>;
-    else
-        return <div id="info-pad">{InfoPadComponents}</div>;
+    if(infoBuckets?.length === 0) return <div id="info-pad">no cv-info found</div>;
+    return (
+        <div id="info-pad">
+            {infoBuckets.map((bucket: Bucket<VersionedItem<any>>, i: number) => (
+                <div className="info-pad-section" key={i}>
+                    <h2>{bucket.id.toUpperCase()}</h2>
+                    <div className='section-items'>
+                        {bucket.items.map((I, i) =>
+                            <VersionedItemUI key={i} obj={I.value} />
+                        )}
+                    </div>
+                </div>
+            ))}
+        </div>
+    )
 };
 
 export default InfoPad;

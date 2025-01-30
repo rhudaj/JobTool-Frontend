@@ -1,4 +1,4 @@
-import './versionScroll.sass'
+import './versionedItem.sass'
 import { useEffect, useMemo, useState } from "react";
 import { BucketType, BucketTypes, InfoPadMap, Item } from "../dnd/types";
 import { StandaloneDragItem } from '../dnd/BucketItem';
@@ -7,7 +7,7 @@ export interface VersionedItem<T=any> {
     id: string,
     item_type: string,
     versions: Item<T>[],
-}
+};
 
 /**
  * You can flip through versions, but
@@ -17,24 +17,36 @@ export interface VersionedItem<T=any> {
  * up to the dropped component to extract the value
  * corresponding to that ID.
  */
-export default function VersionedItemUI(props: {
+export function VersionedItemUI(props: {
     obj: VersionedItem,
     onUpdate?: (newObj: VersionedItem<any>) => void;
 }) {
 
+    // ----------------- STATE -----------------
+
     const [versions, setVersions] = useState<Item<any>[]>(null);
     const [cur, setCur] = useState(0);
 
-    // Get the display item type
-    const displayItem = useMemo(()=>
-        BucketTypes[props.obj.item_type].DisplayItem
-    , [props.obj.item_type]);
-
     useEffect(()=> setVersions(props.obj.versions), [props.obj.versions]);
 
-    const handleNewVersion = () => {
+    // Get the display item function
+    const displayItem = useMemo(()=> BucketTypes[props.obj.item_type].DisplayItem, [props.obj.item_type]);
+
+    // ----------------- CONTROLS -----------------
+
+    const switchVersion = () => {
         setCur(prev => (prev === versions.length-1) ? 0 : prev+1)
     };
+
+    const newVersion = () => {
+        // create a copy of the current version.
+        const copy = {...versions[cur]};
+        copy.id += "_copy";
+        versions.splice(0, 0, copy);
+        setCur(0);
+    };
+
+    // ----------------- RENDER -----------------
 
     if (!versions) return null;
 
@@ -44,7 +56,10 @@ export default function VersionedItemUI(props: {
 
     return (
         <div className="versioned-item-container">
-            <span className="switch-version-button" onDoubleClick={handleNewVersion} title={version_str}>S</span>
+            <div className='version-controls'>
+                <span className="control-button" id="switch" onDoubleClick={switchVersion} title={version_str}>S</span>
+                <span className="control-button" id="new" onDoubleClick={newVersion} title={version_str}>E</span>
+            </div>
             <StandaloneDragItem item={dnd_item} item_type={bt.item_type} >
                 {displayItem({obj: versions[cur].value})}
             </StandaloneDragItem>

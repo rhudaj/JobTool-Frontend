@@ -1,6 +1,6 @@
 import { CVSection } from "job-tool-shared-types";
 import { ExperienceUI, SectionUI, SummaryUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
-import VersionedItemUI from "../infoPad/versionScroll";
+import { VersionedItemUI } from "../VersionedItem/versionedItem";
 import TextEditDiv from "../TextEditDiv/texteditdiv";
 import "./types.scss";
 
