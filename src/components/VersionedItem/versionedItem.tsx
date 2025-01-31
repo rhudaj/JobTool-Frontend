@@ -140,6 +140,7 @@ export function VersionedItemUI(props: {
             </div>
             <StandaloneDragItem item={dnd_item} item_type={bt.item_type} >
                 <DynamicComponent
+                    key={cur} // force re-render when cur changes
                     type={props.obj.item_type}
                     props={{ obj: versions[cur]?.value }} // Directly use the value
                 />
