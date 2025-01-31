@@ -31,7 +31,6 @@ interface BucketType {
  * is chosen before rendering, keeping React’s hooks order intact. */
 function DynamicComponent({ type, props }) {
     const Component = BucketTypes[type].DisplayItem; // THE KEY LINE!
-    // const Component = useMemo(() => BucketTypes[type]?.DisplayItem, [type]);
     return <Component {...props} />;
 }
 

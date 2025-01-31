@@ -62,8 +62,8 @@ function useCVInfo() {
         }
     };
 
-    const save2backend = () => {
-        BackendAPI.post<CVInfo, null>("saveCVInfo", data);
+    const save2backend = (newData: CVInfo) => {
+        BackendAPI.post<CVInfo, null>("saveCVInfo", newData);
     };
 
     const get = () => data;
@@ -340,9 +340,9 @@ function ResumeBuilder() {
                 savePopup.open(popup_content.save);
             },
             onSaveCVInfoClicked: ()=>{
-                const cur_cv_info: CVInfo = infoPad_ref.current.get();
-                cvInfoState.setData(cur_cv_info);
-                cvInfoState.save2backend();
+                const new_cv_info: CVInfo = infoPad_ref.current.get();
+                cvInfoState.setData(new_cv_info);
+                cvInfoState.save2backend(new_cv_info);
             }
         },
         settings_ui: {

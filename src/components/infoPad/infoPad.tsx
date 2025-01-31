@@ -77,10 +77,18 @@ const InfoPad = forwardRef<InfoPadHandle, { info: CVInfo }>(({ info }, ref) => {
         get: () => { return Sections2Info(sections)  }
     }));
 
+    // ----------------- CONTROLS -----------------
+
+    const onVersionedItemUpdate = (newVI: VersionedItem, sec_idx, item_idx) => {
+        console.log("new versioned item: ", newVI)
+        setSections(cur=>{
+            cur[sec_idx].items[item_idx] = newVI;
+        })
+    }
+
     // ----------------- VIEW -----------------
 
     if (!cvInfo || !sections) return <div id="info-pad">no CV info found</div>;
-
     return (
         <div id="info-pad">
             {sections.map((sec, sec_idx: number) => (
@@ -91,11 +99,7 @@ const InfoPad = forwardRef<InfoPadHandle, { info: CVInfo }>(({ info }, ref) => {
                             <VersionedItemUI
                                 key={item_idx}
                                 obj={I}
-                                onUpdate={((newVI: VersionedItem) => {
-                                    setSections(cur=>{
-                                        cur[sec_idx].items[item_idx] = newVI;
-                                    })
-                                })}
+                                onUpdate={(newVI)=>onVersionedItemUpdate(newVI, sec_idx, item_idx)}
                             />
                         )}
                     </div>
