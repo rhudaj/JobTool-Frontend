@@ -75,8 +75,6 @@ export function VersionedItemUI(props: {
     const [cur, setCur] = useState(0);
     const editPopup = usePopup();
     // ensures the dynamic component re-renders when the version changes:
-    const currentVersion = useMemo(() => versions ? versions[cur]?.value : null, [versions, cur]);
-
 
     useEffect(()=> {
         setVersions(props.obj.versions)
