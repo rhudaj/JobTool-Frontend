@@ -371,7 +371,7 @@ function ResumeBuilder() {
 
             {/* ------------ CUR CV INFO ------------ */}
             <div id="display-info">
-                <div><span className="descr">Name:</span> {cvsState.curCV().name}</div>
+                <div><span className="descr">Name:</span> {cvsState.curCV()?.name}</div>
                 <div><span className="descr">Tags:</span> {cvsState.curCV()?.tags?.join(", ")}</div>
             </div>
 

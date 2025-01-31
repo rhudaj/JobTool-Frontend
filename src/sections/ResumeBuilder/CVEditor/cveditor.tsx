@@ -13,7 +13,7 @@ export interface CVEditorHandle {
 // MAIN COMPONENT
 const CVEditor = forwardRef<CVEditorHandle, { cv: CV, itemFromId: (secId: string, itemId: string)=>any }>(({ cv, itemFromId }, ref) => {
 
-	// -------------- MODEL --------------
+	// -------------- MODEL ---------------
 
 	const [CV, setCV] = useImmer<CV>(null);
 

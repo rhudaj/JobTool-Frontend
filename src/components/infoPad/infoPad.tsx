@@ -69,21 +69,12 @@ const InfoPad = forwardRef<InfoPadHandle, { info: CVInfo }>(({ info }, ref) => {
     React.useEffect(() => {
         if (!info) return;
         setCVInfo(info);
+        setSections(Info2Sections(info));
     }, [info]);
-
-    React.useEffect(()=>{
-        if (!cvInfo) return;
-        setSections(Info2Sections(cvInfo));
-    }, [cvInfo])
-
-    React.useEffect(()=>{
-        if(!sections) return;
-        setCVInfo(Sections2Info(sections));
-    }, [sections])
 
     // give parent access to CV
     useImperativeHandle(ref, () => ({
-        get: () => { return cvInfo  }
+        get: () => { return Sections2Info(sections)  }
     }));
 
     // ----------------- VIEW -----------------
