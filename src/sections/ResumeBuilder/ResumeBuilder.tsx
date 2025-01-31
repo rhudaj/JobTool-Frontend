@@ -28,7 +28,8 @@ const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
 
 function useCVInfo() {
 
-    const [cvInfo, setCVInfo] = useState<CVInfo>(null);
+    const [data, setData] = useState<CVInfo>(null);
+    const [status, setStatus] = useState<boolean>(false);   // was the data fetched?
 
     const log = useLogger("useCVInfo");
 
@@ -38,7 +39,7 @@ function useCVInfo() {
             BackendAPI.get<CVInfo>("cv_info").then(cv_info=>{
                 if(cv_info) {
                     log(`got cv_info from backend`)
-                    setCVInfo(cv_info);
+                    setData(cv_info);
                 } else {
                     log(`NO cv_info from backend`)
                 }
@@ -46,31 +47,39 @@ function useCVInfo() {
         } else {
             // from the /public folder
             fetch(SAMPLES_PATH + "cv_info.json")
-                .then(r => r.json())
-                .then(setCVInfo);
+            .then(r => r.json())
+            .then(cv_info => {
+                if(cv_info) {
+                    setData(cv_info);
+                    setStatus(true);
+                } else {
+                    setStatus(false);
+                }
+            });
         }
     };
 
     const save2backend = () => {
-        BackendAPI.post<CVInfo, null>("saveCVInfo", cvInfo);
+        BackendAPI.post<CVInfo, null>("saveCVInfo", data);
     };
 
-    const get = () => cvInfo;
+    const get = () => data;
 
     // Extract the data from `cv_info` using the specified id
 	const itemFromId = (sec_id: string, item_id: string): any => {
-        if(!cvInfo)     return;
+        if(!data)     return;
 		const [groupId, itemId] = item_id.split("/", 2);
 		if(!groupId) 	return
-		else if(itemId) return cvInfo[sec_id][groupId][itemId];
-		else 			return cvInfo[sec_id][groupId]; // most likely 'default'
+		else if(itemId) return data[sec_id][groupId][itemId];
+		else 			return data[sec_id][groupId]; // most likely 'default'
 	};
 
     return {
+        status,
         fetchData,
         get,
+        setData,
         itemFromId,
-        setCVInfo,
         save2backend
     }
 };
@@ -80,16 +89,11 @@ function useCVs() {
 
     // -------------------- STATE  --------------------
 
-    const [named_cvs, set_named_cvs] = useState<NamedCV[]>(null);
+    const [data, setData] = useState<NamedCV[]>(null);
+    const [status, setStatus] = useState<boolean>(false);   // was the data fetched?
     const [cur, set_cur] = useState<number>(null);
 
-    useEffect(() => {
-        if (!named_cvs || named_cvs.length === 0) return;
-        log(`Got ${named_cvs.length} CVs from backend`);
-        set_cur(0);
-    }, [named_cvs]);
-
-    const log = useLogger("ResumeBuilder");
+    const [log, warn] = useLogger("ResumeBuilder");
 
     // ---------------- CONTROLS (what user sees) ----------------
 
@@ -99,7 +103,15 @@ function useCVs() {
         if(USE_BACKEND) {
             BackendAPI.get<NamedCV[]>("all_cvs").then(cvs=>{
                 const valid_cvs = cvs?.filter(cv => cv && cv.name && cv.data);
-                if(valid_cvs) set_named_cvs(valid_cvs)
+                if(valid_cvs && valid_cvs.length > 0) {
+                    log(`Got ${valid_cvs.length} CVs from backend`);
+                    setData(valid_cvs);
+                    set_cur(0);
+                    setStatus(true);
+                } else {
+                    log(`Got NO CVs from backend`);
+                    setStatus(false);
+                }
             });
         }
         else {
@@ -116,22 +128,26 @@ function useCVs() {
             );
 
             // Wait for all fetches to finish
-            Promise.all(fetchPromises)
-                .then((results) => {
-                    set_named_cvs(results);
-                })
-                .catch((error) => {
-                    // Handle any errors in the fetches
-                    console.error("Error fetching CV data:", error);
-                });
+            Promise.all(fetchPromises).then(cvData => {
+                if(cvData) temp.push(cvData);
+            }).catch((error) => {
+                warn("Error fetching CV data:", error);
+                setStatus(false);
+            });
 
-            set_named_cvs(temp);
+            if(temp.length > 0) {
+                setData(temp);
+                set_cur(0);
+                setStatus(true);
+            } else {
+                setStatus(false);
+            }
         }
     };
 
     const changeCV = (name: string) => {
-        const idx = named_cvs.findIndex((cv) => cv.name === name);
-        log("Changing active_cv to:", named_cvs[idx].name);
+        const idx = data.findIndex((cv: NamedCV) => cv.name === name);
+        log("Changing active_cv to:", data[idx].name);
         set_cur(idx);
     };
 
@@ -140,12 +156,12 @@ function useCVs() {
     };
 
     const importFromJson = (named_cv: NamedCV) => {
-        set_named_cvs([named_cv, ...named_cvs]);
+        setData([named_cv, ...data]);
     };
 
     const deleteCur = (local?: boolean) => {
         // (for now) only delete locally
-        set_named_cvs(prev=>{
+        setData(prev=>{
             const newArr = [...prev];
             newArr.splice(cur, 1)
             return newArr;
@@ -156,10 +172,10 @@ function useCVs() {
     // getters
 
     const curIdx = () => cur;
-    const cvNames = () => named_cvs?.map((ncv) => ncv.name);
-    const curCV = () => named_cvs ? named_cvs[cur] : null;
+    const cvNames = () => data?.map((ncv: NamedCV) => ncv.name);
+    const curCV = () => data ? data[cur] : null;
 
-    return { fetchData, curIdx, cvNames, curCV, importFromJson, changeCV, save2backend, deleteCur };
+    return { status, fetchData, curIdx, cvNames, curCV, importFromJson, changeCV, save2backend, deleteCur };
 }
 
 /* ------------------------------------------------------------------
@@ -270,53 +286,95 @@ function ResumeBuilder() {
         cvInfoState.fetchData();
     }, [])
 
+    // ---------------- CONTROLS ----------------
+
+    const CONTROLS = {
+        popups: {
+            onPDFClicked: () => {
+                saveAsPDF(cvsState.curCV()?.name);
+                exportPopup.close();
+            },
+            onJsonClicked: () => {
+                const cv = editor_ref.current.getCV();
+                if(cv) util.downloadAsJson(cv);
+                exportPopup.close();
+            },
+            onSaveFormSubmit: (newName: string, newTags: string[]) => {
+                cvsState.save2backend({
+                    name: newName,
+                    tags: newTags,
+                    data: editor_ref.current.getCV()
+                });
+                savePopup.close();
+            },
+            onImportJsonFileChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                util.jsonFileImport(e, cvsState.importFromJson);
+                importPopup.close();
+            },
+            onDeleteCV: ()=>{
+                cvsState.deleteCur();
+                deletePopup.close()
+            }
+        },
+        settings: {
+            onPlusClicked: () => {
+                importPopup.open(popup_content.import);
+            },
+            onMinusClicked: () => {
+                deletePopup.open(popup_content.delete);
+            },
+            onSavedItemsFileChanged: (ev: React.ChangeEvent<HTMLInputElement>) => {
+                util.jsonFileImport(ev, ({ name, data }) => cvInfoState.setData(data) );
+            },
+            onExportClicked: () => {
+                exportPopup.open(popup_content.export);
+            },
+            onSaveCurCVClicked: () => {
+                savePopup.open(popup_content.save);
+            },
+            onSaveCVInfoClicked: ()=>{
+                const cur_cv_info: CVInfo = infoPad_ref.current.get();
+                cvInfoState.setData(cur_cv_info);
+                cvInfoState.save2backend();
+            }
+        },
+        settings_ui: {
+            onClickFileSettings: () => {
+                setSettingN(prev=>prev===1?null:1);
+            },
+            onClickSelectSettings: () => {
+                setSettingN(prev=>prev===0?null:0);
+            }
+        }
+    };
+
     // ---------------- VIEW ----------------
 
     const popup_content = {
         export: (
             <div className="popup-content export-popup">
                 <h2>Export As</h2>
-                <button onClick={() => {
-                    saveAsPDF(cvsState.curCV()?.name);
-                    exportPopup.close();
-                }}>PDF</button>
-                <button onClick={()=>{
-                    const cv = editor_ref.current.getCV();
-                    if(cv) util.downloadAsJson(cv);
-                    exportPopup.close();
-                }}>JSON</button>
+                <button onClick={CONTROLS.popups.onPDFClicked}>PDF</button>
+                <button onClick={CONTROLS.popups.onJsonClicked}>JSON</button>
             </div>
         ),
         save: (
             <SaveForm
                 name={cvsState.curCV()?.name}
                 tags={cvsState.curCV()?.tags}
-                onSave={(newName: string, newTags: string[]) => {
-                    cvsState.save2backend({
-                        name: newName,
-                        tags: newTags,
-                        data: editor_ref.current.getCV()
-                    });
-                    savePopup.close();
-                }}
+                onSave={CONTROLS.popups.onSaveFormSubmit}
             />
         ),
         import: (
             <div className="popup-content">
                 <p>New Resume from JSON:</p>
-                <input type="file" accept=".json" onChange={e => {
-                    util.jsonFileImport(e, cvsState.importFromJson);
-                    importPopup.close();
-                }}/>
+                <input type="file" accept=".json" onChange={CONTROLS.popups.onImportJsonFileChange}/>
             </div>
         ),
         delete: (
             <div className="popup-content">
                 <p>Are you sure you want to delete?</p>
-                <button onClick={()=>{
-                    cvsState.deleteCur();
-                    deletePopup.close()
-                }}>Yes</button>
+                <button onClick={CONTROLS.popups.onDeleteCV}>Yes</button>
             </div>
         )
     };
@@ -325,8 +383,8 @@ function ResumeBuilder() {
         ( // FILE:
             <SubSection id="ss-named-cvs" heading="My Resumes">
                 <div id="named-cvs-controls">
-                    <div onClick={()=>importPopup.open(popup_content.import)}>+</div>
-                    <div onClick={()=>deletePopup.open(popup_content.delete)}>-</div>
+                    <div onClick={CONTROLS.settings.onPlusClicked}>+</div>
+                    <div onClick={CONTROLS.settings.onMinusClicked}>-</div>
                 </div>
                 <SavedCVs
                     cvNames={cvsState.cvNames()}
@@ -339,19 +397,14 @@ function ResumeBuilder() {
             <div id="file-controls">
                 <div style={{ display: "flex", gap: "10rem" }}>
                     <p>New Saved Items from JSON:</p>
-                    <input type="file" accept=".json" onChange={(ev) =>
-                        util.jsonFileImport(ev, ({ name, data }) =>
-                            cvInfoState.setCVInfo(data)
-                        )}
-                    />
+                    <input type="file" accept=".json" onChange={CONTROLS.settings.onSavedItemsFileChanged}/>
                 </div>
-                <div onClick={()=>exportPopup.open(popup_content.export)}>Export</div>
-                {USE_BACKEND && <div onClick={()=>savePopup.open(popup_content.save)}>Save Current CV</div>}
-                {USE_BACKEND && <div onClick={()=>{
-                    const cur_cv_info: CVInfo = infoPad_ref.current.get();
-                    cvInfoState.setCVInfo(cur_cv_info);
-                    cvInfoState.save2backend();
-                }}>Save CV Info</div>}
+                {USE_BACKEND &&
+                    <>
+                    <button onClick={CONTROLS.settings.onSaveCurCVClicked}>Save Current CV</button>
+                    <button onClick={CONTROLS.settings.onSaveCVInfoClicked}>Save CV Info</button>
+                    </>
+                }
             </div>
         )
     ];
@@ -359,29 +412,35 @@ function ResumeBuilder() {
     if (!cvsState.cvNames() || !cvInfoState.get()) return null;
     return (
         <Section id="section-cv" heading="Resume Builder">
-            {/* ------------ SETTINGS ------------ */}
+            {/* ------------ POPUPS ------------ */}
             {[exportPopup.PopupComponent, savePopup.PopupComponent, importPopup.PopupComponent, deletePopup.PopupComponent]}
+            {/* ------------ SETTINGS ------------ */}
             <div>
                 <div className="resume-builder-controls">
-                    <div className={settingN===1?"selected":""} onClick={()=>setSettingN(prev=>prev===1?null:1)}>File</div>
-                    <div className={settingN===0?"selected":""} onClick={()=>setSettingN(prev=>prev===0?null:0)}>Select</div>
+                    <div className={settingN===1?"selected":""} onClick={CONTROLS.settings_ui.onClickFileSettings}>File</div>
+                    <div className={settingN===0?"selected":""} onClick={CONTROLS.settings_ui.onClickSelectSettings}>Select</div>
                 </div>
                 { settingN!==null && settings[settingN] }
             </div>
-
-            {/* ------------ CUR CV INFO ------------ */}
+            {/* ------------ DISPLAY THE CURRENT CV's META INFO ------------ */}
             <div id="display-info">
-                <div><span className="descr">Name:</span> {cvsState.curCV()?.name}</div>
-                <div><span className="descr">Tags:</span> {cvsState.curCV()?.tags?.join(", ")}</div>
+                <div>
+                    <span className="descr">Name:</span> {cvsState.curCV()?.name}
+                </div>
+                <div>
+                    <span className="descr">Tags:</span>
+                    {cvsState.curCV()?.tags?.join(", ")}
+                </div>
+                <div className="export-container">
+                    <button onClick={CONTROLS.settings.onExportClicked}>Export</button>
+                </div>
             </div>
-
              {/* ------------ CV EDITOR ------------ */}
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
                     <PrintablePage page_id="cv-page">
                         <CVEditor cv={cvsState.curCV()?.data} itemFromId={cvInfoState.itemFromId} ref={editor_ref} />
                     </PrintablePage>
-                    {/* <div>TESTING</div> */}
                     <InfoPad ref={infoPad_ref} info={cvInfoState.get()} />
                 </SplitView>
             </DndProvider>
