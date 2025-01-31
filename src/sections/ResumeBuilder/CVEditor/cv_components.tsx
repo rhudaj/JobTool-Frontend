@@ -7,8 +7,9 @@ import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 import { Item } from "../../../components/dnd/types";
 import useLogger from "../../../hooks/logger";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useImmer } from "use-immer";
+import { isEqual } from "lodash";
 
 function SectionUI(props: {
 	obj: CVSection;

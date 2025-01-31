@@ -133,6 +133,7 @@ function ItemBucket(props: BucketProps) {
 
     React.useEffect(() => {
         if (!bucket.items) return;
+        if(isEqual(bucket.items, props.bucket.items)) return;
         props.onUpdate?.(bucket.items);
     }, [bucket.items]);
 
