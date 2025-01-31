@@ -5,6 +5,7 @@ import { joinClassNames } from "../../util/joinClassNames";
 import { Item, DEFAULT_ITEM_TYPE, BucketTypes, Bucket } from "./types";
 import { useImmer } from "use-immer";
 import BucketItem from "./BucketItem";
+import { isEqual } from "lodash";
 
 /* Empty all values in an object (recursively) */
 const emptyObject = (obj: any): any => {
@@ -36,8 +37,6 @@ const prevGap = (itemIndex: number) => itemIndex;
 const nextGap = (itemIndex: number) => itemIndex + 1;
 
 
-let DID_JUST_LOAD = false;
-
 /**
  * Bucket State Manager
  * @param values - initial values of the bucket
@@ -47,8 +46,7 @@ const useBucket = (initVals: Item[]) => {
     const [items, setItems] = useImmer<Item[]>(null);
 
     useEffect(()=>{
-        // console.log("useBucket\n\tnew initVals")
-        DID_JUST_LOAD = true;
+        if(isEqual(items, initVals)) return;
         setItems(initVals)
     }, [initVals])
 
@@ -134,9 +132,7 @@ function ItemBucket(props: BucketProps) {
     const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
 
     React.useEffect(() => {
-        // TODO: figure out a better way to manage this.
-        if (!bucket.items || DID_JUST_LOAD) return;
-        DID_JUST_LOAD = false;
+        if (!bucket.items) return;
         props.onUpdate?.(bucket.items);
     }, [bucket.items]);
 
@@ -145,8 +141,6 @@ function ItemBucket(props: BucketProps) {
     // ----------------- DND RELATED -----------------
 
     const onItemHover = (hoverId: string, dragId: string, isBelow: boolean, isRight: boolean) => {
-
-        // if (props.dropDisabled) return; // TODO: bring this check outside.
 
         // Wether its "past half" depends on orientation of the bucket
         const isPastHalf = type.isVertical ? isBelow : isRight;

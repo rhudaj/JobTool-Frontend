@@ -6,6 +6,7 @@ import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 import { Item } from "../../../components/dnd/types";
+import useLogger from "../../../hooks/logger";
 
 function SectionUI(props: {
 	obj: CVSection;
@@ -13,12 +14,15 @@ function SectionUI(props: {
 	onUpdate?: (newObj: CVSection) => void;
 }) {
 
+	const log = useLogger("SectionUI");
+
 	const formatHeader = (s: string) => s.toUpperCase();
 
 	const handleBucketUpdate = (newItems: Item<string>[]) =>{
+		log("handleBucketUpdate: ", newItems);
 		props.onUpdate?.({
 			...props.obj,
-			item_ids: newItems.map(I=>I.value)
+			item_ids: newItems.map((I: Item<string>) => I.value)
 		});
 	};
 
@@ -33,7 +37,7 @@ function SectionUI(props: {
 				<ItemBucket
 					bucket={{
 						id: props.obj.name,
-						items: props.obj.item_ids.map((iid,i)=>({
+						items: props.obj.item_ids.map((iid: string, i: number)=>({
 							id: `${props.obj.name}-${i}`,
 							value: iid
 						}))
