@@ -31,6 +31,8 @@ function useCVInfo() {
     const [data, setData] = useState<CVInfo>(null);
     const [status, setStatus] = useState<boolean>(false);   // was the data fetched?
 
+    useEffect(()=> log("Status == ", status), [status]);
+
     const log = useLogger("useCVInfo");
 
     // FETCH the data:
@@ -40,6 +42,7 @@ function useCVInfo() {
                 if(cv_info) {
                     log(`got cv_info from backend`)
                     setData(cv_info);
+                    setStatus(true);
                 } else {
                     log(`NO cv_info from backend`)
                 }
@@ -84,7 +87,7 @@ function useCVInfo() {
     }
 };
 
-// Manages any state/controls relating to the CV builder
+// Manages any state/controls relating to the list of cv's
 function useCVs() {
 
     // -------------------- STATE  --------------------
@@ -96,6 +99,10 @@ function useCVs() {
     const [log, warn] = useLogger("ResumeBuilder");
 
     // ---------------- CONTROLS (what user sees) ----------------
+
+    useEffect(()=>{
+        log("cur/data has changed!");
+    }, [cur, data])
 
     // setters
 
@@ -409,7 +416,7 @@ function ResumeBuilder() {
         )
     ];
 
-    if (!cvsState.cvNames() || !cvInfoState.get()) return null;
+    if (!cvsState.status || !cvInfoState.status) return null;
     return (
         <Section id="section-cv" heading="Resume Builder">
             {/* ------------ POPUPS ------------ */}
@@ -441,6 +448,7 @@ function ResumeBuilder() {
                     <PrintablePage page_id="cv-page">
                         <CVEditor cv={cvsState.curCV()?.data} itemFromId={cvInfoState.itemFromId} ref={editor_ref} />
                     </PrintablePage>
+                    {/* <div>TESTING</div> */}
                     <InfoPad ref={infoPad_ref} info={cvInfoState.get()} />
                 </SplitView>
             </DndProvider>

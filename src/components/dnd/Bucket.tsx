@@ -35,6 +35,9 @@ function DropGap(props: { isActive: boolean }) {
 const prevGap = (itemIndex: number) => itemIndex;
 const nextGap = (itemIndex: number) => itemIndex + 1;
 
+
+let DID_JUST_LOAD = false;
+
 /**
  * Bucket State Manager
  * @param values - initial values of the bucket
@@ -43,7 +46,11 @@ const useBucket = (initVals: Item[]) => {
 
     const [items, setItems] = useImmer<Item[]>(null);
 
-    useEffect(()=>setItems(initVals), [initVals])
+    useEffect(()=>{
+        // console.log("useBucket\n\tnew initVals")
+        DID_JUST_LOAD = true;
+        setItems(initVals)
+    }, [initVals])
 
     // -----------------STATE CONTROL-----------------
 
@@ -127,8 +134,9 @@ function ItemBucket(props: BucketProps) {
     const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
 
     React.useEffect(() => {
-        if (!bucket.items) return;
-        if (JSON.stringify(bucket.items) == JSON.stringify(props.bucket.items)) return;  // needed, else maximum depth! TODO:
+        // TODO: figure out a better way to manage this.
+        if (!bucket.items || DID_JUST_LOAD) return;
+        DID_JUST_LOAD = false;
         props.onUpdate?.(bucket.items);
     }, [bucket.items]);
 

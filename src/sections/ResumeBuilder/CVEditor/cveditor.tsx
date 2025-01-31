@@ -5,6 +5,7 @@ import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useImmer } from "use-immer";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { DynamicComponent, Item } from "../../../components/dnd/types";
+import useLogger from "../../../hooks/logger";
 
 export interface CVEditorHandle {
 	getCV: () => CV;
@@ -17,15 +18,31 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV, itemFromId: (secId: string
 
 	const [CV, setCV] = useImmer<CV>(null);
 
-	useEffect(() => setCV(cv), [cv]);
+	useEffect(() => {
+		log("new cv from props!");
+		setCV(cv)
+	}, [cv]);
 
 	// give parent access to CV
 	useImperativeHandle(ref, () => ({
 		getCV: () => { return CV }
 	}));
 
+	const log = useLogger("CVEditor");
+
+	// -------------- CONTROLS -----------
+
 	const handleItemsChange = (newItems: Item[]) => {
-		setCV(cur => { cur.sections = newItems.map(I=>I.value) })
+		setCV(cur => {
+			cur.sections = newItems.map((I: Item) => I.value)
+		})
+	};
+
+	const handleSectionChange = (newObj: CVSection, idx: number) => {
+		log(`section ${idx} changed: `, newObj)
+		setCV(cur_cv=>{
+			cur_cv.sections[idx] = newObj;
+		})
 	};
 
 	// -------------- VIEW --------------
@@ -42,7 +59,10 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV, itemFromId: (secId: string
 			<ItemBucket
 				bucket={{
 					id: "sections",
-					items: CV.sections.map((S: CVSection)=>({id: S.name, value: S} as Item<CVSection>))
+					items: CV.sections.map((S: CVSection)=>({
+						id: S.name,
+						value: S
+					}))
 				}}
 				type="sections"
 				onUpdate={handleItemsChange}
@@ -53,11 +73,7 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV, itemFromId: (secId: string
 					<UI.SectionUI
 						key={i}
 						obj={S}
-						onUpdate={(newObj: CVSection)=>{
-							setCV(cur_cv=>{
-								cur_cv.sections[i] = newObj;
-							})
-						}}
+						onUpdate={(newObj: CVSection)=>handleSectionChange(newObj, i)}
 					>
 						{/* SECTION ITEMS  -------------------------------------- */}
 						{S.item_ids.map((iid: string, i: number) => (
