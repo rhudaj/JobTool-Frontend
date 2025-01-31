@@ -69,14 +69,14 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV, itemFromId: (secId: string
 				addItemDisabled
 			>
 				{/* SECTIONS -------------------------------------- */}
-				{CV.sections.map((S: CVSection, i: number)=>(
+				{CV.sections.map((S: CVSection, i: number) =>
 					<UI.SectionUI
 						key={i}
 						obj={S}
 						onUpdate={(newObj: CVSection)=>handleSectionChange(newObj, i)}
 					>
 						{/* SECTION ITEMS  -------------------------------------- */}
-						{S.item_ids.map((iid: string, i: number) => (
+						{S.item_ids.map((iid: string, i: number) =>
 							<DynamicComponent
 								type={S.bucket_type}
 								props={{
@@ -84,9 +84,9 @@ const CVEditor = forwardRef<CVEditorHandle, { cv: CV, itemFromId: (secId: string
 									// don't care ab updates to individual items
 								}}
 							/>
-						))}
+						)}
 					</UI.SectionUI>
-				))}
+				)}
 			</ItemBucket>
 		</div>
 	);

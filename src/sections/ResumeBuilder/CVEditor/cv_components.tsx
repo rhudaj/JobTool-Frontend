@@ -7,6 +7,8 @@ import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 import { Item } from "../../../components/dnd/types";
 import useLogger from "../../../hooks/logger";
+import { useEffect, useState } from "react";
+import { useImmer } from "use-immer";
 
 function SectionUI(props: {
 	obj: CVSection;
@@ -76,22 +78,27 @@ function SummaryUI(props: {
 	)
 }
 
+// Note: we can make changes to this and it be local.
 function ExperienceUI(props: {
 	obj: Experience,
 	onUpdate?: (newObj: Experience) => void;
 }) {
 
+	const [data, setData] = useImmer(props.obj);
+
 	const handleUpdate = (field: keyof Experience, val: any) => {
-		props.onUpdate?.({ ...props.obj, [field]: val });
+		setData(cur=>{
+			cur[field] = val;
+		})
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {
-		const newPoints = [...props.obj.description];
-		newPoints[i] = newVal;
-		handleUpdate('description', newPoints);
+		setData(cur=>{
+			cur.description[i] = newVal;
+		})
 	};
 
-	if (!props.obj) return null;
+	if (!data) return null;
 	return (
 		<div className="experience">
 			{/* ROW 1 */}
@@ -99,18 +106,18 @@ function ExperienceUI(props: {
 				{/* ROW 1 */}
 				<div>
 					<div>
-						<TextEditDiv className="title" tv={props.obj.title} onUpdate={val => handleUpdate('title', val)} />
-						{ props.obj.link && <LinkUI {...props.obj.link} /> }
+						<TextEditDiv className="title" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
+						{ data.link && <LinkUI {...data.link} /> }
 					</div>
-					<DateUI dateRange={props.obj.date} onUpdate={val => handleUpdate('date', val)} />
+					<DateUI dateRange={data.date} onUpdate={val => handleUpdate('date', val)} />
 				</div>
 				{/* ROW 2 */}
 				<div>
 					<div className="role-item-list">
-						{ props.obj.role     	? <TextEditDiv className="role" tv={props.obj.role} onUpdate={val => handleUpdate('role', val)} /> 		: null }
-						{ props.obj.item_list && props.obj.item_list.length>0  	? <DelimitedList className="item-list" items={props.obj.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} /> : null}
+						{ data.role     	? <TextEditDiv className="role" tv={data.role} onUpdate={val => handleUpdate('role', val)} /> 		: null }
+						{ data.item_list && data.item_list.length>0  	? <DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} /> : null}
 					</div>
-					{ props.obj.location ? <TextEditDiv className="location" tv={props.obj.location} onUpdate={val => handleUpdate('location', val)}/> 	: null }
+					{ data.location ? <TextEditDiv className="location" tv={data.location} onUpdate={val => handleUpdate('location', val)}/> 	: null }
 				</div>
 			</div>
 			{/* ROW 2 */}
@@ -118,18 +125,23 @@ function ExperienceUI(props: {
 				<ul>
 					<ItemBucket
 						bucket={{
-							id: 	`${props.obj.title}-bucket`,
-							items: props.obj.description.map((item: string, i: number)=>({
-								id: `${props.obj.title}-bp${i}`,
+							id: `${data.title}-bucket`,
+							items: data.description.map((item: string, i: number)=>({
+								id: `${data.title}-bp${i}`,
 								value: item
 							}))
 						}}
 						type={"exp-points"}
-						onUpdate={newPoints => handleUpdate('description', newPoints)}
+						onUpdate={newPoints => handleUpdate('description', newPoints.map(I=>I.value))}
 						replaceDisabled deleteOnMoveDisabled
 					>
-						{props.obj.description.map((item: string, i: number)=>(
-							<li><TextEditDiv tv={item} onUpdate={newVal=>handleItemChange(i, newVal)} /></li>
+						{data.description.map((item: string, i: number)=>(
+							<li>
+								<TextEditDiv
+									tv={item}
+									onUpdate={newVal=>handleItemChange(i, newVal)}
+								/>
+							</li>
 						))}
 					</ItemBucket>
 				</ul>

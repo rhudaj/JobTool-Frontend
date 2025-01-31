@@ -113,7 +113,6 @@ export function VersionedItemUI(props: {
     if (!versions) return null;
 
     const version_str = `${props.obj?.id}/${versions[cur]?.id}`;
-    const bt: BucketType = BucketTypes[props.obj.item_type]; // todo: use DynamicComponent instead
     const dnd_item: Item<string> = {id: version_str, value: version_str};
 
     return (
@@ -123,8 +122,10 @@ export function VersionedItemUI(props: {
                 <span className="control-button" id="switch" onDoubleClick={switchVersion} title={version_str}>S</span>
                 <span className="control-button" id="new" onDoubleClick={openEditPopup} title={version_str}>E</span>
             </div>
-            <StandaloneDragItem item={dnd_item} item_type={bt.item_type} >
-                {displayItem({obj: versions[cur].value})}
+            <StandaloneDragItem item={dnd_item} item_type={props.obj.item_type} >
+                <DynamicComponent type={props.obj.item_type} props={{
+                    obj: versions[cur].value
+                }}/>
             </StandaloneDragItem>
         </div>
     )

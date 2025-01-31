@@ -70,11 +70,11 @@ function useCVInfo() {
 
     // Extract the data from `cv_info` using the specified id
 	const itemFromId = (sec_id: string, item_id: string): any => {
-        if(!data)     return;
-		const [groupId, itemId] = item_id.split("/", 2);
-		if(!groupId) 	return
-		else if(itemId) return data[sec_id][groupId][itemId];
-		else 			return data[sec_id][groupId]; // most likely 'default'
+        const [groupId, itemId] = item_id.split("/", 2);
+        if(!data)           return;
+		else if (!groupId) 	return
+		else if(itemId)     return data[sec_id][groupId][itemId];
+		else 			    return data[sec_id][groupId];           // most likely 'default'
 	};
 
     return {
