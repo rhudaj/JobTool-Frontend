@@ -86,6 +86,11 @@ function ExperienceUI(props: {
 
 	const [data, setData] = useImmer(props.obj);
 
+	useEffect(()=>{
+		if(!data) return;
+		props.onUpdate?.(data);
+	}, [data])
+
 	const handleUpdate = (field: keyof Experience, val: any) => {
 		setData(cur=>{
 			cur[field] = val;

@@ -3,6 +3,7 @@ import { ExperienceUI, SectionUI, SummaryUI } from "../../sections/ResumeBuilder
 import { VersionedItemUI } from "../VersionedItem/versionedItem";
 import TextEditDiv from "../TextEditDiv/texteditdiv";
 import "./types.scss";
+import { useMemo } from "react";
 
 const DEFAULT_ITEM_TYPE = "DRAG-ITEM";
 
@@ -29,7 +30,8 @@ interface BucketType {
  * No hooks are conditionally called! The component itself
  * is chosen before rendering, keeping React’s hooks order intact. */
 function DynamicComponent({ type, props }) {
-    const Component = BucketTypes[type].DisplayItem; // THE KEY LINE!
+    // const Component = BucketTypes[type].DisplayItem; // THE KEY LINE!
+    const Component = useMemo(() => BucketTypes[type]?.DisplayItem, [type]);
     return <Component {...props} />;
 }
 

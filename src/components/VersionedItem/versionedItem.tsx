@@ -22,9 +22,16 @@ function EditItem(props: {
     const [id, setId] = useState(null);
     const [value, setValue] = useState(null);
 
-    useEffect(()=>setId(props.startingItem.id), [props.startingItem.id]);
-    useEffect(()=>setValue(props.startingItem.value), [props.startingItem.value]);
+    useEffect(()=>{
+        setId(props.startingItem.id)
+    }, [props.startingItem.id]);
 
+    useEffect(() => {
+        console.log('value = ', props.startingItem.value)
+        setValue(props.startingItem.value)
+    }, [props.startingItem.value]);
+
+    if(!value) return;
     return (
         <div className='item-edit'>
             <div className='name-edit'>
@@ -33,13 +40,16 @@ function EditItem(props: {
             </div>
             <div className='content-edit'>
                 <h3>Content:</h3>
-                <DynamicComponent type={props.item_type} props={{
-                    obj: value,
-                    onUpdate: (newVal: any) => {
-                        console.log('Changes have been made');
-                        setValue(newVal);
-                    }
-                }}/>
+                <DynamicComponent
+                    type={props.item_type}
+                    props={{
+                        obj: value,
+                        onUpdate: (newVal: any) => {
+                            console.log('Changes have been made');
+                            setValue(newVal);
+                        }
+                    }}
+                />
             </div>
             <button onClick={()=>props.onSave({id: id, value: value})}>Save</button>
         </div>
@@ -63,31 +73,42 @@ export function VersionedItemUI(props: {
 
     const [versions, setVersions] = useImmer<Item<any>[]>(null);
     const [cur, setCur] = useState(0);
-    const displayItem = useMemo(()=> BucketTypes[props.obj.item_type].DisplayItem, [props.obj.item_type]);
     const editPopup = usePopup();
+    // ensures the dynamic component re-renders when the version changes:
+    const currentVersion = useMemo(() => versions ? versions[cur]?.value : null, [versions, cur]);
 
-    useEffect(()=> setVersions(props.obj.versions), [props.obj.versions]);
+
+    useEffect(()=> {
+        setVersions(props.obj.versions)
+    }, [props.obj.versions]);
 
     // Alert parent when state changes
     useEffect(()=>{
         if(!versions) return;
+        console.log("versions update: ", versions);
         props.onUpdate({
             ...props.obj,
             versions: versions
         })
     }, [versions])
 
+    useEffect(() => {
+        console.log(`Switched version to ${cur}`, versions?.[cur]);
+    }, [cur, versions]);
+
     // ----------------- CONTROLS -----------------
 
     const switchVersion = () => {
-        setCur(prev => (prev === versions.length-1) ? 0 : prev+1)
+        setCur(prev => (prev === versions.length - 1 ? 0 : prev + 1));
     };
 
-    const addNew = (newItem: Item) => {
-        setVersions(cur=>{
-            cur.push(newItem)
-        })
-        setCur(versions.length-1);
+    const onSaveNew = (newItem: Item) => {
+        setVersions(draft => {
+            draft.push(newItem);
+        });
+        setCur(prev => prev + 1); // Ensure cur updates in sync
+        editPopup.close();
+        console.log("Added a new item version!");
     };
 
     const openEditPopup = () => {
@@ -99,11 +120,7 @@ export function VersionedItemUI(props: {
             <EditItem
                 startingItem={copy}
                 item_type={props.obj.item_type}
-                onSave={(newItem: Item)=>{
-                    addNew(newItem);
-                    editPopup.close();
-                    console.log("added a new item version!");
-                }}
+                onSave={onSaveNew}
             />
         )
     };
@@ -113,6 +130,7 @@ export function VersionedItemUI(props: {
     if (!versions) return null;
 
     const version_str = `${props.obj?.id}/${versions[cur]?.id}`;
+    const bt: BucketType = BucketTypes[props.obj.item_type]; // needed since ATM, drag-item names arent synced
     const dnd_item: Item<string> = {id: version_str, value: version_str};
 
     return (
@@ -122,10 +140,11 @@ export function VersionedItemUI(props: {
                 <span className="control-button" id="switch" onDoubleClick={switchVersion} title={version_str}>S</span>
                 <span className="control-button" id="new" onDoubleClick={openEditPopup} title={version_str}>E</span>
             </div>
-            <StandaloneDragItem item={dnd_item} item_type={props.obj.item_type} >
-                <DynamicComponent type={props.obj.item_type} props={{
-                    obj: versions[cur].value
-                }}/>
+            <StandaloneDragItem item={dnd_item} item_type={bt.item_type} >
+                <DynamicComponent
+                    type={props.obj.item_type}
+                    props={{ obj: versions[cur]?.value }} // Directly use the value
+                />
             </StandaloneDragItem>
         </div>
     )
