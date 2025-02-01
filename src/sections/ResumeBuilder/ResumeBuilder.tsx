@@ -107,11 +107,11 @@ function useCVs() {
 
     const fetchData = () => {
         if(USE_BACKEND) {
-            BackendAPI.get<NamedCV[]>("all_cvs").then(cvs=>{
-                const valid_cvs = cvs?.filter(cv => cv && cv.name && cv.data);
-                if(valid_cvs && valid_cvs.length > 0) {
-                    log(`Got ${valid_cvs.length} CVs from backend`);
-                    setData(valid_cvs);
+            BackendAPI.get<NamedCV[]>("all_cvs").then(ncvs=>{
+                // const valid_cvs = ncvs?.filter(cv => cv && cv.name && cv.data);
+                if(ncvs && ncvs.length > 0) {
+                    log(`Got ${ncvs.length} CVs from backend`);
+                    setData(ncvs);
                     set_cur(0);
                     setStatus(true);
                 } else {
