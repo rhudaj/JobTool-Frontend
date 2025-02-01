@@ -1,10 +1,19 @@
 // *** if you put the below inside the .drag-drop-wrapper styles above, they will not work
 
+.standalone-drag-item-wrapper {
+    position: relative;
+    & > .move-handle {
+        position: absolute;
+        width: min-content;
+        padding: 1rem;
+        top: -20rem;
+        left: -20rem;
+    }
+}
+
 .dnd-item-wrapper {
 
-    // & .can-drag:hover {
-    //     outline: 2rem dashed red;
-    // }
+    position: relative;
 
     & .dragging:active {
         opacity: 0.1;

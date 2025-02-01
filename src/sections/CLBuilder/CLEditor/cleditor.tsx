@@ -1,6 +1,6 @@
 import "./cleditor.sass"
 import { useEffect } from "react";
-import ItemBucket from "../../../components/dnd/ItemBucket";
+import ItemBucket from "../../../components/dnd/Bucket";
 import { useImmer } from "use-immer";
 
 function CLEditor(props: {
@@ -28,12 +28,13 @@ function CLEditor(props: {
     };
 
     return (
-        <ItemBucket
-            id="cl-paragraphs"
-            values={pgs}
-            onItemChange={handleItemChange}
-            onUpdate={setPgs}
-        />
+        <></>
+        // <ItemBucket
+        //     id="cl-paragraphs"
+        //     values={pgs}
+        //     onItemChange={handleItemChange}
+        //     onUpdate={setPgs}
+        // />
     );
 }
 

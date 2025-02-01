@@ -1,0 +1,39 @@
+.versioned-item-container
+    position: relative
+
+.version-controls
+    position: absolute // relative to parent
+    top: 0
+    left: -20rem
+    display: flex
+    flex-direction: column
+
+.version-id
+    // div with text, floats up above the item
+    position: absolute // relative to parent
+    top: -20rem
+    text-align: right
+    width: 100%
+    padding-right: 20rem
+    color: grey
+
+.control-button
+    padding: 2rem
+    &#switch
+        background-color: orange
+    &#new
+        background-color: lightgreen
+    &#edit
+        background-color: lightpink
+
+// ITEM EDIT POPUP ------------------------------------------------------------
+
+.item-edit
+    padding: 20rem
+    display: flex
+    flex-direction: column
+    gap: 20rem
+    & > *
+        & > h3
+            border-bottom: 2rem solid grey
+            margin-bottom: 10rem

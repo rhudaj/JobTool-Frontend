@@ -1,11 +1,11 @@
-import "./ItemBucket.scss";
+import "./Bucket.scss";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import React, { useEffect } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
-import { Item, DEFAULT_ITEM_TYPE, BucketTypes } from "./types";
+import { Item, DEFAULT_ITEM_TYPE, BucketTypes, Bucket } from "./types";
 import { useImmer } from "use-immer";
-import DNDItem from "./Item";
-import objectHash from "object-hash";
+import BucketItem from "./BucketItem";
+import { isEqual } from "lodash";
 
 /* Empty all values in an object (recursively) */
 const emptyObject = (obj: any): any => {
@@ -36,24 +36,19 @@ function DropGap(props: { isActive: boolean }) {
 const prevGap = (itemIndex: number) => itemIndex;
 const nextGap = (itemIndex: number) => itemIndex + 1;
 
-// TODO: Item { idx: int, bucket: string, value: any }
 
 /**
  * Bucket State Manager
  * @param values - initial values of the bucket
  */
-const useBucket = (initVals: any[]) => {
+const useBucket = (initVals: Item[]) => {
 
     const [items, setItems] = useImmer<Item[]>(null);
 
     useEffect(()=>{
-        console.log('useBucket: new values');
-        setItems(initVals?.map(v => ({
-            id: objectHash.sha1(v),
-            value: v,
-        })))
+        if(isEqual(items, initVals)) return;
+        setItems(initVals)
     }, [initVals])
-
 
     // -----------------STATE CONTROL-----------------
 
@@ -106,7 +101,6 @@ const useBucket = (initVals: any[]) => {
     return { items, getValues, addItem, addBlankItem, moveItem, removeItem, changeItemValue, getIdx };
 };
 
-
 // Provided to the children of a bucket (<DNDItem>'s)
 interface BucketItemContext {
     bucket_id: string,
@@ -118,13 +112,11 @@ interface BucketItemContext {
     onRemove?: (dragId: any) => void;
 };
 
-
 interface BucketProps {
-    id: any,
+    bucket: Bucket,
+    children: JSX.Element[],  // the bucket data d.n.n corresponding to the displayed items.
     type?: string, // by default, same as ID
-    values: any[],
-    onItemChange?: (index: number, newItem: any) => void, // Callback for item updates
-    onUpdate?: (newValues: any[]) => void,
+    onUpdate?: (newItems: Item[]) => void, // when the `Bucket` data changes.
     deleteDisabled?: boolean,
     replaceDisabled?: boolean,
     dropDisabled?: boolean,
@@ -132,35 +124,24 @@ interface BucketProps {
     addItemDisabled?: boolean,
 };
 
-/**
- * Bucket of DND Items component
- * @param props
- * @returns
- * TODO: hover and drop only works when over an item, not if there is empty space at the bottom of all items
- * TODO: controls should be put here next to each item (since they only make sense if the item is in a bucker)
- */
 function ItemBucket(props: BucketProps) {
 
     // ----------------- STATE -----------------
 
-    const bucket = useBucket(props.values);
-
+    const bucket = useBucket(props.bucket.items);
     const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(undefined);
 
-    const type = BucketTypes[props.type ?? props.id];
-
     React.useEffect(() => {
-        if (!bucket.items || !props.onUpdate) return;
-        const newValues = bucket.getValues();
-        if (JSON.stringify(newValues) == JSON.stringify(props.values)) return;  // needed, else maximum depth! TODO:
-        props.onUpdate(newValues); // && items != bucket.items
+        if (!bucket.items) return;
+        if(isEqual(bucket.items, props.bucket.items)) return;
+        props.onUpdate?.(bucket.items);
     }, [bucket.items]);
+
+    const type = BucketTypes[props.type ?? props.bucket.id];
 
     // ----------------- DND RELATED -----------------
 
     const onItemHover = (hoverId: string, dragId: string, isBelow: boolean, isRight: boolean) => {
-
-        // if (props.dropDisabled) return; // TODO: bring this check outside.
 
         // Wether its "past half" depends on orientation of the bucket
         const isPastHalf = type.isVertical ? isBelow : isRight;
@@ -227,7 +208,7 @@ function ItemBucket(props: BucketProps) {
                 if (hoveredGap !== undefined) setHoveredGap(undefined);
 
                 // (optional) returned item will be the 'dropResult' and available in 'endDrag'
-                return { id: props.id };
+                return { id: props.bucket.id };
             },
             collect: (monitor) => ({
                 isHovered: !props.dropDisabled && monitor.isOver(),
@@ -239,29 +220,20 @@ function ItemBucket(props: BucketProps) {
 
     // -----------------RENDER-----------------
 
-    if (!bucket.items) {
-        return null
-    }
+    if (!bucket.items || props.children.length !== bucket.items.length) return null
 
-    const classes = joinClassNames(
-        "bucket-wrapper",
-        isHovered ? "hover" : ""
-    );
+    const classes = joinClassNames('bucket-wrapper', isHovered?'hover':'');
 
     return (
         <div ref={dropRef} className={classes} onMouseLeave={()=>setHoveredGap(undefined)}>
             <div className={type.displayItemsClass}>
                 {bucket.items.map((I: Item, i: number) => {
 
-                    const handleUpdate = (newVal: any) => {
-                        if(props.onItemChange) props.onItemChange(i, newVal); // Notify parent of the change
-                    };
-
                     return (
                         <>
                             { i === 0 && <DropGap isActive={hoveredGap === prevGap(i)} /> }
                             <BucketContext.Provider value={{
-                                bucket_id: props.id,
+                                bucket_id: props.bucket.id,
                                 item_type: type.item_type ?? DEFAULT_ITEM_TYPE,
                                 disableReplace: props.replaceDisabled,
                                 onDelete: !props.deleteDisabled         && bucket.removeItem,
@@ -269,9 +241,9 @@ function ItemBucket(props: BucketProps) {
                                 onHover: !props.dropDisabled            && onItemHover,
                                 onRemove: !props.deleteOnMoveDisabled   && bucket.removeItem,
                             }}>
-                                <DNDItem key={i} item={I}>
-                                    {type.DisplayItem({obj: I.value, onUpdate: handleUpdate})}
-                                </DNDItem>
+                                <BucketItem key={i} item={I}>
+                                    {props.children[i]}
+                                </BucketItem>
                             </BucketContext.Provider>
                             <DropGap isActive={hoveredGap === nextGap(i)} />
                         </>

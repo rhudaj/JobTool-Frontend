@@ -1,58 +1,80 @@
 import "./cveditor.sass";
-import { Experience, Link, MonthYear, DateRange } from "job-tool-shared-types";
+import { Experience, Link, MonthYear, DateRange, CVSection, CV } from "job-tool-shared-types";
 import TextEditDiv from "../../../components/TextEditDiv/texteditdiv";
 import { joinClassNames } from "../../../util/joinClassNames";
-import ItemBucket from "../../../components/dnd/ItemBucket";
+import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
+import { Item } from "../../../components/dnd/types";
+import useLogger from "../../../hooks/logger";
+import { useEffect } from "react";
+import { useImmer } from "use-immer";
 
-function SectionUI(props: { obj: any, onUpdate: (newObj: any) => void }) {
+function SectionUI(props: {
+	obj: CVSection;
+	children: any[];
+	onUpdate?: (newObj: CVSection) => void;
+}) {
+	const [data, setData] = useImmer<CVSection>(null);
 
+	// parent --> this
+	useEffect(()=>{
+		if(props.obj.name === "education") {
+			log("education SectionUI received a new props.obj: ", props.obj);
+		}
+		if(!props.obj) return;
+		setData(props.obj);
+	}, [props.obj]);
+
+	// this --> parent
+	useEffect(()=>{
+		if(!data) return;
+		props.onUpdate?.(data);
+	}, [data]);
+
+	const log = useLogger("SectionUI");
 	const formatHeader = (s: string) => s.toUpperCase();
 
-	if(!props.obj) return null;
+	const handleBucketUpdate = (newItems: Item<string>[]) =>{
+		log("handleBucketUpdate: ", newItems);
+		setData(draft=>{
+			draft.items = newItems.map((I: Item) => I.value);
+		})
+	};
 
-	const handleObjChange = (newVal: any) =>{
-		const new_sec = {
-			...props.obj,
-			content: newVal
-		}
-		props.onUpdate(new_sec);
-	}
-
-	const handleItemChange = (i: number, newVal: any) => {
-		const new_content = [...props.obj.content];
-		new_content[i] = newVal;
-		const new_sec = {
-			...props.obj,
-			content: new_content
-		}
-		props.onUpdate(new_sec);
-	}
-
+	if(!data) return null;
 	return (
 		<div className="section" >
 			<div className="sec-head">
-				<p>{formatHeader(props.obj.name)}</p>
+				<p>{formatHeader(data.name)}</p>
 				<hr />
 			</div>
-			<div id={`sec-${props.obj.name}`} className="sec-content">
+			<div id={`sec-${data.name}`} className="sec-content">
 				<ItemBucket
-					id={props.obj.name}
-					values={props.obj.content}
-					type={props.obj.item_type}
-					onItemChange={handleItemChange}
-					onUpdate={handleObjChange}
-				/>
+					bucket={{
+						id: data.name,
+						items: data.items.map((item: any, i: number)=>({
+							id:    `${data.name}-${i}`,
+							value: item
+						}))
+					}}
+					type={data.bucket_type}
+					onUpdate={handleBucketUpdate}
+				>
+					{props.children}
+				</ItemBucket>
 			</div>
 		</div>
 	)
 }
 
-function SummaryUI(props: { obj: any, onUpdate?: (newObj: any) => void }) {
+function SummaryUI(props: {
+	obj: any,
+	onUpdate?: (newObj: any) => void
+}) {
 
 	const handleUpdate = (key: string, newVal: any) => {
-		props.onUpdate({...props.obj, [key]: newVal});
+		props.onUpdate?.({...props.obj, [key]: newVal});
 	};
 
 	return (
@@ -70,20 +92,39 @@ function SummaryUI(props: { obj: any, onUpdate?: (newObj: any) => void }) {
 	)
 }
 
-function ExperienceUI(props: { obj: Experience, onUpdate?: (newObj: Experience) => void }) {
+// Note: we can make changes to this and it be local.
+function ExperienceUI(props: {
+	obj: Experience,
+	onUpdate?: (newObj: Experience) => void;
+}) {
+
+	const [data, setData] = useImmer(null);
+
+	// parent --> this
+	useEffect(()=>{
+		if(!props.obj) return;
+		setData(props.obj);
+	}, [props.obj]);
+
+	// this --> parent
+	useEffect(()=>{
+		if(!data) return;
+		props.onUpdate?.(data);
+	}, [data])
 
 	const handleUpdate = (field: keyof Experience, val: any) => {
-		if(!props.onUpdate) return;
-		props.onUpdate({ ...props.obj, [field]: val });
+		setData(cur=>{
+			cur[field] = val;
+		})
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {
-		const newPoints = [...props.obj.description];
-		newPoints[i] = newVal;
-		handleUpdate('description', newPoints);
+		setData(cur=>{
+			cur.description[i] = newVal;
+		})
 	};
 
-	if (!props.obj) return null;
+	if (!data) return null;
 	return (
 		<div className="experience">
 			{/* ROW 1 */}
@@ -91,31 +132,44 @@ function ExperienceUI(props: { obj: Experience, onUpdate?: (newObj: Experience) 
 				{/* ROW 1 */}
 				<div>
 					<div>
-						<TextEditDiv className="title" tv={props.obj.title} onUpdate={val => handleUpdate('title', val)} />
-						{ props.obj.link && <LinkUI {...props.obj.link} /> }
+						<TextEditDiv className="title" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
+						{ data.link && <LinkUI {...data.link} /> }
 					</div>
-					<DateUI obj={props.obj.date} onUpdate={val => handleUpdate('date', val)} />
+					<DateUI obj={data.date} onUpdate={val => handleUpdate('date', val)} />
 				</div>
 				{/* ROW 2 */}
 				<div>
 					<div className="role-item-list">
-						{ props.obj.role     	? <TextEditDiv className="role" tv={props.obj.role} onUpdate={val => handleUpdate('role', val)} /> 		: null }
-						{ props.obj.item_list && props.obj.item_list.length>0  	? <DelimitedList className="item-list" items={props.obj.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} /> : null}
+						{ data.role     	? <TextEditDiv className="role" tv={data.role} onUpdate={val => handleUpdate('role', val)} /> 		: null }
+						{ data.item_list && data.item_list.length>0  	? <DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} /> : null}
 					</div>
-					{ props.obj.location ? <TextEditDiv className="location" tv={props.obj.location} onUpdate={val => handleUpdate('location', val)}/> 	: null }
+					{ data.location ? <TextEditDiv className="location" tv={data.location} onUpdate={val => handleUpdate('location', val)}/> 	: null }
 				</div>
 			</div>
 			{/* ROW 2 */}
 			<div className="exp-content">
 				<ul>
 					<ItemBucket
-						id={`${props.obj.title}-bucket`}
+						bucket={{
+							id: `${data.title}-bucket`,
+							items: data.description.map((item: string, i: number)=>({
+								id: `${data.title}-bp${i}`,
+								value: item
+							}))
+						}}
 						type={"exp-points"}
-						values={props.obj.description}
-						onItemChange={handleItemChange}
-						onUpdate={newPoints => handleUpdate('description', newPoints)}
+						onUpdate={newPoints => handleUpdate('description', newPoints.map(I=>I.value))}
 						replaceDisabled deleteOnMoveDisabled
-					/>
+					>
+						{data.description.map((item: string, i: number)=>(
+							<li>
+								<TextEditDiv
+									tv={item}
+									onUpdate={newVal=>handleItemChange(i, newVal)}
+								/>
+							</li>
+						))}
+					</ItemBucket>
 				</ul>
 			</div>
 		</div>

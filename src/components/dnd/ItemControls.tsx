@@ -15,10 +15,9 @@ const ItemControlsContainer = React.forwardRef<HTMLElement, any>((
 
     const [refHovered, setRefHovered] = useToggle();
     const [isHovered, setIsHovered] = useToggle();
-    const [position, setPosition] = React.useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
-    const pad_left = 5;
-    const pad_top = 29;
+    const pad_left = 5
+    const pad_top = 20
 
     // Setup state when ref is passed
     React.useEffect(() => {
@@ -29,11 +28,6 @@ const ItemControlsContainer = React.forwardRef<HTMLElement, any>((
         // Attach mouse-event listeners to the parent.
 
         const handleMouseEnter = (ev: MouseEvent) => {
-            const Bounds = parent_el.getBoundingClientRect(); // is this necessary again?
-            setPosition({
-                top: Bounds.top + window.scrollY,
-                left: Bounds.left + window.scrollX,
-            });
             setRefHovered(true);
             document.addEventListener("mousemove", handleMouseMove);
             // Only want the most nested item's controls to be active
@@ -47,7 +41,7 @@ const ItemControlsContainer = React.forwardRef<HTMLElement, any>((
             // Check if the mouse has left the parent/ref:
             const Bounds = parent_el.getBoundingClientRect();
             const isInsideBounds = (
-                event.clientX >= Bounds.left - pad_left &&
+                event.clientX >= Bounds.left -pad_left &&
                 event.clientX <= Bounds.right + pad_left &&
                 event.clientY >= Bounds.top - pad_top &&
                 event.clientY <= Bounds.bottom + pad_top
@@ -91,8 +85,8 @@ const ItemControlsContainer = React.forwardRef<HTMLElement, any>((
         <div className="dnd-item-controls"
             style={{
                 position: "absolute",
-                top: position.top - pad_top,
-                left: position.left - pad_left,
+                top: -pad_top,
+                left: -pad_left,
             }}
             onMouseEnter={()=>setIsHovered(true)}
             onMouseLeave={()=>setIsHovered(false)}
