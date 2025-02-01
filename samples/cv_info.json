@@ -1,108 +1,144 @@
 {
-    "languages": [
-        "Java",
-        "C++",
-        "Python",
-        "Ruby"
-    ],
-    "technologies": [
-        "Vue.js",
-        "Express.js",
-        "MySQL",
-        "Docker"
-    ],
-    "courses": [
-        "Data Structures",
-        "Operating Systems",
-        "Cloud Computing",
-        "Software Engineering"
-    ],
-    "education": [
-        {
-            "date": {
-                "start": { "month": 9, "year": 2018 },
-                "end": { "month": 5, "year": 2022 }
+    "education": {
+        "bachelors_cs_waterloo": {
+            "v1_data_focused": {
+                "date": {
+                    "start": { "month": 9, "year": 2015 },
+                    "end": { "month": 6, "year": 2019 }
+                },
+                "role": "Bachelor of Computer Science",
+                "title": "University of Waterloo",
+                "location": "University of Waterloo",
+                "description": [
+                    "Dean's List, AI Specialization",
+                    "Relevant Coursework: Machine Learning, Data Structures, Algorithms"
+                ],
+                "item_list": []
             },
-            "title": "Bachelor of Science in Computer Engineering",
-            "role": "University of Toronto",
-            "description": [
-                "Specialization: Cloud Systems, Awards: Dean’s List, Merit-based Scholarship",
-                "Courses: Data Structures, Operating Systems, Cloud Computing, Software Engineering"
-            ],
-            "item_list": []
-        }
-    ],
-    "experience": [
-        {
-            "date": {
-                "start": { "month": 6, "year": 2022 },
-                "end": { "month": 12, "year": 2023 }
-            },
-            "title": "TechWorks",
-            "role": "Cloud Engineer",
-            "location": "Vancouver, BC",
-            "description": [
-                "Implemented cloud-based infrastructure solutions with AWS for clients in healthcare, optimizing their systems and reducing costs by 25%.",
-                "Developed serverless applications using AWS Lambda and DynamoDB, improving system scalability and reducing maintenance costs.",
-                "Collaborated with DevOps teams to deploy applications using Docker, Jenkins, and Kubernetes, streamlining CI/CD pipelines."
-            ],
-            "item_list": ["AWS", "Docker", "Jenkins", "Kubernetes"]
+            "v2_software_focused": {
+                "date": {
+                    "start": { "month": 9, "year": 2015 },
+                    "end": { "month": 6, "year": 2019 }
+                },
+                "role": "Bachelor of Computer Science",
+                "title": "University of Waterloo",
+                "location": "University of Waterloo",
+                "description": [
+                    "Dean's List, Software Engineering Specialization",
+                    "Relevant Coursework: Operating Systems, Databases, Software Design"
+                ],
+                "item_list": []
+            }
         },
-        {
-            "date": {
-                "start": { "month": 1, "year": 2021 },
-                "end": { "month": 5, "year": 2022 }
+        "masters_dataScience_harvard": {
+            "v1_data_focused": {
+                "date": {
+                    "start": { "month": 9, "year": 2020 },
+                    "end": { "month": 6, "year": 2022 }
+                },
+                "role": "Master of Data Science",
+                "title": "Harvard University",
+                "location": "Harvard University",
+                "description": [
+                    "Thesis: Deep Learning for Healthcare",
+                    "Relevant Coursework: Big Data Analytics, Statistical Modeling"
+                ],
+                "item_list": []
             },
-            "title": "Innovative Solutions Inc.",
-            "role": "Backend Developer",
-            "location": "Montreal, QC",
-            "description": [
-                "Designed and optimized RESTful APIs using Node.js and MySQL, enabling the efficient processing of over 1,000,000 requests per day.",
-                "Built microservices architecture to support scalable solutions and improved system reliability by 30%.",
-                "Worked closely with frontend teams to integrate APIs into React-based applications."
-            ],
-            "item_list": ["Node.js", "MySQL", "Microservices", "API Design"]
+            "v2_software_focused": {
+                "date": {
+                    "start": { "month": 9, "year": 2020 },
+                    "end": { "month": 6, "year": 2022 }
+                },
+                "role": "Master of Data Science",
+                "title": "Harvard University",
+                "location": "Harvard University",
+                "description": [
+                    "Thesis: Scalable Cloud Computing for AI",
+                    "Relevant Coursework: Cloud Computing, Scalable Systems"
+                ],
+                "item_list": []
+            }
         }
-    ],
-    "projects": [
-        {
-            "date": { "start": { "month": 7, "year": 2023 } },
-            "title": "E-Commerce Analytics Dashboard",
-            "link": {
-                "url": "https://github.com/techlover/ecom-dashboard",
-                "icon": "fa fa-link"
+    },
+    "experience": {
+        "google": {
+            "v1_data_focused": {
+                "date": {
+                    "start": { "year": 2022, "month": 7 },
+                    "end": { "year": 2024, "month": 1 }
+                },
+                "title": "Google",
+                "role": "Data Scientist",
+                "location": "Mountain View, CA",
+                "description": [
+                    "Developed machine learning models for ad targeting",
+                    "Optimized data pipelines reducing processing time by 30%",
+                    "Collaborated with engineers to deploy models at scale"
+                ],
+                "item_list": ["Python", "TensorFlow", "BigQuery"]
             },
-            "description": [
-                "Developed a dashboard using Vue.js and Express.js for tracking e-commerce sales metrics, helping small businesses optimize their operations.",
-                "Implemented real-time data visualizations with Chart.js, allowing business owners to make data-driven decisions quickly."
-            ],
-            "item_list": ["Vue.js", "Express.js", "Chart.js", "MySQL"]
-        },
-        {
-            "date": { "start": { "month": 2, "year": 2024 } },
-            "title": "Fitness Tracker Application",
-            "link": {
-                "url": "https://github.com/techlover/fit-tracker",
-                "icon": "fa fa-link"
-            },
-            "description": [
-                "Created a fitness tracker application that syncs data from wearable devices using REST APIs, allowing users to monitor their health progress.",
-                "Used Vue.js for the frontend and integrated a Node.js backend with MongoDB for data storage and analysis."
-            ],
-            "item_list": ["Vue.js", "Node.js", "MongoDB", "REST APIs"]
-        },
-        {
-            "date": { "start": { "month": 10, "year": 2023 } },
-            "title": "Smart Home Control System",
-            "link": {
-                "url": "https://github.com/techlover/smart-home",
-                "icon": "fa fa-link"
-            },
-            "description": [
-                "Built a smart home control system that integrates with IoT devices using MQTT protocol.",
-                "The system allows users to control lights, temperature, and appliances remotely via a mobile app built with React Native."
-            ],
-            "item_list": ["React Native", "MQTT", "IoT", "Node.js"]
+            "v2_software_focused": {
+                "date": {
+                    "start": { "year": 2022, "month": 7 },
+                    "end": { "year": 2024, "month": 1 }
+                },
+                "title": "Google",
+                "role": "Software Engineer",
+                "location": "Mountain View, CA",
+                "description": [
+                    "Developed scalable microservices for cloud applications",
+                    "Led migration of legacy systems to modern cloud infrastructure",
+                    "Improved system performance by 40% through optimizations"
+                ],
+                "item_list": ["Java", "Kubernetes", "GCP"]
+            }
         }
-    ]
+    },
+    "projects": {
+        "predictive_analytics": {
+            "v1_data_focused": {
+                "date": { "start": { "month": 3, "year": 2023 } },
+                "title": "Predictive Analytics for Finance",
+                "link": {
+                    "url": "https://github.com/predictive-analytics",
+                    "icon": "fa fa-link"
+                },
+                "description": [
+                    "Built machine learning models to predict stock prices",
+                    "Integrated real-time financial data APIs",
+                    "Achieved 85% accuracy in market trend predictions"
+                ],
+                "item_list": ["Python", "scikit-learn", "Pandas"]
+            },
+            "v2_software_focused": {
+                "date": { "start": { "month": 3, "year": 2023 } },
+                "title": "Financial Data Processing Engine",
+                "link": {
+                    "url": "https://github.com/finance-engine",
+                    "icon": "fa fa-link"
+                },
+                "description": [
+                    "Developed an ETL pipeline for financial data",
+                    "Deployed the system on AWS using serverless architecture",
+                    "Processed 10M+ transactions daily with high reliability"
+                ],
+                "item_list": ["AWS Lambda", "DynamoDB", "Python"]
+            }
+        }
+    },
+    "summary": {
+        "default": {
+            "v1_data_focused": {
+                "summary": "Data scientist with experience in machine learning, predictive analytics, and cloud-based data pipelines.",
+                "languages": ["Python", "SQL", "R"],
+                "technologies": ["TensorFlow", "BigQuery", "AWS"]
+            },
+            "v2_software_focused": {
+                "summary": "Software engineer specializing in scalable cloud systems, microservices, and distributed computing.",
+                "languages": ["Java", "Go", "Python"],
+                "technologies": ["Kubernetes", "Docker", "GCP"]
+            }
+        }
+    }
 }

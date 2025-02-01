@@ -35,8 +35,8 @@
         "sections": [
             {
                 "name": "summary",
-                "item_type": "summary",
-                "content": [{
+                "bucket_type": "summary",
+                "items": [{
                     "summary": "3 years of experience in software development and product engineering, with a focus on improving workflows, automating repetitive tasks, and delivering high-quality code. Passionate about building scalable applications and mentoring team members. Proficient in:",
                     "languages": [
                         "Python",
@@ -66,8 +66,8 @@
             },
             {
                 "name": "education",
-                "item_type": "experiences",
-                "content": [
+                "bucket_type": "experiences",
+                "items": [
                     {
                         "date": {
                             "start": { "month": 8, "year": 2019 },
@@ -85,8 +85,8 @@
             },
             {
                 "name": "experience",
-                "item_type": "experiences",
-                "content": [
+                "bucket_type": "experiences",
+                "items": [
                     {
                         "date": {
                             "start": { "month": 6, "year": 2022 },
@@ -136,8 +136,8 @@
             },
             {
                 "name": "projects",
-                "item_type": "experiences",
-                "content": [
+                "bucket_type": "experiences",
+                "items": [
                     {
                         "date": {
                             "start": { "month": 10, "year": 2023 },
@@ -149,7 +149,7 @@
                             "icon": "fa fa-link"
                         },
                         "description": [
-                            "Developed an AI-powered writing assistant with OpenAI’s GPT-3 API, allowing users to generate creative and technical content.",
+                            "Developed an AI-powered writing assistant with OpenAI’s GPT-3 API, allowing users to generate creative and technical items.",
                             "Designed an intuitive UI with Next.js and integrated payment processing for subscription tiers.",
                             "Optimized backend processing with Redis caching, reducing API response times by 50%."
                         ],

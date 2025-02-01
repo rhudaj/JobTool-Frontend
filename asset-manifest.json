@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/JobTool-Frontend/static/css/main.5f91555a.css",
-    "main.js": "/JobTool-Frontend/static/js/main.82c865f3.js",
+    "main.css": "/JobTool-Frontend/static/css/main.b4965d52.css",
+    "main.js": "/JobTool-Frontend/static/js/main.84b23bd8.js",
     "index.html": "/JobTool-Frontend/index.html",
-    "main.5f91555a.css.map": "/JobTool-Frontend/static/css/main.5f91555a.css.map",
-    "main.82c865f3.js.map": "/JobTool-Frontend/static/js/main.82c865f3.js.map"
+    "main.b4965d52.css.map": "/JobTool-Frontend/static/css/main.b4965d52.css.map",
+    "main.84b23bd8.js.map": "/JobTool-Frontend/static/js/main.84b23bd8.js.map"
   },
   "entrypoints": [
-    "static/css/main.5f91555a.css",
-    "static/js/main.82c865f3.js"
+    "static/css/main.b4965d52.css",
+    "static/js/main.84b23bd8.js"
   ]
 }
