@@ -1,7 +1,7 @@
 import "./resumebuilder.sass";
 import { useEffect, useState, useRef } from "react";
 import Section from "../../components/Section/Section";
-import { NamedCV } from "job-tool-shared-types";
+import { NamedCV, CV } from "job-tool-shared-types";
 import BackendAPI from "../../backend_api";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
@@ -17,6 +17,7 @@ import SubSection from "../../components/Section/SubSection";
 import TextEditDiv from "../../components/TextEditDiv/texteditdiv";
 import TextItems from "../../components/TextItems/TextItems";
 import { usePopup } from "../../hooks/Popup/popup";
+import { useImmer } from "use-immer";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
@@ -166,7 +167,7 @@ function useCVs() {
         BackendAPI.post<NamedCV, null>("saveCV", ncv);
     };
 
-    const importFromJson = (named_cv: NamedCV) => {
+    const add = (named_cv: NamedCV) => {
         setData([named_cv, ...data]);
     };
 
@@ -186,7 +187,7 @@ function useCVs() {
     const cvNames = () => data?.map((ncv: NamedCV) => ncv.name);
     const curCV = () => data ? data[cur] : null;
 
-    return { status, fetchData, curIdx, cvNames, curCV, importFromJson, changeCV, save2backend, deleteCur };
+    return { status, fetchData, curIdx, cvNames, curCV, add, changeCV, save2backend, deleteCur };
 }
 
 /* ------------------------------------------------------------------
@@ -239,6 +240,67 @@ const SaveForm = (props: {
 
             <button type="submit" disabled={!isNameValid}>Save</button>
         </form>
+    );
+};
+
+const ImportForm = (props: {
+    onComplete: (ncv: NamedCV) => void;
+}) => {
+
+    const [ncv, setNCV] = useImmer<NamedCV>(null);
+    const [errMsg, setErrMsg] = useState("");
+
+    useEffect(()=>{
+        if(!ncv) return;
+        console.log("ncv: ", ncv);
+    }, [ncv])
+
+    // only the data not a full NamedCV json
+    const onJsonFromText = (txt: string) => {
+        let parsed: any;
+        try {
+            parsed = JSON.parse(txt);
+        } catch (err: unknown) {
+            setErrMsg(String(err))
+            setNCV(null);
+            return;
+        }
+        setErrMsg("");
+        setNCV({
+            name: "untitled",
+            data: parsed,
+            tags: [],
+        })
+    };
+
+    const onImportNCVFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+        util.jsonFileImport(e, setNCV);
+    };
+
+    const onDoneClicked = () => {
+        props.onComplete(ncv);
+    }
+
+    return (
+        <div className="popup-content" id="import-popup">
+            <p>Import from JSON</p>
+            <div>
+                <p>Copy and Paste</p>
+                <textarea
+                    className="json-paste-area"
+                    placeholder="paste json"
+                    onPaste={(e)=>onJsonFromText(e.clipboardData.getData('Text'))}
+                />
+                <p className="error-message">{errMsg}</p>
+            </div>
+            <div>
+                <p>Import File</p>
+                <input type="file" accept=".json" onChange={onImportNCVFile}/>
+            </div>
+            <div>
+                <button disabled={ncv===null} onClick={onDoneClicked}>Done</button>
+            </div>
+        </div>
     );
 };
 
@@ -319,8 +381,12 @@ function ResumeBuilder() {
                 savePopup.close();
             },
             onImportJsonFileChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-                util.jsonFileImport(e, cvsState.importFromJson);
+                util.jsonFileImport(e, cvsState.add);
                 importPopup.close();
+            },
+            onPasteJson: (json_str: string, name: string) => {
+                const cv = JSON.parse(json_str);
+                cvsState.add(cv)
             },
             onDeleteCV: ()=>{
                 cvsState.deleteCur();
@@ -347,6 +413,10 @@ function ResumeBuilder() {
                 const new_cv_info: CVInfo = infoPad_ref.current.get();
                 cvInfoState.setData(new_cv_info);
                 cvInfoState.save2backend(new_cv_info);
+            },
+            onImportFormComplete: (ncv: NamedCV) => {
+                cvsState.add(ncv);
+                importPopup.close();
             }
         },
         settings_ui: {
@@ -377,9 +447,8 @@ function ResumeBuilder() {
             />
         ),
         import: (
-            <div className="popup-content">
-                <p>New Resume from JSON:</p>
-                <input type="file" accept=".json" onChange={CONTROLS.popups.onImportJsonFileChange}/>
+            <div className="popup-content" id="import-popup">
+                <ImportForm onComplete={CONTROLS.settings.onImportFormComplete}/>
             </div>
         ),
         delete: (
