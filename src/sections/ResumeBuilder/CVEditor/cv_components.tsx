@@ -94,7 +94,8 @@ function SummaryUI(props: {
 
 // Note: we can make changes to this and it be local.
 function ExperienceUI(props: {
-	obj: Experience,
+	obj: Experience;
+	disableBucketFeatures?: boolean;
 	onUpdate?: (newObj: Experience) => void;
 }) {
 
@@ -159,7 +160,10 @@ function ExperienceUI(props: {
 						}}
 						type={"exp-points"}
 						onUpdate={newPoints => handleUpdate('description', newPoints.map(I=>I.value))}
+						// By default, these are disabled
 						replaceDisabled deleteOnMoveDisabled
+						// Conditionally disabled
+						{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true } : {})}
 					>
 						{data.description.map((item: string, i: number)=>(
 							<li>

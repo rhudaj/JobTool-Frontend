@@ -237,7 +237,11 @@ export function VersionedItemUI(props: {
                 <DynamicComponent
                     key={cur} // force re-render when cur changes
                     type={props.obj.item_type}
-                    props={{ obj: versions[cur]?.value }} // Directly use the value
+                    props={{
+                        obj: versions[cur]?.value,
+                        disableBucketFeatures: true     // applies to any item with a Bucket component
+                        // TODO: cutoff drag events instead?
+                    }}
                 />
             </StandaloneDragItem>
         </div>
