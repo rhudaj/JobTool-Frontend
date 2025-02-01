@@ -35,8 +35,8 @@
         "sections": [
             {
                 "name": "summary",
-                "item_type": "summary",
-                "content": [{
+                "bucket_type": "summary",
+                "items": [{
                     "summary": "3 years of experience in software engineering with expertise in backend development, system design, and data processing. Passionate about building reliable and scalable systems. Proficient in:",
                     "languages": [
                         "Python",
@@ -63,8 +63,8 @@
             },
             {
                 "name": "experience",
-                "item_type": "experiences",
-                "content": [
+                "bucket_type": "experiences",
+                "items": [
                     {
                         "date": {
                             "start": { "month": 1, "year": 2021 },
@@ -114,8 +114,8 @@
             },
             {
                 "name": "projects",
-                "item_type": "experiences",
-                "content": [
+                "bucket_type": "experiences",
+                "items": [
                     {
                         "date": {
                             "start": { "month": 6, "year": 2023 },
@@ -154,8 +154,8 @@
             },
             {
                 "name": "education",
-                "item_type": "experiences",
-                "content": [
+                "bucket_type": "experiences",
+                "items": [
                     {
                         "date": {
                             "start": { "month": 9, "year": 2014 },

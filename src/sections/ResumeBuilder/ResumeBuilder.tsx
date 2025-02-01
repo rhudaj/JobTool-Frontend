@@ -20,6 +20,7 @@ import { usePopup } from "../../hooks/Popup/popup";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
+const CVS_PATH = `${SAMPLES_PATH}/CVs`;
 
 /* ------------------------------------------------------------------
  *                       CV STATE MANAGER                           *
@@ -52,6 +53,7 @@ function useCVInfo() {
             .then(r => r.json())
             .then(cv_info => {
                 if(cv_info) {
+                    log(`got cv_info from ${SAMPLES_PATH}`);
                     setData(cv_info);
                     setStatus(true);
                 } else {
@@ -126,28 +128,31 @@ function useCVs() {
                 "sample_resume2.json",
                 "sample_resume3.json",
             ];
-            const temp = [];
 
-            const fetchPromises = samps.map(name =>
-                fetch(`${SAMPLES_PATH}/CVs/${name}`)
-                .then(r => r.json())
-            );
-
-            // Wait for all fetches to finish
-            Promise.all(fetchPromises).then(cvData => {
-                if(cvData) temp.push(cvData);
-            }).catch((error) => {
+            // Fetch all sample files:
+            Promise.all(
+                samps.map(name =>
+                    fetch(`${CVS_PATH}/${name}`)
+                    .then(r => r.json())
+                )
+            )
+            // Once they're all fetched:
+            .then((cv_arr) => {
+                // Once they
+                if(cv_arr.length > 0) {
+                    log(`Got ${cv_arr.length} CVs from ${CVS_PATH}`)
+                    setData(cv_arr);
+                    set_cur(0);
+                    setStatus(true);
+                } else {
+                    setStatus(false);
+                }
+            })
+            // If you encountered an error:
+            .catch((error) => {
                 warn("Error fetching CV data:", error);
                 setStatus(false);
             });
-
-            if(temp.length > 0) {
-                setData(temp);
-                set_cur(0);
-                setStatus(true);
-            } else {
-                setStatus(false);
-            }
         }
     };
 

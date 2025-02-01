@@ -232,7 +232,7 @@ export function VersionedItemUI(props: {
                 <span className="control-button" id="new" onDoubleClick={openEditNewItemPopup} title={"Copy as New"}>+</span>
             </div>
             {/* this text is also floating */}
-            <div className='version-id'>{version_str}</div>
+            <div className='version-id-container'><p>{version_str}</p></div>
             <StandaloneDragItem item={dnd_item} item_type={bt.item_type} >
                 <DynamicComponent
                     key={cur} // force re-render when cur changes
