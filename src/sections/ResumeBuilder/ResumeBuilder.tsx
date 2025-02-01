@@ -1,7 +1,7 @@
 import "./resumebuilder.sass";
 import { useEffect, useState, useRef } from "react";
 import Section from "../../components/Section/Section";
-import { NamedCV, CV } from "job-tool-shared-types";
+import { NamedCV } from "job-tool-shared-types";
 import BackendAPI from "../../backend_api";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
@@ -20,6 +20,7 @@ import { usePopup } from "../../hooks/Popup/popup";
 import { useImmer } from "use-immer";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
+const TEST_MODE = true // process.env.REACT_APP_TEST_MODE === "1";
 const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
 const CVS_PATH = `${SAMPLES_PATH}/CVs`;
 
@@ -304,6 +305,26 @@ const ImportForm = (props: {
     );
 };
 
+// If TEST_MODE is enabled
+const SaveTrainingExampleForm = (props: {
+    onSave: (job: string) => void;
+}) => {
+
+    const [job, setJob] = useState<string>(null);
+
+    return (
+        <div className="popup-content">
+            <p>Save Training Example</p>
+            <textarea
+                className="job-paste-area"
+                placeholder="paste job description"
+                onBlur={(e)=>setJob(e.target.value)}
+            />
+            <button disabled={job === null} onClick={()=>props.onSave(job)}>Save</button>
+        </div>
+    )
+};
+
 function SavedCVs(props: {
     cvNames: string[];
     curIdx: number;
@@ -352,6 +373,7 @@ function ResumeBuilder() {
     const savePopup = usePopup();
     const importPopup = usePopup();
     const deletePopup = usePopup();
+    const saveTrainExPopup = usePopup();
 
     // Fetch data on mount
     useEffect(()=>{
@@ -391,6 +413,15 @@ function ResumeBuilder() {
             onDeleteCV: ()=>{
                 cvsState.deleteCur();
                 deletePopup.close()
+            },
+            onSaveTrainEx: (job: string) => {
+                console.log("onSaveTrainEx: job = ", job);
+                BackendAPI.post<{job: string, ncv: NamedCV}, null>("saveCVTrainEx", {
+                    job: job,
+                    ncv: cvsState.curCV()
+                }).then(v=>{
+                    saveTrainExPopup.close();
+                })
             }
         },
         settings: {
@@ -417,6 +448,9 @@ function ResumeBuilder() {
             onImportFormComplete: (ncv: NamedCV) => {
                 cvsState.add(ncv);
                 importPopup.close();
+            },
+            onSaveTrainExClicked: () => {
+                saveTrainExPopup.open(popup_content.saveTrainEx)
             }
         },
         settings_ui: {
@@ -456,6 +490,9 @@ function ResumeBuilder() {
                 <p>Are you sure you want to delete?</p>
                 <button onClick={CONTROLS.popups.onDeleteCV}>Yes</button>
             </div>
+        ),
+        saveTrainEx: (
+            <SaveTrainingExampleForm onSave={CONTROLS.popups.onSaveTrainEx}/>
         )
     };
 
@@ -485,6 +522,9 @@ function ResumeBuilder() {
                     <button onClick={CONTROLS.settings.onSaveCVInfoClicked}>Save CV Info</button>
                     </>
                 }
+                {TEST_MODE &&
+                    <button onClick={CONTROLS.settings.onSaveTrainExClicked}>Save Train Example</button>
+                }
             </div>
         )
     ];
@@ -493,7 +533,7 @@ function ResumeBuilder() {
     return (
         <Section id="section-cv" heading="Resume Builder">
             {/* ------------ POPUPS ------------ */}
-            {[exportPopup.PopupComponent, savePopup.PopupComponent, importPopup.PopupComponent, deletePopup.PopupComponent]}
+            {[exportPopup.PopupComponent, savePopup.PopupComponent, importPopup.PopupComponent, deletePopup.PopupComponent, saveTrainExPopup.PopupComponent]}
             {/* ------------ SETTINGS ------------ */}
             <div>
                 <div className="resume-builder-controls">
