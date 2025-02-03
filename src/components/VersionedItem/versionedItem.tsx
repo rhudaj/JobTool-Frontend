@@ -137,11 +137,10 @@ export function VersionedItemUI(props: {
 }) {
 
     // ----------------- STATE -----------------
-
     const [versions, setVersions] = useImmer<Item<any>[]>(null);
     const [cur, setCur] = useState(0);
     const editNewItemPopup = usePopup();
-    // ensures the dynamic component re-renders when the version changes:
+
 
     useEffect(()=> {
         setVersions(props.obj.versions)
@@ -234,30 +233,15 @@ export function VersionedItemUI(props: {
             <ControlsBox
                 id="version-controls"
                 controls={[
-                    {
-                        id: "edit",
-                        icon_class: "fa-solid fa-pen",
-                        onClick: openEditExistingPopup
-                    },
-                    {
-                        id:"switch",
-                        icon_class: "fa-solid fa-right-left",
-                        onClick: onSwitchVersion
-                    },
-                    {
-                        id: "new",
-                        icon_class: "fa-solid fa-plus",
-                        onClick: openEditNewItemPopup
-                    }
+                    { id: "edit", icon_class: "fa-solid fa-pen", onClick: openEditExistingPopup },
+                    { id:"switch", icon_class: "fa-solid fa-right-left", onClick: onSwitchVersion },
+                    { id: "new", icon_class: "fa-solid fa-plus", onClick: openEditNewItemPopup }
                 ]}
             />
-            {/* <div className='version-controls'> */}
-                {/* <i id="switch"  className="control-button fa-solid fa-right-left" onClick={switchVersion} title="Switch" /> */}
-                {/* <i id="edit"    className="control-button fa-solid fa-pen" onClick={openEditExistingPopup} title="Edit"/> */}
-                {/* <i id="new"     className="control-button fa-solid fa-plus" onClick={openEditNewItemPopup} title={"Copy as New"}/> */}
-            {/* </div> */}
             {/* this text is also floating */}
-            <div className='version-id-container'><p>{version_str}</p></div>
+            <div className='version-id-container'>
+                <p>{version_str}</p>
+            </div>
             <StandaloneDragItem item={dnd_item} item_type={bt.item_type} >
                 <DynamicComponent
                     key={cur} // force re-render when cur changes
