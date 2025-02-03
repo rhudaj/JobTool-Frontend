@@ -1,0 +1,35 @@
+.standalone-drag-item-wrapper
+    position: relative
+    & > .move-handle
+        position: absolute
+        width: min-content
+        padding: 1rem
+        top: -20rem
+        left: -20rem
+
+
+// ITEM WRAPPER
+.dnd-item-wrapper
+
+    position: relative
+
+    & .dragging:active
+        opacity: 0.1
+
+    // have to do this for some reason to get the hover to work
+    & .droppable, &.droppable
+        background-color: lightcyan
+
+
+// CONTROLS CONTAINER
+#dnd-item-controls
+    top: -1cqh
+    // height: max-content
+    left: 0
+    .control-button
+        font-size: 1cqw             // constant with container width
+        border: 1rem solid black
+        padding: .1em
+        opacity: 0.5
+        &:hover
+            opacity: 1

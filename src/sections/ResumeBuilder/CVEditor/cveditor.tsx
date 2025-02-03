@@ -81,7 +81,7 @@ const CVEditor = forwardRef<CVEditorHandle, CVEditorProps>((props, ref) => {
 						onUpdate={(newObj: CVSection)=>handleSectionChange(newObj, i)}
 					>
 						{/* SECTION ITEMS  -------------------------------------- */}
-						{S.items?.map((item: any, i: number) => 
+						{S.items?.map((item: any, i: number) =>
 							<DynamicComponent
 								type={S.bucket_type}
 								props={{

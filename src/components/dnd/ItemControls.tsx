@@ -1,5 +1,4 @@
 import useToggle from '../../hooks/toggle';
-import './ItemControls.sass';
 import React from "react";
 
 /**
@@ -83,11 +82,6 @@ const ItemControlsContainer = React.forwardRef<HTMLElement, any>((
     if (!refHovered) return null; // No controls when the parent is not hovered.
     return (
         <div className="dnd-item-controls"
-            style={{
-                position: "absolute",
-                top: -pad_top,
-                left: -pad_left,
-            }}
             onMouseEnter={()=>setIsHovered(true)}
             onMouseLeave={()=>setIsHovered(false)}
         >
