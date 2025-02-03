@@ -4,7 +4,7 @@
 .version-controls
     position: absolute // relative to parent
     top: 0
-    left: -20rem
+    right: 100% // always stays to leftr, regardless of child items css.
     display: flex
     flex-direction: column
 
@@ -27,13 +27,12 @@
 
 
 .control-button
-    padding: 2rem
-    &#switch
-        background-color: orange
-    &#new
-        background-color: lightgreen
-    &#edit
-        background-color: lightpink
+    color: grey
+    padding: 10rem
+    &:hover
+        color: black
+        transform: scale(1.1)
+        transition: all .3s
 
 // ITEM EDIT POPUP ------------------------------------------------------------
 

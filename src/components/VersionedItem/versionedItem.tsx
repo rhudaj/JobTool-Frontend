@@ -6,6 +6,7 @@ import TextEditDiv from '../TextEditDiv/texteditdiv';
 import { usePopup } from '../../hooks/Popup/popup';
 import { useImmer } from 'use-immer';
 import { isEqual } from 'lodash';
+import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
 
 export interface VersionedItem<T=any> {
     id: string,
@@ -13,6 +14,7 @@ export interface VersionedItem<T=any> {
     versions: Item<T>[],
 };
 
+// HELPER/SUB COMPONENTS
 
 function EditNewItem(props: {
     startingItem: Item<any>;
@@ -118,6 +120,8 @@ function EditExistingItem(props: {
         </div>
     );
 };
+
+// MAIN COMPONENT
 
 /**
  * You can flip through versions, but
@@ -227,9 +231,9 @@ export function VersionedItemUI(props: {
             {editNewItemPopup.PopupComponent}
             {/* CONTROLS ARE FLOATING TO THE LEFT (NOT IN THE LAYOUT) */}
             <div className='version-controls'>
-                <span className="control-button" id="switch" onDoubleClick={switchVersion} title="Switch">S</span>
-                <span className="control-button" id="edit" onDoubleClick={openEditExistingPopup} title="Edit">E</span>
-                <span className="control-button" id="new" onDoubleClick={openEditNewItemPopup} title={"Copy as New"}>+</span>
+                <i id="switch"  className="control-button fa-solid fa-right-left" onDoubleClick={switchVersion} title="Switch" />
+                <i id="edit"    className="control-button fa-solid fa-pen" onDoubleClick={openEditExistingPopup} title="Edit"/>
+                <i id="new"     className="control-button fa-solid fa-plus" onDoubleClick={openEditNewItemPopup} title={"Copy as New"}/>
             </div>
             {/* this text is also floating */}
             <div className='version-id-container'><p>{version_str}</p></div>
