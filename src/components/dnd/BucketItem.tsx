@@ -3,66 +3,8 @@ import { useDrag, useDrop } from "react-dnd";
 import React, { useContext } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
 import { Item } from "./types";
-import ItemControlsContainer from "./ItemControls";
 import { BucketContext } from "./Bucket";
-import { ControlsBox } from "../ControlsBox/ControlBox";
-
-import { useState, useEffect, useRef } from "react";
-
-function useHoverBuffer(buffer: number) {
-    const ref = useRef<HTMLDivElement>(null);
-    const [isHovered, setIsHovered] = useState(false);
-    const [nestedHovered, setNestedHovered] = useState(false);
-
-    // Handlers:
-
-    const handleMouseMove = (event: MouseEvent) => {
-        if (!ref.current) return;
-        const rect = ref.current.getBoundingClientRect();
-        const insideParent =
-            event.clientX >= rect.left &&
-            event.clientX <= rect.right &&
-            event.clientY >= rect.top &&
-            event.clientY <= rect.bottom;
-        const nearParent =
-            event.clientX >= rect.left - buffer &&
-            event.clientX <= rect.right + buffer &&
-            event.clientY >= rect.top - buffer &&
-            event.clientY <= rect.bottom + buffer;
-        setIsHovered(insideParent || nearParent);
-    }
-
-    const handleMouseEnter = () => {
-        if (!ref.current) return;
-        setNestedHovered(false); // reset
-        ref.current.dispatchEvent(
-            new CustomEvent("nested-hover", { bubbles: true,  })
-        ); // Dispatch nested-hover when mouse enters
-    }
-
-    const handleNestedHover = (event: Event) => {
-        // Don't show controls when nested-hover event reaches this component
-        if (!ref.current || event.target === ref.current) return
-        setNestedHovered(true);
-    }
-
-    useEffect(() => {
-        document.addEventListener("mousemove", handleMouseMove);
-        return () => document.removeEventListener("mousemove", handleMouseMove);
-    }, [buffer]);
-
-    useEffect(() => {
-        ref.current?.addEventListener("mouseenter", handleMouseEnter);
-        ref.current?.addEventListener("nested-hover", handleNestedHover);
-        return () => {
-            ref.current?.removeEventListener("mouseenter", handleMouseEnter);
-            ref.current?.removeEventListener("nested-hover", handleNestedHover);
-        };
-    }, []);
-
-    return { ref: ref, isHovered: isHovered && !nestedHovered };
-}
-
+import { ControlsBox, useHoverBuffer } from "../ControlsBox/ControlBox";
 
 export default function BucketItem(props: { item: Item, children: JSX.Element }) {
 
@@ -188,7 +130,7 @@ export function StandaloneDragItem(props: {
 
     // -------------------- STATE ---------------------
 
-    const ref = React.useRef(null);
+    const { ref, isHovered } = useHoverBuffer(15); // 40px buffer zone
 
     // -----------------DRAG FUNCTIONALITY-----------------
 
@@ -219,9 +161,14 @@ export function StandaloneDragItem(props: {
 
     return (
         <div ref={ref} className={classNames}>
-            <ItemControlsContainer ref={ref}>
-                <div ref={drag} className="move-handle">M</div>
-            </ItemControlsContainer>
+            { isHovered &&
+            <ControlsBox id="dnd-item-controls" controls={[
+                {
+                    id: "move",
+                    icon_class: "fa-solid fa-grip",
+                    ref: drag,
+                }
+            ]}/>}
             {props.children}
         </div>
     );
