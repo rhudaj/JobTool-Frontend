@@ -19,10 +19,13 @@ import TextItems from "../../components/TextItems/TextItems";
 import { usePopup } from "../../hooks/Popup/popup";
 import { useImmer } from "use-immer";
 
+// Get settigns from .env file 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
-const TEST_MODE = true // process.env.REACT_APP_TEST_MODE === "1";
+const TEST_MODE = process.env.REACT_APP_TEST_MODE === "1";
 const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
 const CVS_PATH = `${SAMPLES_PATH}/CVs`;
+
+console.log("USE_BACKEND: ", USE_BACKEND, " TEST_MODE: ", TEST_MODE);
 
 /* ------------------------------------------------------------------
  *                       CV STATE MANAGER                           *
@@ -522,8 +525,9 @@ function ResumeBuilder() {
                     <button onClick={CONTROLS.settings.onSaveCVInfoClicked}>Save CV Info</button>
                     </>
                 }
-                {TEST_MODE &&
+                {TEST_MODE ?
                     <button onClick={CONTROLS.settings.onSaveTrainExClicked}>Save Train Example</button>
+                    : null
                 }
             </div>
         )
