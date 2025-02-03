@@ -106,6 +106,7 @@ interface BucketItemContext {
     bucket_id: string,
     item_type: string,
     disableReplace?: boolean,
+    disableMove?: boolean,
     onDelete?: (id: any) => void,
     onAddItem?: (id: any, below: boolean) => void,
     onHover?: (hoverId: string, dragId: string, isBelow: boolean, isRight: boolean) => void,
@@ -122,6 +123,7 @@ interface BucketProps {
     dropDisabled?: boolean,
     deleteOnMoveDisabled?: boolean,
     addItemDisabled?: boolean,
+    moveItemDisabled?: boolean,
 };
 
 function ItemBucket(props: BucketProps) {
@@ -235,6 +237,7 @@ function ItemBucket(props: BucketProps) {
                             <BucketContext.Provider value={{
                                 bucket_id: props.bucket.id,
                                 item_type: type.item_type ?? DEFAULT_ITEM_TYPE,
+                                disableMove: props.moveItemDisabled,
                                 disableReplace: props.replaceDisabled,
                                 onDelete: !props.deleteDisabled         && bucket.removeItem,
                                 onAddItem: !props.addItemDisabled       && bucket.addBlankItem,

@@ -9,6 +9,8 @@ import { Item } from "../../../components/dnd/types";
 import useLogger from "../../../hooks/logger";
 import { useEffect } from "react";
 import { useImmer } from "use-immer";
+import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
+
 
 function SectionUI(props: {
 	obj: CVSection;
@@ -126,6 +128,16 @@ function ExperienceUI(props: {
 	};
 
 	if (!data) return null;
+
+	const bucket_items = data.description.map((item: string, i: number)=>(
+		<li>
+			<TextEditDiv
+				tv={item}
+				onUpdate={newVal=>handleItemChange(i, newVal)}
+			/>
+		</li>
+	));
+
 	return (
 		<div className="experience">
 			{/* ROW 1 */}
@@ -150,30 +162,25 @@ function ExperienceUI(props: {
 			{/* ROW 2 */}
 			<div className="exp-content">
 				<ul>
-					<ItemBucket
-						bucket={{
-							id: `${data.title}-bucket`,
-							items: data.description.map((item: string, i: number)=>({
-								id: `${data.title}-bp${i}`,
-								value: item
-							}))
-						}}
-						type={"exp-points"}
-						onUpdate={newPoints => handleUpdate('description', newPoints.map(I=>I.value))}
-						// By default, these are disabled
-						replaceDisabled deleteOnMoveDisabled
-						// Conditionally disabled
-						{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true } : {})}
-					>
-						{data.description.map((item: string, i: number)=>(
-							<li>
-								<TextEditDiv
-									tv={item}
-									onUpdate={newVal=>handleItemChange(i, newVal)}
-								/>
-							</li>
-						))}
-					</ItemBucket>
+					{props.disableBucketFeatures ? bucket_items : (
+						<ItemBucket
+							bucket={{
+								id: `${data.title}-bucket`,
+								items: data.description.map((item: string, i: number)=>({
+									id: `${data.title}-bp${i}`,
+									value: item
+								}))
+							}}
+							type={"exp-points"}
+							onUpdate={newPoints => handleUpdate('description', newPoints.map(I=>I.value))}
+							// By default, these are disabled
+							replaceDisabled deleteOnMoveDisabled
+							// Conditionally disabled
+							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
+						>
+							{bucket_items}
+						</ItemBucket>
+					)}
 				</ul>
 			</div>
 		</div>

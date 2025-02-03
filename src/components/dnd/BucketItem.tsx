@@ -92,7 +92,7 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
         <div ref={ref} className={classNames}>
             {props.children}
             { isHovered &&
-            <ControlsBox id="dnd-item-controls" controls={[
+            <ControlsBox className="dnd-item-controls" controls={[
                 {
                     id: "move",
                     icon_class: "fa-solid fa-grip",
@@ -162,13 +162,11 @@ export function StandaloneDragItem(props: {
     return (
         <div ref={ref} className={classNames}>
             { isHovered &&
-            <ControlsBox id="dnd-item-controls" controls={[
-                {
-                    id: "move",
-                    icon_class: "fa-solid fa-grip",
-                    ref: drag,
-                }
-            ]}/>}
+            <ControlsBox className="dnd-item-controls" controls={[{
+                id: "move",
+                icon_class: "fa-solid fa-grip",
+                ref: drag,
+            }]}/>}
             {props.children}
         </div>
     );

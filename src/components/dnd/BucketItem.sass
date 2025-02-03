@@ -9,7 +9,7 @@
 
 
 // ITEM WRAPPER
-.dnd-item-wrapper
+.dnd-item-wrapper, .standalone-drag-item-wrapper
 
     position: relative
 
@@ -21,15 +21,15 @@
         background-color: lightcyan
 
 
-// CONTROLS CONTAINER
-#dnd-item-controls
-    top: -1cqh
-    // height: max-content
-    left: 0
-    .control-button
-        font-size: 1.3cqw             // constant with container width
-        border: 1rem solid black
-        padding: .1em
-        opacity: 0.5
-        &:hover
-            opacity: 1
+    // CONTROLS CONTAINER
+    .dnd-item-controls
+        top: -1cqh
+        // height: max-content
+        left: 0
+        & > .control-button
+            font-size: min(1.3cqw, 10rem)
+            border: 1rem solid black
+            padding: .1em
+            opacity: 0.5
+            &:hover
+                opacity: 1
