@@ -1,0 +1,14 @@
+.controls-box
+    position: absolute // relative to parent
+    top: 0
+    right: 100% // always stays to leftr, regardless of child items css.
+    display: flex
+    flex-direction: column
+
+.control-button
+    color: grey
+    padding: 10rem
+    &:hover
+        color: black
+        transform: scale(1.1)
+        transition: all .3s

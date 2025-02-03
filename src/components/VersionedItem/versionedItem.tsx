@@ -6,7 +6,7 @@ import TextEditDiv from '../TextEditDiv/texteditdiv';
 import { usePopup } from '../../hooks/Popup/popup';
 import { useImmer } from 'use-immer';
 import { isEqual } from 'lodash';
-import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
+import { ControlsBox } from '../ControlsBox/ControlBox';
 
 export interface VersionedItem<T=any> {
     id: string,
@@ -163,10 +163,6 @@ export function VersionedItemUI(props: {
 
     // ----------------- CONTROLS -----------------
 
-    const switchVersion = () => {
-        setCur(prev => (prev === versions.length - 1 ? 0 : prev + 1));
-    };
-
     const onSaveNew = (newItem: Item) => {
         setVersions(draft => {
             draft.push(newItem);
@@ -218,6 +214,11 @@ export function VersionedItemUI(props: {
         )
     };
 
+
+    const onSwitchVersion = () => {
+        setCur(prev => (prev === versions.length - 1 ? 0 : prev + 1));
+    };
+
     // ----------------- RENDER -----------------
 
     if (!versions) return null;
@@ -230,11 +231,31 @@ export function VersionedItemUI(props: {
         <div className="versioned-item-container">
             {editNewItemPopup.PopupComponent}
             {/* CONTROLS ARE FLOATING TO THE LEFT (NOT IN THE LAYOUT) */}
-            <div className='version-controls'>
-                <i id="switch"  className="control-button fa-solid fa-right-left" onDoubleClick={switchVersion} title="Switch" />
-                <i id="edit"    className="control-button fa-solid fa-pen" onDoubleClick={openEditExistingPopup} title="Edit"/>
-                <i id="new"     className="control-button fa-solid fa-plus" onDoubleClick={openEditNewItemPopup} title={"Copy as New"}/>
-            </div>
+            <ControlsBox
+                id="version-controls"
+                controls={[
+                    {
+                        id: "edit",
+                        icon_class: "fa-solid fa-pen",
+                        onClick: openEditExistingPopup
+                    },
+                    {
+                        id:"switch",
+                        icon_class: "fa-solid fa-right-left",
+                        onClick: onSwitchVersion
+                    },
+                    {
+                        id: "new",
+                        icon_class: "fa-solid fa-plus",
+                        onClick: openEditNewItemPopup
+                    }
+                ]}
+            />
+            {/* <div className='version-controls'> */}
+                {/* <i id="switch"  className="control-button fa-solid fa-right-left" onClick={switchVersion} title="Switch" /> */}
+                {/* <i id="edit"    className="control-button fa-solid fa-pen" onClick={openEditExistingPopup} title="Edit"/> */}
+                {/* <i id="new"     className="control-button fa-solid fa-plus" onClick={openEditNewItemPopup} title={"Copy as New"}/> */}
+            {/* </div> */}
             {/* this text is also floating */}
             <div className='version-id-container'><p>{version_str}</p></div>
             <StandaloneDragItem item={dnd_item} item_type={bt.item_type} >
