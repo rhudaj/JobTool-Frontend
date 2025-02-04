@@ -187,6 +187,95 @@ function ExperienceUI(props: {
 	);
 }
 
+// TODO: this is a temp solution
+// dont show date.
+function ProjectUI(props: {
+	obj: Experience;
+	disableBucketFeatures?: boolean;
+	onUpdate?: (newObj: Experience) => void;
+}) {
+
+	const [data, setData] = useImmer(null);
+
+	// parent --> this
+	useEffect(()=>{
+		if(!props.obj) return;
+		setData(props.obj);
+	}, [props.obj]);
+
+	// this --> parent
+	useEffect(()=>{
+		if(!data) return;
+		props.onUpdate?.(data);
+	}, [data])
+
+	const handleUpdate = (field: keyof Experience, val: any) => {
+		setData(cur=>{
+			cur[field] = val;
+		})
+	};
+
+	const handleItemChange = (i: number, newVal: any) => {
+		setData(cur=>{
+			cur.description[i] = newVal;
+		})
+	};
+
+	if (!data) return null;
+
+	const bucket_items = data.description.map((item: string, i: number)=>(
+		<li>
+			<TextEditDiv
+				tv={item}
+				onUpdate={newVal=>handleItemChange(i, newVal)}
+			/>
+		</li>
+	));
+
+	return (
+		<div className="experience">
+			{/* ROW 1 */}
+			<div className="header-info">
+				{/* ROW 1 */}
+				<div>
+					{/* COL 1 */}
+					<div className="role-item-list">
+						<TextEditDiv className="title" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
+						<span style={{fontWeight: "bold"}}>|</span>
+						{ data.item_list && data.item_list.length>0  	? <DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} /> : null}
+					</div>
+					{/* COL 2 */}
+					{ data.link && <LinkUI {...data.link} /> }
+				</div>
+			</div>
+			{/* ROW 2 */}
+			<div className="exp-content">
+				<ul>
+					{props.disableBucketFeatures ? bucket_items : (
+						<ItemBucket
+							bucket={{
+								id: `${data.title}-bucket`,
+								items: data.description.map((item: string, i: number)=>({
+									id: `${data.title}-bp${i}`,
+									value: item
+								}))
+							}}
+							type={"exp-points"}
+							onUpdate={newPoints => handleUpdate('description', newPoints.map(I=>I.value))}
+							// By default, these are disabled
+							replaceDisabled deleteOnMoveDisabled
+							// Conditionally disabled
+							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
+						>
+							{bucket_items}
+						</ItemBucket>
+					)}
+				</ul>
+			</div>
+		</div>
+	);
+}
+
 function DateUI(props: { obj: DateRange, onUpdate?: any }) {
 
 	const DELIM = " - ";
@@ -264,4 +353,4 @@ function DelimitedList(props: {
 	);
 }
 
-export { SectionUI, SummaryUI, ExperienceUI, DateUI, LinkUI, DelimitedList }
+export { SectionUI, SummaryUI, ExperienceUI, ProjectUI, DateUI, LinkUI, DelimitedList }

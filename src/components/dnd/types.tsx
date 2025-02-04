@@ -1,5 +1,5 @@
 import { CVSection } from "job-tool-shared-types";
-import { ExperienceUI, SectionUI, SummaryUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
+import { ExperienceUI, SectionUI, SummaryUI, ProjectUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
 import { VersionedItemUI } from "../VersionedItem/versionedItem";
 import TextEditDiv from "../TextEditDiv/texteditdiv";
 import "./types.scss";
@@ -29,7 +29,14 @@ interface BucketType {
  * No hooks are conditionally called! The component itself
  * is chosen before rendering, keeping React’s hooks order intact. */
 function DynamicComponent({ type, props }) {
-    const Component = BucketTypes[type].DisplayItem; // THE KEY LINE!
+    let Component;
+    try {
+        const bt = BucketTypes[type];
+        Component = bt.DisplayItem;
+    } catch(err) {
+        alert(`ERROR! bucket type "${type}" DNE.`);
+        return <></>;
+    }
     return <Component {...props} />;
 }
 
@@ -44,6 +51,12 @@ const BucketTypes: { [key: string]: BucketType } = {
         isVertical: true,
         displayItemsClass:"experiences",
         DisplayItem: ExperienceUI
+    },
+    "projects": {
+        item_type: "projects",
+        isVertical: true,
+        displayItemsClass:"experiences",
+        DisplayItem: ProjectUI
     },
     "exp-points": {
         displayItemsClass: "exp-points",
@@ -79,7 +92,7 @@ const BucketTypes: { [key: string]: BucketType } = {
 
 const InfoPadMap = {
     "summary":      "summary",
-    "projects":     "experiences",
+    "projects":     "projects",
     "experience":   "experiences",
     "education":    "experiences",
     "paragraphs":   "cl-info-pad",

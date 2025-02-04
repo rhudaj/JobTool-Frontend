@@ -1,5 +1,5 @@
 import './versionedItem.sass'
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { BucketType, BucketTypes, DynamicComponent, Item } from "../dnd/types";
 import { StandaloneDragItem } from '../dnd/BucketItem';
 import TextEditDiv from '../TextEditDiv/texteditdiv';
