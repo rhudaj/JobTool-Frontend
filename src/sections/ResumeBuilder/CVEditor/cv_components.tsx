@@ -156,7 +156,7 @@ function ExperienceUI(props: {
 					<div className="hi-col-1 role-item-list">
 						{ data.role &&
 						<TextEditDiv className="role" tv={data.role} onUpdate={val => handleUpdate('role', val)} />}
-						{ data.item_list && data.item_list.length>0 &&
+						{  (data.item_list && data.item_list.length>1) &&
 						<>
 						<span className="divider">|</span>
 						<DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} />
@@ -250,7 +250,7 @@ function ProjectUI(props: {
 				<div className="hi-row-1">
 					<div className="hi-col-1 role-item-list">
 						<TextEditDiv className="title" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
-						{ data.item_list && data.item_list.length>0 &&
+						{ (data.item_list && data.item_list.length>1) &&
 						<>
 						<span className="divider">|</span>
 						<DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} />
