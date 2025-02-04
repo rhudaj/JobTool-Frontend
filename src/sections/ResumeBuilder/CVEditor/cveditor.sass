@@ -5,7 +5,7 @@ $page-padding-top:              calc(20 * $base-font-size)
 
 // CV CONTENT SPECIFIC:
 $hr-line-width:         .5rem
-$experiences-gap:       calc(5 * $base-font-size)
+$experiences-gap:       calc(7 * $base-font-size)
 $exp-row-gap:           calc(5 * $base-font-size)
 $exp-col-gap:           calc(5 * $base-font-size)
 $exp-head-content-gap:  calc(5 * $base-font-size)
@@ -68,35 +68,20 @@ $title-font:            calc(8 * $base-font-size)
                 display: flex
                 flex-direction: column
                 gap: 0.25em
-                & > *                   // children rows
+                .hi-row-1, .hi-row-2
                     display: flex
-                    & > *               // both rows
-                        width: 100%
-                    & > :first-child    // role - link
-                        width: 100%
-                        display: flex
-                        column-gap: 3%
-                    & > :last-child
-                        text-align: right
-                        white-space: nowrap
-                        width: min-content
-                    .role-item-list
-                        display: flex
-                        gap: 5rem
-                        white-space: nowrap
-                        .item-list
-                            width: max-content
-                            white-space: nowrap
-                        &:has(.role)
-                            .item-list::before
-                                font-weight: bold
-                                content: "|\00a0\00a0"
-
-
+                    justify-content: space-between
             // second child
             .exp-content
                 padding-left: $exp-indent
 
+.role-item-list
+    display: flex
+    gap: 5rem
+    white-space: nowrap
+    .item-list
+        width: max-content
+        white-space: nowrap
 
 // STYLES ------------------
 

@@ -143,20 +143,30 @@ function ExperienceUI(props: {
 			{/* ROW 1 */}
 			<div className="header-info">
 				{/* ROW 1 */}
-				<div>
-					<div>
+				<div className="hi-row-1">
+					<div className="hi-col-1">
 						<TextEditDiv className="title" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
-						{ data.link && <LinkUI {...data.link} /> }
 					</div>
-					<DateUI obj={data.date} onUpdate={val => handleUpdate('date', val)} />
+					<div className="hi-col-2">
+						<DateUI obj={data.date} onUpdate={val => handleUpdate('date', val)} />
+					</div>
 				</div>
 				{/* ROW 2 */}
-				<div>
-					<div className="role-item-list">
-						{ data.role     	? <TextEditDiv className="role" tv={data.role} onUpdate={val => handleUpdate('role', val)} /> 		: null }
-						{ data.item_list && data.item_list.length>0  	? <DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} /> : null}
+				<div className="hi-row-2">
+					<div className="hi-col-1 role-item-list">
+						{ data.role &&
+						<TextEditDiv className="role" tv={data.role} onUpdate={val => handleUpdate('role', val)} />}
+						{ data.item_list && data.item_list.length>0 &&
+						<>
+						<span className="divider">|</span>
+						<DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} />
+						</>
+						}
 					</div>
-					{ data.location ? <TextEditDiv className="location" tv={data.location} onUpdate={val => handleUpdate('location', val)}/> 	: null }
+					<div className="hi-col-2">
+						{ data.location &&
+						<TextEditDiv className="location" tv={data.location} onUpdate={val => handleUpdate('location', val)}/>}
+					</div>
 				</div>
 			</div>
 			{/* ROW 2 */}
@@ -237,15 +247,18 @@ function ProjectUI(props: {
 			{/* ROW 1 */}
 			<div className="header-info">
 				{/* ROW 1 */}
-				<div>
-					{/* COL 1 */}
-					<div className="role-item-list">
+				<div className="hi-row-1">
+					<div className="hi-col-1 role-item-list">
 						<TextEditDiv className="title" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
-						<span style={{fontWeight: "bold"}}>|</span>
-						{ data.item_list && data.item_list.length>0  	? <DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} /> : null}
+						{ data.item_list && data.item_list.length>0 &&
+						<>
+						<span className="divider">|</span>
+						<DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} />
+						</>}
 					</div>
-					{/* COL 2 */}
-					{ data.link && <LinkUI {...data.link} /> }
+					<div className="hi-col-2">
+						{ data.link && <LinkUI {...data.link} /> }
+					</div>
 				</div>
 			</div>
 			{/* ROW 2 */}
