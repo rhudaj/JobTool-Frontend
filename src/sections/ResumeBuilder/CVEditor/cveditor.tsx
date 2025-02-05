@@ -1,7 +1,7 @@
 import "./cveditor.sass";
 import { CV, CVSection } from "job-tool-shared-types";
 import * as UI from "./cv_components"
-import { forwardRef, useEffect, useImperativeHandle } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { useImmer } from "use-immer";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { DynamicComponent, Item } from "../../../components/dnd/types";
@@ -12,7 +12,8 @@ export interface CVEditorHandle {
 };
 
 interface CVEditorProps {
-	cv: CV
+	cv: CV;
+	onUpdate: () => void;
 };
 
 /**
@@ -23,23 +24,32 @@ const CVEditor = forwardRef<CVEditorHandle, CVEditorProps>((props, ref) => {
 	// -------------- MODEL ---------------
 
 	const [CV, setCV] = useImmer<CV>(null);
+	const isFirstRender = useRef(true);
 
+	// parent -> this
 	useEffect(() => {
-		log("new cv from props!");
 		setCV(props.cv)
+		isFirstRender.current = true;
 	}, [props.cv]);
 
-	// give parent access to CV
+	// notify the parent when changed (but not on mount, and not when its from the props.)
+	useEffect(() => {
+		if(!CV) return;
+		if(isFirstRender.current) {
+			isFirstRender.current = false;
+			return;
+		}
+		props.onUpdate()
+	}, [CV]);
+
+	// give can access it whenever it wants.
 	useImperativeHandle(ref, () => ({
 		getCV: () => { return CV }
 	}));
 
-	const log = useLogger("CVEditor");
-
 	// -------------- CONTROLS -----------
 
 	const handleSectionsBucketChange = (newItems: Item[]) => {
-		log(`SectionsBucketChange changed: `, newItems)
 		setCV(draft => {
 			draft.sections = newItems?.map((I: Item) => I.value)
 		})

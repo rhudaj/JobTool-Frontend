@@ -1,7 +1,7 @@
 import "./resumebuilder.sass";
 import { useEffect, useState, useRef } from "react";
 import Section from "../../components/Section/Section";
-import { NamedCV } from "job-tool-shared-types";
+import { CV, NamedCV } from "job-tool-shared-types";
 import BackendAPI from "../../backend_api";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
@@ -18,6 +18,7 @@ import TextEditDiv from "../../components/TextEditDiv/texteditdiv";
 import TextItems from "../../components/TextItems/TextItems";
 import { usePopup } from "../../hooks/Popup/popup";
 import { useImmer } from "use-immer";
+import { isEqual } from "lodash";
 
 // Get settigns from .env file
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
@@ -35,8 +36,6 @@ function useCVInfo() {
 
     const [data, setData] = useState<CVInfo>(null);
     const [status, setStatus] = useState<boolean>(false);   // was the data fetched?
-
-    useEffect(()=> log("Status == ", status), [status]);
 
     const log = useLogger("useCVInfo");
 
@@ -104,17 +103,16 @@ function useCVs() {
 
     // -------------------- STATE  --------------------
 
-    const [data, setData] = useState<NamedCV[]>(null);
+    const [data, setData] = useImmer<NamedCV[]>(null);
+
+    const [trackMods, setTrackMods] = useState<boolean[]>(null);
+
     const [status, setStatus] = useState<boolean>(false);   // was the data fetched?
     const [cur, set_cur] = useState<number>(null);
 
     const [log, warn] = useLogger("ResumeBuilder");
 
     // ---------------- CONTROLS (what user sees) ----------------
-
-    useEffect(()=>{
-        log("cur/data has changed!");
-    }, [cur, data])
 
     // setters
 
@@ -125,6 +123,7 @@ function useCVs() {
                 endpoint: "all_cvs",
                 handleSuccess: ncvs=>{
                     setData(ncvs);
+                    setTrackMods( new Array(ncvs.length).fill(false) );
                     set_cur(0);
                     setStatus(true);
                 },
@@ -168,7 +167,7 @@ function useCVs() {
         }
     };
 
-    const changeCV = (name: string) => {
+    const changeCur = (name: string) => {
         const idx = data.findIndex((cv: NamedCV) => cv.name === name);
         log("Changing active_cv to:", data[idx].name);
         set_cur(idx);
@@ -198,13 +197,26 @@ function useCVs() {
         set_cur(0);
     };
 
+
+    const setCurModified = (isMod: boolean, cv?: CV) => {
+        trackMods[cur] = isMod;
+        if (!cv) return;
+        setData(draft=>{
+            draft[cur].data = cv;
+        })
+    };
+
+    const isModified = (idx?: number) => {
+        return trackMods[idx ?? cur];
+    }
+
     // getters
 
     const curIdx = () => cur;
     const cvNames = () => data?.map((ncv: NamedCV) => ncv.name);
     const curCV = () => data ? data[cur] : null;
 
-    return { status, fetchData, curIdx, cvNames, curCV, add, changeCV, save2backend, deleteCur };
+    return { status, isModified, fetchData, curIdx, cvNames, curCV, add, changeCur, save2backend, deleteCur, setCurModified };
 }
 
 /* ------------------------------------------------------------------
@@ -413,6 +425,15 @@ function ResumeBuilder() {
                 exportPopup.close();
             },
             onSaveFormSubmit: (newName: string, newTags: string[]) => {
+                // first check that the cv has actually changed!
+
+                const edited_cv = editor_ref.current.getCV();
+
+                if(isEqual(edited_cv, cvsState.curCV().data)) {
+                    alert("No changes have been made to the CV!");
+                    return;
+                }
+
                 cvsState.save2backend({
                     name: newName,
                     tags: newTags,
@@ -485,6 +506,11 @@ function ResumeBuilder() {
             onClickSelectSettings: () => {
                 setSettingN(prev=>prev===0?null:0);
             }
+        },
+        other: {
+            onCurCvModified: () => {
+                cvsState.setCurModified(true, editor_ref.current.getCV());
+            }
         }
     };
 
@@ -531,7 +557,7 @@ function ResumeBuilder() {
                 <SavedCVs
                     cvNames={cvsState.cvNames()}
                     curIdx={cvsState.curIdx()}
-                    onChange={cvsState.changeCV}
+                    onChange={cvsState.changeCur}
                 />
             </SubSection>
         ),
@@ -572,6 +598,8 @@ function ResumeBuilder() {
             <div id="display-info">
                 <div>
                     <span className="descr">Name:</span> {cvsState.curCV()?.name}
+                    {cvsState.isModified() &&
+                    <span className="is-modified-status">{"(modified)"}</span>}
                 </div>
                 <div>
                     <span className="descr">Tags:</span>
@@ -585,7 +613,7 @@ function ResumeBuilder() {
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
                     <PrintablePage page_id="cv-page">
-                        <CVEditor cv={cvsState.curCV()?.data} ref={editor_ref} />
+                        <CVEditor cv={cvsState.curCV()?.data} onUpdate={CONTROLS.other.onCurCvModified} ref={editor_ref} />
                     </PrintablePage>
                     {/* <div>TESTING</div> */}
                     <InfoPad ref={infoPad_ref} info={cvInfoState.get()} />
