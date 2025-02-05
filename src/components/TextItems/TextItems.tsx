@@ -31,14 +31,7 @@ const TextItems = forwardRef((props: {
         })
     }
 
-    const Item = (txt: string, idx: number) => (
-        <span className="item" onDoubleClick={e=>onDeleteItem(idx)}>
-            {txt}
-        </span>
-    )
-
     if (!items) return null;
-
     return (
         <div className="text-items">
             <div className="text-input"
@@ -47,7 +40,11 @@ const TextItems = forwardRef((props: {
                 onKeyDown={handleKeyDown}
             />
             <div className="items-container">
-                {items.map(Item)}
+                { items.map((txt: string, idx: number) => (
+                    <span className="item" onDoubleClick={()=>onDeleteItem(idx)}>
+                        {txt}
+                    </span>
+                ))}
             </div>
         </div>
     )

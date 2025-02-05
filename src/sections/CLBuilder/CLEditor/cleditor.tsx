@@ -39,8 +39,8 @@ function CLEditor(props: {
             onUpdate={handleBucketUpdate}
         >
             {
-                pgs?.map((p: string)=>
-                    <DynamicComponent type="cl-paragraphs" props={{obj: p}}/>
+                pgs?.map((p: string, i: number)=>
+                    <DynamicComponent key={i} type="cl-paragraphs" props={{obj: p}}/>
                 )
             }
         </ItemBucket>

@@ -19,7 +19,7 @@ import TextItems from "../../components/TextItems/TextItems";
 import { usePopup } from "../../hooks/Popup/popup";
 import { useImmer } from "use-immer";
 
-// Get settigns from .env file 
+// Get settigns from .env file
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 const TEST_MODE = process.env.REACT_APP_TEST_MODE === "1";
 const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
@@ -336,7 +336,7 @@ function SavedCVs(props: {
 }) {
     const curName = props.cvNames ? props.cvNames[props.curIdx] : "";
 
-    const CVThumnail = (name: string) => (
+    const CVThumnail = ({name}) => (
         <div
             className={joinClassNames(
                 "cv-thumbnail",
@@ -350,7 +350,9 @@ function SavedCVs(props: {
 
     return (
         <div className="cv-thumnail-container">
-            {props.cvNames?.map(CVThumnail)}
+            {props.cvNames?.map((name, i)=>
+                <CVThumnail key={i} name={name} />
+            )}
         </div>
     );
 }

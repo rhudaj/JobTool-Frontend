@@ -55,7 +55,7 @@ const useBucket = (initVals: Item[]) => {
     const getIdx = (id: any) => items.findIndex(I => I.id === id);
 
     const getValues = () => {
-        return items?.map((I) => I.value);
+        return items?.map(I => I.value);
     };
 
     /**

@@ -18,27 +18,29 @@ class BackendAPI {
 
         const url = `${this.HOST}/${endpoint}`;
 
-        this.log(`Attempting ${method} =>`, url);
-
         try {
+            // build the request options:
             const options: RequestInit = {
                 method,
                 headers: { "Content-Type": "application/json" },
-                ...(body && { body: JSON.stringify(body) }),
             };
+
+            // add a body if any:
+            if(body) options.body = JSON.stringify(body);
 
             const response = await fetch(url, options);
 
-            this.log("Response status =", response.status);
-
             if (!response.ok) {
-                throw new Error(`Request failed with status: ${response.status}`);
+                this.log(`${endpoint} Request failed!\n\tstatus: ${response.status}\n\tmessage: ${response.statusText}`);
+                return null;
+            } else {
+                this.log(`${endpoint} Request success!\n\tstatus: ${response.status}\n\tmessage: ${response.statusText}`)
             }
 
             const data: T = await response.json();
             return data;
         } catch (err: unknown) {
-            this.log("ERROR with request to", url, "err:", err);
+            this.log(`ERROR with request to ${endpoint}:\n\t`, err);
             return null;
         }
     }

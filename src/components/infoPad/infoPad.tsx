@@ -92,7 +92,7 @@ const InfoPad = forwardRef<InfoPadHandle, { info: CVInfo }>(({ info }, ref) => {
     return (
         <div id="info-pad">
             {sections.map((sec, sec_idx: number) => (
-                <div className="info-pad-section" key={sec_idx}>
+                <div key={sec_idx} className="info-pad-section">
                     <h2>{sec.secName.toUpperCase()}</h2>
                     <div className='section-items'>
                         {sec.items.map((I: VersionedItem, item_idx) =>

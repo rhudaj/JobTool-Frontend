@@ -27,7 +27,14 @@ export function ControlsBox(props: {
     return (
         <div className={joinClassNames(props.className, "controls-box")} id={props.id} style={Orientation}>
             {props.controls.map(({ id, icon_class, title, disabled, ...handlers }) => (
-                disabled ? null : <i key={id} id={id} className={joinClassNames("control-button", icon_class)} title={title} {...handlers}/>
+                disabled ? null :
+                    <i
+                        key={id}
+                        id={id}
+                        className={joinClassNames("control-button", icon_class)}
+                        title={title}
+                        {...handlers}
+                    />
             ))}
         </div>
     );
