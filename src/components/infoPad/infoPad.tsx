@@ -80,7 +80,6 @@ const InfoPad = forwardRef<InfoPadHandle, { info: CVInfo }>(({ info }, ref) => {
     // ----------------- CONTROLS -----------------
 
     const onVersionedItemUpdate = (newVI: VersionedItem, sec_idx, item_idx) => {
-        console.log("new versioned item: ", newVI)
         setSections(cur=>{
             cur[sec_idx].items[item_idx] = newVI;
         })

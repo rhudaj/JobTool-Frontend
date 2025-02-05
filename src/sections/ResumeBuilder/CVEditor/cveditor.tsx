@@ -90,7 +90,7 @@ const CVEditor = forwardRef<CVEditorHandle, CVEditorProps>((props, ref) => {
 						{/* SECTION ITEMS  -------------------------------------- */}
 						{S.items?.map((item: any, j: number) =>
 							<DynamicComponent
-								key={j}
+								key={`${i}-${j}`}
 								type={S.bucket_type}
 								props={{
 									obj: item,

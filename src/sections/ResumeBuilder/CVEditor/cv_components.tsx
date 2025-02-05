@@ -130,7 +130,7 @@ function ExperienceUI(props: {
 	if (!data) return null;
 
 	const bucket_items = data.description.map((item: string, i: number)=>(
-		<li>
+		<li key={i}>
 			<TextEditDiv
 				tv={item}
 				onUpdate={newVal=>handleItemChange(i, newVal)}
@@ -234,7 +234,7 @@ function ProjectUI(props: {
 	if (!data) return null;
 
 	const bucket_items = data.description.map((item: string, i: number)=>(
-		<li>
+		<li key={i}>
 			<TextEditDiv
 				tv={item}
 				onUpdate={newVal=>handleItemChange(i, newVal)}

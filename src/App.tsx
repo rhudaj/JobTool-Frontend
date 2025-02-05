@@ -23,7 +23,13 @@ function SideMenu(props: {
         );
     };
 
-    return <div id="side-menu">{props.labels.map((l,i)=><MenuItem key={i} text={l}/>)}</div>;
+    return (
+        <div id="side-menu">
+            {props.labels.map((txt,i)=>
+                <MenuItem key={txt} text={txt}/>
+            )}
+        </div>
+    );
 }
 
 function TopMenu(props: {}) {

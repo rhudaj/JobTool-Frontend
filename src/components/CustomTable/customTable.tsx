@@ -37,7 +37,9 @@ function CustomTable(props: {
 
     const HeaderRow = () => (
         <tr key='header-row' id="header-row">
-            { props.headers.map((h,i) => <td key={i}>{h}</td>) }
+            {props.headers.map((h,i) =>
+                <td key={`header-col-${i}`}>{h}</td>
+            )}
         </tr>
     );
 
