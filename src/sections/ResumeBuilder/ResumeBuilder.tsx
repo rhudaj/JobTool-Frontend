@@ -216,7 +216,7 @@ function useCVs() {
     const cvNames = () => data?.map((ncv: NamedCV) => ncv.name);
     const curCV = () => data ? data[cur] : null;
 
-    return { status, isModified, fetchData, curIdx, cvNames, curCV, add, changeCur, save2backend, deleteCur, setCurModified };
+    return { status, isModified, trackMods, fetchData, curIdx, cvNames, curCV, add, changeCur, save2backend, deleteCur, setCurModified };
 }
 
 /* ------------------------------------------------------------------
@@ -358,25 +358,25 @@ function SavedCVs(props: {
     curIdx: number;
     onChange: (name: string) => void;
     onAdd?: () => void;
+    trackMods?: boolean[];
 }) {
     const curName = props.cvNames ? props.cvNames[props.curIdx] : "";
 
-    const CVThumnail = ({name}) => (
-        <div
-            className={joinClassNames(
-                "cv-thumbnail",
-                name === curName ? "active" : ""
-            )}
-            onClick={(e) => props.onChange(name)}
-        >
-            {name}
-        </div>
-    );
 
     return (
         <div className="cv-thumnail-container">
             {props.cvNames?.map((name, i)=>
-                <CVThumnail key={i} name={name} />
+                <div
+                    key={i}
+                    className={joinClassNames(
+                        "cv-thumbnail",
+                        name === curName ? "active" : "",
+                        props.trackMods?.[i] ? "is-modified" : "",
+                    )}
+                    onClick={(e) => props.onChange(name)}
+                >
+                    {name}
+                </div>
             )}
         </div>
     );
@@ -558,6 +558,7 @@ function ResumeBuilder() {
                     cvNames={cvsState.cvNames()}
                     curIdx={cvsState.curIdx()}
                     onChange={cvsState.changeCur}
+                    trackMods={cvsState.trackMods}
                 />
             </SubSection>
         ),
