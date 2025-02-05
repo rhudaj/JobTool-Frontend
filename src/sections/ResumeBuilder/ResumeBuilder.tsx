@@ -43,15 +43,15 @@ function useCVInfo() {
     // FETCH the data:
     const fetchData = () => {
         if(USE_BACKEND) {
-            BackendAPI.get<CVInfo>("cv_info").then(cv_info=>{
-                if(cv_info) {
-                    log(`got cv_info from backend`)
-                    setData(cv_info);
-                    setStatus(true);
-                } else {
-                    log(`NO cv_info from backend`)
-                }
-            });
+            BackendAPI.request<undefined, CVInfo>({
+                method: "GET",
+                endpoint: "cv_info",
+                handleSuccess: cv_info => { setData(cv_info); setStatus(true); },
+                handleError: (msg: string) => {
+                    setStatus(false);
+                    alert(msg);
+                },
+            })
         } else {
             // from the /public folder
             fetch(SAMPLES_PATH + "cv_info.json")
@@ -69,7 +69,13 @@ function useCVInfo() {
     };
 
     const save2backend = (newData: CVInfo) => {
-        BackendAPI.post<CVInfo, null>("saveCVInfo", newData);
+        BackendAPI.request<CVInfo>({
+            method: "POST",
+            endpoint: "saveCVInfo",
+            body: newData,
+            handleSuccess: () => alert("Success! Saved cv info"),
+            handleError: alert,
+        });
     };
 
     const get = () => data;
@@ -114,18 +120,19 @@ function useCVs() {
 
     const fetchData = () => {
         if(USE_BACKEND) {
-            BackendAPI.get<NamedCV[]>("all_cvs").then(ncvs=>{
-                // const valid_cvs = ncvs?.filter(cv => cv && cv.name && cv.data);
-                if(ncvs && ncvs.length > 0) {
-                    log(`Got ${ncvs.length} CVs from backend`);
+            BackendAPI.request<undefined, NamedCV[]>({
+                method: "GET",
+                endpoint: "all_cvs",
+                handleSuccess: ncvs=>{
                     setData(ncvs);
                     set_cur(0);
                     setStatus(true);
-                } else {
-                    log(`Got NO CVs from backend`);
+                },
+                handleError: (msg: string) => {
                     setStatus(false);
+                    alert(msg);
                 }
-            });
+            })
         }
         else {
             const samps = [
@@ -168,7 +175,13 @@ function useCVs() {
     };
 
     const save2backend = (ncv: NamedCV) => {
-        BackendAPI.post<NamedCV, null>("saveCV", ncv);
+        BackendAPI.request<NamedCV>({
+            method: "POST",
+            endpoint: "saveCV",
+            body: ncv,
+            handleSuccess: ()=>alert("Saved CV!"),
+            handleError: alert
+        })
     };
 
     const add = (named_cv: NamedCV) => {
@@ -421,11 +434,18 @@ function ResumeBuilder() {
             },
             onSaveTrainEx: (job: string) => {
                 console.log("onSaveTrainEx: job = ", job);
-                BackendAPI.post<{job: string, ncv: NamedCV}, null>("saveCVTrainEx", {
-                    job: job,
-                    ncv: cvsState.curCV()
-                }).then(v=>{
-                    saveTrainExPopup.close();
+                BackendAPI.request<{job: string, ncv: NamedCV}>({
+                    method: "POST",
+                    endpoint: "saveCVTrainEx",
+                    body: {
+                        job: job,
+                        ncv: cvsState.curCV()
+                    },
+                    handleSuccess: () => {
+                        alert("Saved Training Example")
+                        saveTrainExPopup.close();
+                    },
+                    handleError: alert
                 })
             }
         },

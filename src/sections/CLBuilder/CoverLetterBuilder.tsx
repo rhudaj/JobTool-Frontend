@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import BackendAPI from "../../backend_api";
 import Section from "../../components/Section/Section";
 import { DndProvider } from "react-dnd";
@@ -28,11 +28,13 @@ const JobPopup = (props: {
     }
 
     const onGenerateClicked = () => {
-        BackendAPI.post<{ job_info: string }, string[]>("genCL", { job_info: jobTxt })
-        .then(result=>{
-            console.log("received cl paragraphs: ", result);
-            setResult(result);
-        })
+        BackendAPI.request<{ job_info: string }, string[]>({
+            method: "POST",
+            endpoint: "genCL",
+            body: { job_info: jobTxt },
+            handleSuccess: (data: string[]) => setResult(data),
+            handleError: alert
+        });
     };
 
     const onContinueClicked = () => {
@@ -74,14 +76,12 @@ function CLBuilder(props: {}) {
     useEffect(() => {
         if(process.env.REACT_APP_USE_BACKEND === "1") {
             // Get the cl info
-            BackendAPI.get<any>("cl_info").then((cl_info) => {
-                if (cl_info) {
-                    console.log("Got CL info from backend:");
-                    setCLInfo(cl_info);
-                } else {
-                    console.log("No CL info from backend");
-                }
-            });
+            BackendAPI.request({
+                method: "GET",
+                endpoint: "cl_info",
+                handleSuccess: setCLInfo,
+                handleError: alert
+            })
         } else {
             setParagraphs([])
         }

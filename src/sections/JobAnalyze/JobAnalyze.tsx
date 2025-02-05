@@ -13,9 +13,15 @@ function JobAnalyze() {
     const [jobText, setJobText] = useState<string>("");
 
     const saveAnnotation = () => {
-        BackendAPI.post<{ job_text: string, annotations: any[] }, null>("save_annotation", {
-            job_text: initJobText,
-            annotations: JIRef.current.get(),
+        BackendAPI.request<{ job_text: string, annotations: any[] }>({
+            method: "POST",
+            endpoint: "save_annotation",
+            body: {
+                job_text: initJobText,
+                annotations: JIRef.current.get(),
+            },
+            handleSuccess: () => alert("Success!"),
+            handleError: alert,
         });
     };
 
