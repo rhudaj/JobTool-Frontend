@@ -46,9 +46,14 @@ const CVEditor = forwardRef<CVEditorHandle, CVEditorProps>((props, ref) => {
 	};
 
 	const handleSectionChange = (newObj: CVSection, idx: number) => {
-		log(`section ${idx} changed: `, newObj)
 		setCV(draft => {
 			draft.sections[idx] = newObj;
+		})
+	};
+
+	const handleItemChange = (newVal: any, sec_idx: number, item_idx: number) => {
+		setCV(draft => {
+			draft.sections[sec_idx].items[item_idx] = newVal;
 		})
 	};
 
@@ -77,16 +82,19 @@ const CVEditor = forwardRef<CVEditorHandle, CVEditorProps>((props, ref) => {
 			>
 				{/* SECTIONS -------------------------------------- */}
 				{CV.sections?.map((S: CVSection, i: number) =>
-					<UI.SectionUI key={i} obj={S}
+					<UI.SectionUI
+						key={i}
+						obj={S}
 						onUpdate={(newObj: CVSection)=>handleSectionChange(newObj, i)}
 					>
 						{/* SECTION ITEMS  -------------------------------------- */}
-						{S.items?.map((item: any, i: number) =>
+						{S.items?.map((item: any, j: number) =>
 							<DynamicComponent
+								key={j}
 								type={S.bucket_type}
 								props={{
 									obj: item,
-									// don't care ab updates to individual items
+									onUpdate: (newVal: any) => handleItemChange(newVal, i, j)
 								}}
 							/>
 						)}
