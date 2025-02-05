@@ -105,10 +105,10 @@ function useCVs() {
 
     const [data, setData] = useImmer<NamedCV[]>(null);
 
-    const [trackMods, setTrackMods] = useState<boolean[]>(null);
-
     const [status, setStatus] = useState<boolean>(false);   // was the data fetched?
     const [cur, set_cur] = useState<number>(null);
+
+    const [trackMods, setTrackMods] = useState<boolean[]>(null);
 
     const [log, warn] = useLogger("ResumeBuilder");
 
@@ -155,6 +155,7 @@ function useCVs() {
                     setData(cv_arr);
                     set_cur(0);
                     setStatus(true);
+                    setTrackMods( new Array(cv_arr.length).fill(false) );
                 } else {
                     setStatus(false);
                 }
