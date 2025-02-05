@@ -105,8 +105,8 @@ function CustomTable(props: {
                 {
                     // Map each item of data to a row
                     data.map((rowData: any, rowNum: number) => (
-                        <DataRow key={rowNum} rowNum={rowNum} rowData={
-                            // ensure <item> is an array if not already
+                        <DataRow key={`row-${rowNum}`} rowNum={rowNum} rowData={
+                            // ensure item is an array if not already
                             Array.isArray(rowData) ? rowData : [rowData]
                         }/>
                     ))

@@ -149,16 +149,11 @@ export function VersionedItemUI(props: {
     // Alert parent when state changes
     useEffect(()=>{
         if(!versions) return;
-        console.log("versions update: ", versions);
         props.onUpdate({
             ...props.obj,
             versions: versions
         })
     }, [versions])
-
-    useEffect(() => {
-        console.log(`Switched version to ${cur}`, versions?.[cur]);
-    }, [cur, versions]);
 
     // ----------------- CONTROLS -----------------
 

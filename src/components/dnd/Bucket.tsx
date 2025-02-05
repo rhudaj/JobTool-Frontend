@@ -232,7 +232,7 @@ function ItemBucket(props: BucketProps) {
                 {bucket.items.map((I: Item, i: number) => {
 
                     return (
-                        <div key={i}>
+                        <div key={`bucket-${props.bucket.id}-item-${i}`}>
                             { i === 0 && <DropGap isActive={hoveredGap === prevGap(i)} /> }
                             <BucketContext.Provider value={{
                                 bucket_id: props.bucket.id,

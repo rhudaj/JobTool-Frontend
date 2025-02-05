@@ -18,7 +18,6 @@ export function ControlsBox(props: {
     controls: IconControl[];
     isVertical?: boolean;
 }) {
-    console.log("Controls: ", props.controls);
 
     const Orientation: React.CSSProperties = {
         flexDirection: props.isVertical ? "column" : "row"
@@ -29,7 +28,7 @@ export function ControlsBox(props: {
             {props.controls.map(({ id, icon_class, title, disabled, ...handlers }) => (
                 disabled ? null :
                     <i
-                        key={id}
+                        key={id} // static list
                         id={id}
                         className={joinClassNames("control-button", icon_class)}
                         title={title}
