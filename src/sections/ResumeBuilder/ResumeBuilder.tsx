@@ -427,10 +427,7 @@ function ResumeBuilder() {
             },
             onSaveFormSubmit: (newName: string, newTags: string[]) => {
                 // first check that the cv has actually changed!
-
-                const edited_cv = editor_ref.current.getCV();
-
-                if(isEqual(edited_cv, cvsState.curCV().data)) {
+                if(!cvsState.trackMods[cvsState.curIdx()]) {
                     alert("No changes have been made to the CV!");
                     return;
                 }
