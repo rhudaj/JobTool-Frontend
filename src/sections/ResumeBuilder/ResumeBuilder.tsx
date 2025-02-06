@@ -13,7 +13,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import useLogger from "../../hooks/logger";
 import SplitView from "../../components/SplitView/splitview";
-import CVEditor, { CVEditorHandle } from "./CVEditor/cveditor";
+import CVEditor from "./CVEditor/cveditor";
 import * as util from "../../util/fileInOut";
 import { joinClassNames } from "../../util/joinClassNames";
 import SubSection from "../../components/Section/SubSection";
@@ -23,6 +23,8 @@ import { usePopup } from "../../hooks/Popup/popup";
 import { useImmer } from "use-immer";
 import { isEqual } from "lodash";
 import { useCVs } from "./useCVs";
+
+import { CVContext, CVDispatchContext } from "./CVContext";
 
 // Get settigns from .env file
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
@@ -279,7 +281,6 @@ function ResumeBuilder() {
     const cvs = useCVs();
     const cv_info = useCVInfo();
 
-    const editor_ref = useRef<CVEditorHandle>(null);
     const infoPad_ref = useRef<InfoPadHandle>(null);
 
     const [settingN, setSettingN] = useState(null); // null => none, 0 => SavedCVs, 1 => file settings
@@ -307,14 +308,14 @@ function ResumeBuilder() {
                 exportPopup.close();
             },
             onJsonClicked: () => {
-                const cv = editor_ref.current.getCV();
+                const cv = cvs.cur;
                 if (cv) util.downloadAsJson(cv);
                 exportPopup.close();
             },
             onSaveFormSubmit: (newName: string, newTags: string[]) => {
                 // first check that the cv has actually changed!
 
-                const edited_cv = editor_ref.current.getCV();
+                const edited_cv = cvs.cur.data;
 
                 if (isEqual(edited_cv, cvs.cur.data)) {
                     alert("No changes have been made to the CV!");
@@ -324,7 +325,7 @@ function ResumeBuilder() {
                 cvs.save({
                     name: newName,
                     tags: newTags,
-                    data: editor_ref.current.getCV(),
+                    data: edited_cv,
                 });
                 savePopup.close();
             },
@@ -399,12 +400,7 @@ function ResumeBuilder() {
             onClickSelectSettings: () => {
                 setSettingN((prev) => (prev === 0 ? null : 0));
             },
-        },
-        other: {
-            onCurCvModified: () => {
-                cvs.setCurModified(true, editor_ref.current.getCV());
-            },
-        },
+        }
     };
 
     // ---------------- VIEW ----------------
@@ -537,11 +533,11 @@ function ResumeBuilder() {
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
                     <PrintablePage page_id="cv-page">
-                        <CVEditor
-                            cv={cvs.cur?.data}
-                            dispatch={cvs.dispatch}
-                            ref={editor_ref}
-                        />
+                        <CVContext.Provider value={cvs.cur?.data}>
+                            <CVDispatchContext.Provider value={cvs.dispatch}>
+                                <CVEditor />
+                            </CVDispatchContext.Provider>
+                        </CVContext.Provider>
                     </PrintablePage>
                     <InfoPad ref={infoPad_ref} info={cv_info.get()} />
                 </SplitView>

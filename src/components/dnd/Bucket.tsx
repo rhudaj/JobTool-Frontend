@@ -8,6 +8,10 @@ import BucketItem from "./BucketItem";
 import { isEqual } from "lodash";
 import { useImmer } from "use-immer";
 
+// TODO: bucket should not have internal state. It should simply be a wrapper around the items that its passed.
+// At the moment, you being passes items. Then creating internal state. Then updating internal state, then notifying the parent of the change.
+// And then the parent updates the items. This is a bit convoluted. The bucket should simply be a wrapper around the items.
+
 /* Empty all values in an object (recursively) */
 const emptyObject = (obj: any): any => {
     // 3 CASES

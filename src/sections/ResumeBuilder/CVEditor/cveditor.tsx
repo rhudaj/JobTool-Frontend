@@ -1,72 +1,20 @@
 import "./cveditor.sass";
 import { CV, CVSection } from "job-tool-shared-types";
 import * as UI from "./cv_components"
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
-import { useImmer } from "use-immer";
 import ItemBucket from "../../../components/dnd/Bucket";
-import { DynamicComponent, Item } from "../../../components/dnd/types";
-import useLogger from "../../../hooks/logger";
-import { CVAction, MODIFY_CUR } from "../useCVs";
-
-export interface CVEditorHandle {
-	getCV: () => CV;
-};
-
-interface CVEditorProps {
-	cv: CV;
-	dispatch: React.Dispatch<CVAction>
-};
+import { DynamicComponent } from "../../../components/dnd/types";
+import { useContext } from "react";
+import { CVContext, CVDispatchContext } from "../CVContext";
+import { createContext } from "vm";
 
 /**
  * Cares only about the current CV being edited.
+ * Requires a CVContext and a CVDispatchContext to be provided.
 */
-const CVEditor = forwardRef<CVEditorHandle, CVEditorProps>((props, ref) => {
+function CVEditor() {
 
-	// -------------- MODEL ---------------
-
-	const [CV, setCV] = useImmer<CV>(null);
-	const isFirstRender = useRef(true);
-
-	// parent -> this
-	useEffect(() => {
-		setCV(props.cv)
-		isFirstRender.current = true;
-	}, [props.cv]);
-
-	// notify the parent when changed (but not on mount, and not when its from the props.)
-	useEffect(() => {
-		if(!CV) return;
-		if(isFirstRender.current) {
-			isFirstRender.current = false;
-			return;
-		}
-		props.dispatch({type: MODIFY_CUR, payload: {cv: CV}});
-	}, [CV]);
-
-	// give can access it whenever it wants.
-	useImperativeHandle(ref, () => ({
-		getCV: () => { return CV }
-	}));
-
-	// -------------- CONTROLS -----------
-
-	const handleSectionsBucketChange = (newItems: Item[]) => {
-		setCV(draft => {
-			draft.sections = newItems?.map((I: Item) => I.value)
-		})
-	};
-
-	const handleSectionChange = (newObj: CVSection, idx: number) => {
-		setCV(draft => {
-			draft.sections[idx] = newObj;
-		})
-	};
-
-	const handleItemChange = (newVal: any, sec_idx: number, item_idx: number) => {
-		setCV(draft => {
-			draft.sections[sec_idx].items[item_idx] = newVal;
-		})
-	};
+	const CV: CV = useContext(CVContext);
+	const cv_dispatch = useContext(CVDispatchContext);
 
 	// -------------- VIEW --------------
 
@@ -88,32 +36,15 @@ const CVEditor = forwardRef<CVEditorHandle, CVEditorProps>((props, ref) => {
 					}))
 				}}
 				type="sections"
-				onUpdate={handleSectionsBucketChange}
 				addItemDisabled
 			>
-				{/* SECTIONS -------------------------------------- */}
-				{CV.sections?.map((S: CVSection, i: number) =>
-					<UI.SectionUI
-						key={i}
-						obj={S}
-						onUpdate={(newObj: CVSection)=>handleSectionChange(newObj, i)}
-					>
-						{/* SECTION ITEMS  -------------------------------------- */}
-						{S.items?.map((item: any, j: number) =>
-							<DynamicComponent
-								key={`${i}-${j}`}
-								type={S.bucket_type}
-								props={{
-									obj: item,
-									onUpdate: (newVal: any) => handleItemChange(newVal, i, j)
-								}}
-							/>
-						)}
-					</UI.SectionUI>
-				)}
+					{/* SECTIONS -------------------------------------- */}
+					{CV.sections?.map((S: CVSection, i: number) =>
+						<UI.SectionUI key={i} obj={S} />
+					)}
 			</ItemBucket>
 		</div>
 	);
-});
+};
 
 export default CVEditor;

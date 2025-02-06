@@ -1,48 +1,25 @@
 import "./cveditor.sass";
-import { Experience, Link, MonthYear, DateRange, CVSection, CV } from "job-tool-shared-types";
+import { Experience, Link, MonthYear, DateRange, CVSection } from "job-tool-shared-types";
 import TextEditDiv from "../../../components/TextEditDiv/texteditdiv";
 import { joinClassNames } from "../../../util/joinClassNames";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
-import { Item } from "../../../components/dnd/types";
-import useLogger from "../../../hooks/logger";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useImmer } from "use-immer";
 import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
+import { CVContext } from "../CVContext";
+import { DynamicComponent } from "../../../components/dnd/types";
 
 
 function SectionUI(props: {
 	obj: CVSection;
-	children: any[];
 	onUpdate?: (newObj: CVSection) => void;
 }) {
-	const [data, setData] = useImmer<CVSection>(null);
 
-	// parent --> this
-	useEffect(()=>{
-		if(props.obj.name === "education") {
-			log("education SectionUI received a new props.obj: ", props.obj);
-		}
-		if(!props.obj) return;
-		setData(props.obj);
-	}, [props.obj]);
+	const data = useContext(CVContext).sections.find((s: CVSection) => s.name === props.obj.name);
 
-	// this --> parent
-	useEffect(()=>{
-		if(!data) return;
-		props.onUpdate?.(data);
-	}, [data]);
-
-	const log = useLogger("SectionUI");
 	const formatHeader = (s: string) => s.toUpperCase();
-
-	const handleBucketUpdate = (newItems: Item<string>[]) =>{
-		log("handleBucketUpdate: ", newItems);
-		setData(draft=>{
-			draft.items = newItems.map((I: Item) => I.value);
-		})
-	};
 
 	if(!data) return null;
 	return (
@@ -52,18 +29,20 @@ function SectionUI(props: {
 				<hr />
 			</div>
 			<div id={`sec-${data.name}`} className="sec-content">
-				<ItemBucket
-					bucket={{
-						id: data.name,
-						items: data.items.map((item: any, i: number)=>({
-							id:    `${data.name}-${i}`,
-							value: item
-						}))
-					}}
-					type={data.bucket_type}
-					onUpdate={handleBucketUpdate}
-				>
-					{props.children}
+				<ItemBucket type={data.bucket_type} bucket={{
+					id: data.name,
+					items: data.items.map((item: any, i: number)=>({
+						id:    `${data.name}-${i}`,
+						value: item
+					}))
+				}}>
+					{data.items?.map((item: any, i: number) =>
+						<DynamicComponent
+							key={`${i}-${i}`}
+							type={data.bucket_type}
+							props={{ obj: item, sec: data.name, item_idx: i }}
+						/>
+					)}
 				</ItemBucket>
 			</div>
 		</div>
@@ -97,39 +76,33 @@ function SummaryUI(props: {
 // Note: we can make changes to this and it be local.
 function ExperienceUI(props: {
 	obj: Experience;
+	sec: string;	// TODO: dont do this
+	item_idx: number;
 	disableBucketFeatures?: boolean;
 	onUpdate?: (newObj: Experience) => void;
 }) {
 
-	const [data, setData] = useImmer(null);
-
-	// parent --> this
-	useEffect(()=>{
-		if(!props.obj) return;
-		setData(props.obj);
-	}, [props.obj]);
-
-	// this --> parent
-	useEffect(()=>{
-		if(!data) return;
-		props.onUpdate?.(data);
-	}, [data])
+	const data = useContext(CVContext)
+		?.sections.find((s: CVSection) => s.name === props.sec)
+		?.items[props.item_idx];
 
 	const handleUpdate = (field: keyof Experience, val: any) => {
-		setData(cur=>{
-			cur[field] = val;
-		})
+		data[field] = val;
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {
-		setData(cur=>{
-			cur.description[i] = newVal;
-		})
+		data.description[i] = newVal;
 	};
 
-	if (!data) return null;
+	const handleBucketUpdate = (newPoints) => {
+		data.description = newPoints.map(I=>I.value);
+	};
 
-	const bucket_items = data.description.map((item: string, i: number)=>(
+	if (!data) {
+		console.log("ExperienceUI, data = ", data);
+		return null;
+	}
+	const bulletPoints = data.description.map((item: string, i: number)=>(
 		<li key={i}>
 			<TextEditDiv
 				tv={item}
@@ -172,7 +145,7 @@ function ExperienceUI(props: {
 			{/* ROW 2 */}
 			<div className="exp-content">
 				<ul>
-					{props.disableBucketFeatures ? bucket_items : (
+					{props.disableBucketFeatures ? bulletPoints : (
 						<ItemBucket
 							bucket={{
 								id: `${data.title}-bucket`,
@@ -182,13 +155,13 @@ function ExperienceUI(props: {
 								}))
 							}}
 							type={"exp-points"}
-							onUpdate={newPoints => handleUpdate('description', newPoints.map(I=>I.value))}
+							onUpdate={handleBucketUpdate}
 							// By default, these are disabled
 							replaceDisabled deleteOnMoveDisabled
 							// Conditionally disabled
 							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
 						>
-							{bucket_items}
+							{bulletPoints}
 						</ItemBucket>
 					)}
 				</ul>
