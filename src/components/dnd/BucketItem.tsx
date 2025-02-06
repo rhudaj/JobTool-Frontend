@@ -6,10 +6,15 @@ import { Item } from "./types";
 import { BucketContext } from "./Bucket";
 import { ControlsBox, useHoverBuffer } from "../ControlsBox/ControlBox";
 
+/**
+ * This item should only ever be rendered inside a Bucket component.
+ * Because it requires the BucketContext to be present.
+*/
 export default function BucketItem(props: { item: Item, children: JSX.Element }) {
 
     const bucketContext = useContext(BucketContext);
 
+    // a reference to a drag handle
     const { ref, isHovered } = useHoverBuffer(15); // 40px buffer zone
 
     // -------------------- STATE ---------------------
@@ -67,8 +72,6 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
         [props.item, bucketContext.onHover]
     );
 
-    drop(preview(ref));     // Inject the dnd props into the reference
-
     // Highlight the ref's border when controls hovered
     React.useEffect(()=>{
         if(isHovered) {
@@ -80,7 +83,13 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
         }
     }, [isHovered]);
 
+    drop(preview(ref));     // Inject the dnd props into the reference
+
     // -----------------RENDER-----------------
+
+    if(!bucketContext) {
+        throw new Error("BucketItem must be rendered inside a Bucket component.");
+    }
 
     const classNames = joinClassNames(
         "dnd-item-wrapper",
@@ -121,7 +130,10 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
     );
 };
 
-// Drag only, can't be Dropped on. Only has Move Controls
+/**
+ * A standalone drag item that can be used outside of a bucket.
+ * It has no drop functionality, only drag.
+*/
 export function StandaloneDragItem(props: {
     item: Item,
     item_type: string,
