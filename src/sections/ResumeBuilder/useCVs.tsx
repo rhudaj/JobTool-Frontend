@@ -1,4 +1,4 @@
-import { NamedCV } from "job-tool-shared-types";
+import { CV, NamedCV } from "job-tool-shared-types";
 import { useCallback, useReducer, useMemo } from "react";
 import {produce} from "immer"
 import BackendAPI from "../../backend_api";
@@ -101,6 +101,7 @@ const useFetchCVs = (dispatch) => {
     }, [dispatch]);
 };
 
+// Save to backend
 const save2backend = (ncv: NamedCV) => {
     BackendAPI.request({
         method: "POST",
@@ -121,61 +122,38 @@ const useCVs = () => {
         trackMods: [],
     });
 
-    const fetchData = useFetchCVs(dispatch);
-
-    
-
-    const changeCur = useCallback((name) => {
+    const setCur = (name: string) => {
         const index = state.data.findIndex((cv) => cv.name === name);
         if (index !== -1) dispatch({ type: SET_CURRENT, payload: index });
-    }, [state.data]);
+    };
 
-    const save = useCallback(save2backend, []);
-
-    const add = useCallback((cv) => {
+    const add = (cv: NamedCV) => {
         dispatch({ type: ADD_CV, payload: cv });
-    }, []);
+    };
 
-    const deleteCur = useCallback(() => {
+    const deleteCur = () => {
         dispatch({ type: DELETE_CV });
-    }, []);
+    };
 
-    const setCurModified = useCallback((isMod, cv) => {
+    const setCurModified = (isMod: boolean, cv: CV) => {
         dispatch({ type: MARK_MODIFIED, payload: { isModified: isMod, cv } });
-    }, []);
+    };
 
-    const isModified = useCallback(
-        (idx = state.cur) => state.trackMods[idx],
-        [state.trackMods, state.cur]
-    );
-
-    const curIdx = useMemo(() => state.cur, [state.cur]);
-
-    const cvNames = useMemo(
-        () => state.data.map((cv) => cv.name),
-        [state.data]
-    );
-
-    const cur = useMemo(
-        () => state.data[state.cur] || null,
-        [state.data, state.cur]
-    );
-
-    const mods = useMemo(()=>state.trackMods, [state.trackMods]);
+    const isModified = (idx = state.cur) => state.trackMods[idx];
 
     return {
         status: state.status,
-        curIdx,
-        cvNames,
-        cur,
-        mods,
-        isModified,
-        fetchData,
-        add,
-        changeCur,
-        save,
-        deleteCur,
-        setCurModified,
+        curIdx:         useMemo(() => state.cur,                        [state.cur]),
+        cvNames:        useMemo(() => state.data.map(cv => cv.name),    [state.data]),
+        cur:            useMemo(() => state.data[state.cur] || null,    [state.data, state.cur]),
+        mods:           useMemo(()=>state.trackMods,                    [state.trackMods]),
+        isModified:     useCallback(isModified,                         [state.trackMods, state.cur]),
+        fetch:          useFetchCVs(dispatch),
+        add:            useCallback(add, []),
+        setCur:         useCallback(setCur, [state.data]),
+        save:           useCallback(save2backend, []),
+        deleteCur:      useCallback(deleteCur, []),
+        setCurModified: useCallback(setCurModified, [])
     };
 };
 

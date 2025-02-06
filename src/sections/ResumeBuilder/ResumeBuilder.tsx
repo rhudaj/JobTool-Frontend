@@ -1,7 +1,7 @@
 import "./resumebuilder.sass";
-import { useEffect, useState, useRef, useCallback, useReducer } from "react";
+import { useEffect, useState, useRef } from "react";
 import Section from "../../components/Section/Section";
-import { CV, NamedCV } from "job-tool-shared-types";
+import { NamedCV } from "job-tool-shared-types";
 import BackendAPI from "../../backend_api";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
@@ -277,7 +277,7 @@ function ResumeBuilder() {
     // ---------------- STATE ----------------
 
     const cvs = useCVs();
-    const cvInfoState = useCVInfo();
+    const cv_info = useCVInfo();
 
     const editor_ref = useRef<CVEditorHandle>(null);
     const infoPad_ref = useRef<InfoPadHandle>(null);
@@ -294,8 +294,8 @@ function ResumeBuilder() {
 
     // Fetch data on mount
     useEffect(() => {
-        cvs.fetchData();
-        cvInfoState.fetchData();
+        cvs.fetch();
+        cv_info.fetchData();
     }, []);
 
     // ---------------- CONTROLS ----------------
@@ -370,7 +370,7 @@ function ResumeBuilder() {
                 ev: React.ChangeEvent<HTMLInputElement>
             ) => {
                 util.jsonFileImport(ev, ({ name, data }) =>
-                    cvInfoState.setData(data)
+                    cv_info.setData(data)
                 );
             },
             onExportClicked: () => {
@@ -381,8 +381,8 @@ function ResumeBuilder() {
             },
             onSaveCVInfoClicked: () => {
                 const new_cv_info: CVInfo = infoPad_ref.current.get();
-                cvInfoState.setData(new_cv_info);
-                cvInfoState.save2backend(new_cv_info);
+                cv_info.setData(new_cv_info);
+                cv_info.save2backend(new_cv_info);
             },
             onImportFormComplete: (ncv: NamedCV) => {
                 cvs.add(ncv);
@@ -452,7 +452,7 @@ function ResumeBuilder() {
             <SavedCVs
                 cvNames={cvs.cvNames}
                 curIdx={cvs.curIdx}
-                onChange={cvs.changeCur}
+                onChange={cvs.setCur}
                 trackMods={cvs.mods}
             />
         </SubSection>, // File CONTROLS:
@@ -483,7 +483,7 @@ function ResumeBuilder() {
         </div>,
     ];
 
-    if (!cvs.status || !cvInfoState.status) return null;
+    if (!cvs.status || !cv_info.status) return null;
     return (
         <Section id="section-cv" heading="Resume Builder">
             {/* ------------ POPUPS ------------ */}
@@ -544,7 +544,7 @@ function ResumeBuilder() {
                         />
                     </PrintablePage>
                     {/* <div>TESTING</div> */}
-                    <InfoPad ref={infoPad_ref} info={cvInfoState.get()} />
+                    <InfoPad ref={infoPad_ref} info={cv_info.get()} />
                 </SplitView>
             </DndProvider>
         </Section>
