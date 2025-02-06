@@ -14,54 +14,62 @@ interface CVState {
     trackMods: boolean[];
 };
 
+interface CVAction {
+    type: string,
+    payload?: any
+};
+
+// TODO: turn this into a map; from string to callback
+
 // Action types
 const SET_DATA = "SET_DATA";
 const SET_CURRENT = "SET_CURRENT";
 const ADD_CV = "ADD_CV";
 const DELETE_CV = "DELETE_CV";
-const MARK_MODIFIED = "MARK_MODIFIED";
+const MODIFY_CUR = "MARK_MODIFIED";
 const SET_STATUS = "SET_STATUS";
 
 // Reducer function
-const cvReducer = (state: CVState, action) => {
-    return produce(state, (draft) => {
+const cvReducer = (state: CVState, action: CVAction) => {
+    return produce(state, (D) => {
         switch (action.type) {
             case SET_DATA:
-                draft.data = action.payload;
-                draft.trackMods = new Array(action.payload.length).fill(false);
-                draft.cur = 0;
-                draft.status = true;
+                D.data = action.payload;
+                D.trackMods = new Array(action.payload.length).fill(false);
+                D.cur = 0;
+                D.status = true;
                 break;
 
             case SET_CURRENT:
-                draft.cur = action.payload;
+                D.cur = action.payload;
                 break;
 
             case ADD_CV:
-                draft.data.unshift(action.payload);
-                draft.trackMods.unshift(false);
-                draft.cur = 0;
+                D.data.unshift(action.payload);
+                D.trackMods.unshift(false);
+                D.cur = 0;
                 break;
 
             case DELETE_CV:
-                draft.data.splice(draft.cur, 1);
-                draft.trackMods.splice(draft.cur, 1);
-                draft.cur = 0;
+                D.data.splice(D.cur, 1);
+                D.trackMods.splice(D.cur, 1);
+                D.cur = 0;
                 break;
 
-            case MARK_MODIFIED:
-                draft.trackMods[draft.cur] = action.payload.isModified;
+            case MODIFY_CUR:
+                console.log("MODIFY_CUR", action.payload);
                 if (action.payload.cv) {
-                    draft.data[draft.cur].data = action.payload.cv;
+                    D.data[D.cur].data = action.payload.cv;
+                    D.trackMods[D.cur] = true;
                 }
                 break;
 
             case SET_STATUS:
-                draft.status = action.payload;
+                D.status = action.payload;
                 break;
 
             default:
-                return draft;
+                return D;
         }
     });
 };
@@ -122,9 +130,8 @@ const useCVs = () => {
         trackMods: [],
     });
 
-    const setCur = (name: string) => {
-        const index = state.data.findIndex((cv) => cv.name === name);
-        if (index !== -1) dispatch({ type: SET_CURRENT, payload: index });
+    const selectCur = (idx: number) => {
+        dispatch({ type: SET_CURRENT, payload: idx });
     };
 
     const add = (cv: NamedCV) => {
@@ -136,25 +143,29 @@ const useCVs = () => {
     };
 
     const setCurModified = (isMod: boolean, cv: CV) => {
-        dispatch({ type: MARK_MODIFIED, payload: { isModified: isMod, cv } });
+        dispatch({ type: MODIFY_CUR, payload: { isModified: isMod, cv } });
     };
 
     const isModified = (idx = state.cur) => state.trackMods[idx];
 
     return {
+        // Getters
         status: state.status,
         curIdx:         useMemo(() => state.cur,                        [state.cur]),
         cvNames:        useMemo(() => state.data.map(cv => cv.name),    [state.data]),
         cur:            useMemo(() => state.data[state.cur] || null,    [state.data, state.cur]),
         mods:           useMemo(()=>state.trackMods,                    [state.trackMods]),
-        isModified:     useCallback(isModified,                         [state.trackMods, state.cur]),
+        // Other setters
+        isModified:     useCallback(isModified, [state.trackMods, state.cur]),
         fetch:          useFetchCVs(dispatch),
+        // Dispatch based setters
         add:            useCallback(add, []),
-        setCur:         useCallback(setCur, [state.data]),
+        selectCur:         useCallback(selectCur, [state.data]),
         save:           useCallback(save2backend, []),
         deleteCur:      useCallback(deleteCur, []),
-        setCurModified: useCallback(setCurModified, [])
+        setCurModified: useCallback(setCurModified, []),
+        dispatch: dispatch      // in order to pass it to child components (e.g. CVEditor)
     };
 };
 
-export { useCVs };
+export { useCVs, CVState, CVAction, MODIFY_CUR };

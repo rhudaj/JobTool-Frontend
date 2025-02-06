@@ -6,6 +6,7 @@ import { useImmer } from "use-immer";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { DynamicComponent, Item } from "../../../components/dnd/types";
 import useLogger from "../../../hooks/logger";
+import { CVAction, MODIFY_CUR } from "../useCVs";
 
 export interface CVEditorHandle {
 	getCV: () => CV;
@@ -13,7 +14,7 @@ export interface CVEditorHandle {
 
 interface CVEditorProps {
 	cv: CV;
-	onUpdate: () => void;
+	dispatch: React.Dispatch<CVAction>
 };
 
 /**
@@ -39,7 +40,7 @@ const CVEditor = forwardRef<CVEditorHandle, CVEditorProps>((props, ref) => {
 			isFirstRender.current = false;
 			return;
 		}
-		props.onUpdate()
+		props.dispatch({type: MODIFY_CUR, payload: {cv: CV}});
 	}, [CV]);
 
 	// give can access it whenever it wants.

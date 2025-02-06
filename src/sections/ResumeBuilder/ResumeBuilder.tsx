@@ -245,23 +245,23 @@ const SaveTrainingExampleForm = (props: { onSave: (job: string) => void }) => {
 function SavedCVs(props: {
     cvNames: string[];
     curIdx: number;
-    onChange: (name: string) => void;
+    onChange: (idx: number) => void;
     onAdd?: () => void;
-    trackMods?: boolean[];
+    isModified?: boolean[];
 }) {
     const curName = props.cvNames ? props.cvNames[props.curIdx] : "";
 
     return (
         <div className="cv-thumnail-container">
-            {props.cvNames?.map((name, i) => (
+            {props.cvNames?.map((name, idx) => (
                 <div
-                    key={i}
+                    key={name} // TODO: ensure names are unique
                     className={joinClassNames(
                         "cv-thumbnail",
                         name === curName ? "active" : "",
-                        props.trackMods?.[i] ? "is-modified" : ""
+                        props.isModified?.[idx] ? "is-modified" : ""
                     )}
-                    onClick={(e) => props.onChange(name)}
+                    onClick={() => props.onChange(idx)}
                 >
                     {name}
                 </div>
@@ -452,8 +452,8 @@ function ResumeBuilder() {
             <SavedCVs
                 cvNames={cvs.cvNames}
                 curIdx={cvs.curIdx}
-                onChange={cvs.setCur}
-                trackMods={cvs.mods}
+                onChange={cvs.selectCur}
+                isModified={cvs.mods}
             />
         </SubSection>, // File CONTROLS:
         <div id="file-controls">
@@ -539,11 +539,10 @@ function ResumeBuilder() {
                     <PrintablePage page_id="cv-page">
                         <CVEditor
                             cv={cvs.cur?.data}
-                            onUpdate={CONTROLS.other.onCurCvModified}
+                            dispatch={cvs.dispatch}
                             ref={editor_ref}
                         />
                     </PrintablePage>
-                    {/* <div>TESTING</div> */}
                     <InfoPad ref={infoPad_ref} info={cv_info.get()} />
                 </SplitView>
             </DndProvider>
