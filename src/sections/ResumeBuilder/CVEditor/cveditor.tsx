@@ -2,10 +2,8 @@ import "./cveditor.sass";
 import { CV, CVSection } from "job-tool-shared-types";
 import * as UI from "./cv_components"
 import ItemBucket from "../../../components/dnd/Bucket";
-import { DynamicComponent } from "../../../components/dnd/types";
 import { useContext } from "react";
-import { CVContext, CVDispatchContext } from "../CVContext";
-import { createContext } from "vm";
+import { CVContext } from "../CVContext";
 
 /**
  * Cares only about the current CV being edited.
@@ -14,7 +12,6 @@ import { createContext } from "vm";
 function CVEditor() {
 
 	const CV: CV = useContext(CVContext);
-	const cv_dispatch = useContext(CVDispatchContext);
 
 	// -------------- VIEW --------------
 
@@ -40,7 +37,7 @@ function CVEditor() {
 			>
 					{/* SECTIONS -------------------------------------- */}
 					{CV.sections?.map((S: CVSection, i: number) =>
-						<UI.SectionUI key={i} obj={S} />
+						<UI.SectionUI key={i} obj={S} sec_idx={i} />
 					)}
 			</ItemBucket>
 		</div>

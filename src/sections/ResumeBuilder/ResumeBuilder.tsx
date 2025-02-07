@@ -1,5 +1,5 @@
 import "./resumebuilder.sass";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useReducer } from "react";
 import Section from "../../components/Section/Section";
 import { NamedCV } from "job-tool-shared-types";
 import BackendAPI from "../../backend_api";
@@ -25,6 +25,7 @@ import { isEqual } from "lodash";
 import { useCVs } from "./useCVs";
 
 import { CVContext, CVDispatchContext } from "./CVContext";
+import { cvReducer } from "./useCV";
 
 // Get settigns from .env file
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
@@ -279,6 +280,18 @@ function ResumeBuilder() {
     // ---------------- STATE ----------------
 
     const cvs = useCVs();
+    const [CV, cv_dispatch] = useReducer(cvReducer, null);
+
+    useEffect(() => {
+        if (cvs.status) {
+            cv_dispatch({ type: "SET", payload: cvs.cur.data });
+        }
+    }, [cvs.status]);
+
+    useEffect(()=>{
+        console.log("ResumeBuilder curCV UPDATED!!!", CV);
+    }, [CV])
+
     const cv_info = useCVInfo();
 
     const infoPad_ref = useRef<InfoPadHandle>(null);
@@ -533,8 +546,8 @@ function ResumeBuilder() {
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
                     <PrintablePage page_id="cv-page">
-                        <CVContext.Provider value={cvs.cur?.data}>
-                            <CVDispatchContext.Provider value={cvs.dispatch}>
+                        <CVContext.Provider value={CV}>
+                            <CVDispatchContext.Provider value={cv_dispatch}>
                                 <CVEditor />
                             </CVDispatchContext.Provider>
                         </CVContext.Provider>

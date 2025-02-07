@@ -8,18 +8,27 @@ import * as UI from "./cv_components"
 import { useContext, useEffect } from "react";
 import { useImmer } from "use-immer";
 import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
-import { CVContext } from "../CVContext";
-import { DynamicComponent } from "../../../components/dnd/types";
+import { CVContext, CVDispatchContext } from "../CVContext";
+import { DynamicComponent, Item } from "../../../components/dnd/types";
+import { SET_ITEM, SET_SECTION } from "../useCV";
 
 
-function SectionUI(props: {
-	obj: CVSection;
-	onUpdate?: (newObj: CVSection) => void;
-}) {
+function SectionUI(props: { obj: CVSection; sec_idx: number }) {
 
-	const data = useContext(CVContext).sections.find((s: CVSection) => s.name === props.obj.name);
+	const data = useContext(CVContext)?.sections?.[props.sec_idx];
+	const cv_dispatch = useContext(CVDispatchContext);
 
 	const formatHeader = (s: string) => s.toUpperCase();
+
+	const onBucketUpdate = (newItems: Item[]) => {
+		cv_dispatch({ type: SET_SECTION, payload:  {
+			idx: props.sec_idx,
+			section: {
+				...data,
+				items: newItems.map(I=>I.value)
+			}
+		}});
+	};
 
 	if(!data) return null;
 	return (
@@ -29,18 +38,19 @@ function SectionUI(props: {
 				<hr />
 			</div>
 			<div id={`sec-${data.name}`} className="sec-content">
-				<ItemBucket type={data.bucket_type} bucket={{
+				<ItemBucket type={data.bucket_type} onUpdate={onBucketUpdate} bucket={{
 					id: data.name,
 					items: data.items.map((item: any, i: number)=>({
 						id:    `${data.name}-${i}`,
 						value: item
 					}))
+
 				}}>
 					{data.items?.map((item: any, i: number) =>
 						<DynamicComponent
 							key={`${i}-${i}`}
 							type={data.bucket_type}
-							props={{ obj: item, sec: data.name, item_idx: i }}
+							props={{ obj: item, sec_idx: props.sec_idx, item_idx: i }}
 						/>
 					)}
 				</ItemBucket>
@@ -49,13 +59,20 @@ function SectionUI(props: {
 	)
 }
 
-function SummaryUI(props: {
-	obj: any,
-	onUpdate?: (newObj: any) => void
-}) {
+function SummaryUI(props: { obj: any, sec_idx: number, item_idx: number }) {
+
+	const data = useContext(CVContext)?.sections?.[props.sec_idx];
+	const cv_dispatch = useContext(CVDispatchContext);
 
 	const handleUpdate = (key: string, newVal: any) => {
-		props.onUpdate?.({...props.obj, [key]: newVal});
+		cv_dispatch({ type: SET_ITEM, payload: {
+			sec_idx: props.sec_idx,
+			item_idx: props.item_idx,
+			item: {
+				...data.items[props.item_idx],
+				[key]: newVal
+			}
+		}});
 	};
 
 	return (
@@ -76,18 +93,23 @@ function SummaryUI(props: {
 // Note: we can make changes to this and it be local.
 function ExperienceUI(props: {
 	obj: Experience;
-	sec: string;	// TODO: dont do this
+	sec_idx: number;	// TODO: dont do this
 	item_idx: number;
 	disableBucketFeatures?: boolean;
-	onUpdate?: (newObj: Experience) => void;
 }) {
 
-	const data = useContext(CVContext)
-		?.sections.find((s: CVSection) => s.name === props.sec)
-		?.items[props.item_idx];
+	const data = useContext(CVContext)?.sections[props.sec_idx]?.items[props.item_idx];
+	const cv_dispatch = useContext(CVDispatchContext);
 
 	const handleUpdate = (field: keyof Experience, val: any) => {
-		data[field] = val;
+		cv_dispatch({ type: SET_ITEM, payload: {
+			sec_idx: props.sec_idx,
+			item_idx: props.item_idx,
+			item: {
+				...data,
+				[field]: val
+			}
+		}});
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {
@@ -95,13 +117,14 @@ function ExperienceUI(props: {
 	};
 
 	const handleBucketUpdate = (newPoints) => {
-		data.description = newPoints.map(I=>I.value);
+		handleUpdate('description', newPoints.map(I=>I.value));
 	};
 
 	if (!data) {
 		console.log("ExperienceUI, data = ", data);
 		return null;
 	}
+
 	const bulletPoints = data.description.map((item: string, i: number)=>(
 		<li key={i}>
 			<TextEditDiv
@@ -174,34 +197,31 @@ function ExperienceUI(props: {
 // dont show date.
 function ProjectUI(props: {
 	obj: Experience;
+	sec_idx: number;	// TODO: dont do this
+	item_idx: number;
 	disableBucketFeatures?: boolean;
-	onUpdate?: (newObj: Experience) => void;
 }) {
 
-	const [data, setData] = useImmer(null);
-
-	// parent --> this
-	useEffect(()=>{
-		if(!props.obj) return;
-		setData(props.obj);
-	}, [props.obj]);
-
-	// this --> parent
-	useEffect(()=>{
-		if(!data) return;
-		props.onUpdate?.(data);
-	}, [data])
+	const data = useContext(CVContext)?.sections[props.sec_idx]?.items[props.item_idx];
+	const cv_dispatch = useContext(CVDispatchContext);
 
 	const handleUpdate = (field: keyof Experience, val: any) => {
-		setData(cur=>{
-			cur[field] = val;
-		})
+		cv_dispatch({ type: SET_ITEM, payload: {
+			sec_idx: props.sec_idx,
+			item_idx: props.item_idx,
+			item: {
+				...data,
+				[field]: val
+			}
+		}});
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {
-		setData(cur=>{
-			cur.description[i] = newVal;
-		})
+		data.description[i] = newVal;
+	};
+
+	const handleBucketUpdate = (newPoints) => {
+		handleUpdate('description', newPoints.map(I=>I.value));
 	};
 
 	if (!data) return null;
@@ -247,10 +267,8 @@ function ProjectUI(props: {
 								}))
 							}}
 							type={"exp-points"}
-							onUpdate={newPoints => handleUpdate('description', newPoints.map(I=>I.value))}
-							// By default, these are disabled
+							onUpdate={handleBucketUpdate}
 							replaceDisabled deleteOnMoveDisabled
-							// Conditionally disabled
 							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
 						>
 							{bucket_items}

@@ -14,7 +14,7 @@ interface CVState {
     trackMods: boolean[];
 };
 
-interface CVAction {
+interface CVsAction {
     type: string,
     payload?: any
 };
@@ -30,7 +30,7 @@ const MODIFY_CUR = "MARK_MODIFIED";
 const SET_STATUS = "SET_STATUS";
 
 // Reducer function
-const cvReducer = (state: CVState, action: CVAction) => {
+const cvsReducer = (state: CVState, action: CVsAction) => {
     return produce(state, (D) => {
         switch (action.type) {
             case SET_DATA:
@@ -123,7 +123,7 @@ const save2backend = (ncv: NamedCV) => {
 // Main hook
 const useCVs = () => {
 
-    const [state, dispatch] = useReducer(cvReducer, {
+    const [state, dispatch] = useReducer(cvsReducer, {
         data: [],
         status: false,
         cur: null,
@@ -168,4 +168,4 @@ const useCVs = () => {
     };
 };
 
-export { useCVs, CVState, CVAction, MODIFY_CUR };
+export { useCVs, CVState, CVsAction, MODIFY_CUR };
