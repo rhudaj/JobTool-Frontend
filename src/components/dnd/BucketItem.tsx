@@ -33,7 +33,7 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
             const dropResult: {id: any} = monitor.getDropResult();  // the bucket we dropped on
             // Cancelled/invalid drop || same bucket
             if(!dropResult || dropResult.id === bucketContext.bucket_id) return;
-            bucketContext.onRemove && bucketContext.onRemove(item.id);
+            bucketContext.dispatch({ type: "REMOVE", payload: { id: item.id } });
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging()
@@ -110,20 +110,22 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
                 {
                     id: "delete",
                     icon_class: "fa-solid fa-x",
-                    disabled: !Boolean(bucketContext.onDelete),
-                    onClick: ()=>bucketContext.onDelete(props.item.id)
+                    // disabled: !Boolean(bucketContext.onDelete),
+                    onClick: ()=>bucketContext.dispatch({type: "REMOVE", payload: { id: props.item.id }})
                 },
                 {
                     id: "add-above",
                     icon_class: "fa-solid fa-arrow-up",
-                    disabled: !Boolean(bucketContext.onAddItem),
-                    onClick: ()=>bucketContext.onAddItem(props.item.id, true)
+                    // disabled: !Boolean(bucketContext.onAddItem),
+                    // onClick: ()=>bucketContext.onAddItem(props.item.id, true)
+                    onClick: ()=>bucketContext.dispatch({type: "ADD_BLANK", payload: { id: props.item.id, below: false }})
+
                 },
                 {
                     id: "add-below",
                     icon_class: "fa-solid fa-arrow-down",
-                    disabled: !Boolean(bucketContext.onAddItem),
-                    onClick: ()=>bucketContext.onAddItem(props.item.id, false)
+                    // disabled: !Boolean(bucketContext.onAddItem),
+                    onClick: ()=>bucketContext.dispatch({type: "ADD_BLANK", payload: { id: props.item.id, below: true }})
                 }
             ]}/>}
         </div>
