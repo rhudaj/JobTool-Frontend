@@ -26,6 +26,7 @@ const emptyObject = (obj: any): any => {
     }
 };
 
+export const SET = "SET";              // items: Item[]
 export const ADD = "ADD";              // atIndex: number, item?: Item
 export const ADD_BLANK = "ADD_BLANK";  // id: any, below: boolean
 export const MOVE = "MOVE"             // indexBefore: number, indexAfter: number
@@ -40,6 +41,11 @@ export const bucketReducer = (state: Bucket, action: BucketAction) => {
     return produce(state, (D) => {
         let args;
         switch (action.type) {
+            case SET:  // set the whole CV
+                console.log("bucketReducer -------- SET");
+                args = action.payload as Item[];
+                D.items = args;
+                break;
             case ADD:   // set the whole CV
                 console.log("bucketReducer -------- SET");
                 args = action.payload as { atIndex: number, item?: Item };

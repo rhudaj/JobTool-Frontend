@@ -282,11 +282,17 @@ function ResumeBuilder() {
     const cvs = useCVs();
     const [CV, cv_dispatch] = useReducer(cvReducer, null);
 
+    // Fetch data on mount
     useEffect(() => {
-        if (cvs.status) {
-            cv_dispatch({ type: "SET", payload: cvs.cur.data });
-        }
-    }, [cvs.status]);
+        cvs.fetch();
+        cv_info.fetchData();
+    }, []);
+
+    // Set the current CV when the cvs status changes
+    useEffect(() => {
+        if (!cvs.status) return;
+        cv_dispatch({ type: "SET", payload: cvs.cur.data });
+    }, [cvs.status, cvs.cur]);
 
     useEffect(()=>{
         console.log("ResumeBuilder curCV UPDATED!!!", CV);
@@ -305,12 +311,6 @@ function ResumeBuilder() {
     const importPopup = usePopup();
     const deletePopup = usePopup();
     const saveTrainExPopup = usePopup();
-
-    // Fetch data on mount
-    useEffect(() => {
-        cvs.fetch();
-        cv_info.fetchData();
-    }, []);
 
     // ---------------- CONTROLS ----------------
 

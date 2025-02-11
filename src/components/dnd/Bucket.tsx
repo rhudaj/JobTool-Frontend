@@ -1,19 +1,12 @@
 import "./Bucket.scss";
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import React, { useContext, useReducer } from "react";
+import React, { useContext } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
-import { Item, DEFAULT_ITEM_TYPE, BucketTypes, Bucket } from "./types";
+import { Item, DEFAULT_ITEM_TYPE, BucketTypes } from "./types";
 import BucketItem from "./BucketItem";
-import { isEqual } from "lodash";
-import { ADD, BucketAction, BucketContext, BucketDispatchContext, bucketReducer, CHANGE, MOVE } from "./useBucket";
+import { ADD, BucketAction, BucketContext, BucketDispatchContext, CHANGE, MOVE } from "./useBucket";
 
-// TODO: bucket should not have internal state. It should simply be a wrapper around the items that its passed.
-// At the moment, you being passes items. Then creating internal state. Then updating internal state, then notifying the parent of the change.
-// And then the parent updates the items. This is a bit convoluted. The bucket should simply be a wrapper around the items.
-
-/**
- * Shows a gap between items when dragging over the bucket.
- */
+// Shows a gap between items when dragging over the bucket.
 function DropGap(props: { isActive: boolean }) {
     return <div className="drop-gap" hidden={!props.isActive} />;
 }
@@ -21,7 +14,6 @@ function DropGap(props: { isActive: boolean }) {
 // Helpers to get the get the gap index from the item index
 const prevGap = (itemIndex: number) => itemIndex;
 const nextGap = (itemIndex: number) => itemIndex + 1;
-
 
 // #####################################################
 //                  BUCKET STATE MANAGEMENT
@@ -54,18 +46,17 @@ function ItemBucket(props: {
 }) {
     // ----------------- STATE -----------------
 
-    // const [bucket, bucketDispatch] = useReducer(bucketReducer, { items: props.bucket.items });
-
+    // passed as context:
     const bucket = useContext(BucketContext);
     const bucketDispatch = useContext(BucketDispatchContext);
 
+    // internal:
     const [hoveredGap, setHoveredGap] = React.useState<number>(undefined);
 
-    const type = BucketTypes[props.type ?? bucket.id];
-
-    const getIdx = (id: any) => bucket.items.findIndex(I => I.id === id);
-
     // ----------------- DND RELATED -----------------
+
+    const type = BucketTypes[props.type ?? bucket.id];
+    const getIdx = (id: any) => bucket.items.findIndex(I => I.id === id);
 
     const onItemHover = (
         hoverId: string,
@@ -173,8 +164,7 @@ function ItemBucket(props: {
                             <BucketItemContext.Provider
                                 value={{
                                     bucket_id: bucket.id,
-                                    item_type:
-                                        type.item_type ?? DEFAULT_ITEM_TYPE,
+                                    item_type: type.item_type ?? DEFAULT_ITEM_TYPE,
                                     disableMove: props.moveItemDisabled,
                                     disableReplace: props.replaceDisabled,
                                     dispatch: bucketDispatch,

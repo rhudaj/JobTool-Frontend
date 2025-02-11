@@ -151,16 +151,16 @@ const useCVs = () => {
     return {
         // Getters
         status: state.status,
-        curIdx:         useMemo(() => state.cur,                        [state.cur]),
+        curIdx: state.cur,
+        mods:   state.trackMods,
         cvNames:        useMemo(() => state.data.map(cv => cv.name),    [state.data]),
         cur:            useMemo(() => state.data[state.cur] || null,    [state.data, state.cur]),
-        mods:           useMemo(()=>state.trackMods,                    [state.trackMods]),
-        // Other setters
+        // Other Getters
         isModified:     useCallback(isModified, [state.trackMods, state.cur]),
         fetch:          useFetchCVs(dispatch),
         // Dispatch based setters
         add:            useCallback(add, []),
-        selectCur:         useCallback(selectCur, [state.data]),
+        selectCur:      useCallback(selectCur, [state.data]),
         save:           useCallback(save2backend, []),
         deleteCur:      useCallback(deleteCur, []),
         setCurModified: useCallback(setCurModified, []),

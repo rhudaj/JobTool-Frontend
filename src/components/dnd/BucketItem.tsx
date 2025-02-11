@@ -12,14 +12,10 @@ import { ControlsBox, useHoverBuffer } from "../ControlsBox/ControlBox";
 */
 export default function BucketItem(props: { item: Item, children: JSX.Element }) {
 
-    const bucketContext = useContext(BucketItemContext);
-
-    // a reference to a drag handle
-    const { ref, isHovered } = useHoverBuffer(15); // 40px buffer zone
-
     // -------------------- STATE ---------------------
 
-    // const ref = React.useRef(null);
+    const bucketContext = useContext(BucketItemContext);
+    const { ref, isHovered } = useHoverBuffer(15); // ref' drag handle
 
     // -----------------DRAG FUNCTIONALITY-----------------
 
