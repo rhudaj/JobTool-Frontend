@@ -5,30 +5,40 @@ import { joinClassNames } from "../../../util/joinClassNames";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
-import { useContext, useEffect } from "react";
-import { useImmer } from "use-immer";
+import { useContext, useEffect, useReducer } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
 import { CVContext, CVDispatchContext } from "../CVContext";
 import { DynamicComponent, Item } from "../../../components/dnd/types";
 import { SET_ITEM, SET_SECTION } from "../useCV";
+import { BucketContext, BucketDispatchContext, bucketReducer } from "../../../components/dnd/useBucket";
 
 
 function SectionUI(props: { obj: CVSection; sec_idx: number }) {
 
+	// data from parent:
 	const data = useContext(CVContext)?.sections?.[props.sec_idx];
 	const cv_dispatch = useContext(CVDispatchContext);
 
-	const formatHeader = (s: string) => s.toUpperCase();
+	// bucket state:
+	const [bucket, bucketDispatch] = useReducer(bucketReducer, {
+		id: data?.name,
+		items: data?.items?.map((item: any, i: number)=>({
+			id:    `${data.name}-${i}`,
+			value: item
+		}))
+	})
 
-	const onBucketUpdate = (newItems: Item[]) => {
+	useEffect(() => {
 		cv_dispatch({ type: SET_SECTION, payload:  {
 			idx: props.sec_idx,
 			section: {
 				...data,
-				items: newItems.map(I=>I.value)
+				items: bucket.items.map(I=>I.value)
 			}
 		}});
-	};
+	}, [bucket.items]);
+
+	const formatHeader = (s: string) => s.toUpperCase();
 
 	if(!data) return null;
 	return (
@@ -38,22 +48,19 @@ function SectionUI(props: { obj: CVSection; sec_idx: number }) {
 				<hr />
 			</div>
 			<div id={`sec-${data.name}`} className="sec-content">
-				<ItemBucket type={data.bucket_type} onUpdate={onBucketUpdate} bucket={{
-					id: data.name,
-					items: data.items.map((item: any, i: number)=>({
-						id:    `${data.name}-${i}`,
-						value: item
-					}))
-
-				}}>
-					{data.items?.map((item: any, i: number) =>
-						<DynamicComponent
-							key={`${i}-${i}`}
-							type={data.bucket_type}
-							props={{ obj: item, sec_idx: props.sec_idx, item_idx: i }}
-						/>
-					)}
-				</ItemBucket>
+				<BucketContext.Provider value={bucket}>
+				<BucketDispatchContext.Provider value={bucketDispatch}>
+					<ItemBucket type={data.bucket_type}>
+						{data.items?.map((item: any, i: number) =>
+							<DynamicComponent
+								key={`${i}-${i}`}
+								type={data.bucket_type}
+								props={{ obj: item, sec_idx: props.sec_idx, item_idx: i }}
+							/>
+						)}
+					</ItemBucket>
+				</BucketDispatchContext.Provider>
+				</BucketContext.Provider>
 			</div>
 		</div>
 	)
@@ -101,6 +108,15 @@ function ExperienceUI(props: {
 	const data = useContext(CVContext)?.sections[props.sec_idx]?.items[props.item_idx];
 	const cv_dispatch = useContext(CVDispatchContext);
 
+	// bucket state:
+	const [bucket, bucketDispatch] = useReducer(bucketReducer, {
+		id: "experience",
+		items: data?.description?.map((item: string, i: number)=>({
+			id: `${data.title}-bp${i}`,
+			value: item
+		}))
+	})
+
 	const handleUpdate = (field: keyof Experience, val: any) => {
 		cv_dispatch({ type: SET_ITEM, payload: {
 			sec_idx: props.sec_idx,
@@ -116,9 +132,9 @@ function ExperienceUI(props: {
 		data.description[i] = newVal;
 	};
 
-	const handleBucketUpdate = (newPoints) => {
-		handleUpdate('description', newPoints.map(I=>I.value));
-	};
+	// const handleBucketUpdate = (newPoints) => {
+	// 	handleUpdate('description', newPoints.map(I=>I.value));
+	// };
 
 	if (!data) {
 		console.log("ExperienceUI, data = ", data);
@@ -169,23 +185,17 @@ function ExperienceUI(props: {
 			<div className="exp-content">
 				<ul>
 					{props.disableBucketFeatures ? bulletPoints : (
-						<ItemBucket
-							bucket={{
-								id: `${data.title}-bucket`,
-								items: data.description.map((item: string, i: number)=>({
-									id: `${data.title}-bp${i}`,
-									value: item
-								}))
-							}}
-							type={"exp-points"}
-							onUpdate={handleBucketUpdate}
-							// By default, these are disabled
-							replaceDisabled deleteOnMoveDisabled
-							// Conditionally disabled
-							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
-						>
-							{bulletPoints}
-						</ItemBucket>
+						<BucketContext.Provider value={bucket}>
+						<BucketDispatchContext.Provider value={bucketDispatch}>
+							<ItemBucket
+								type={"exp-points"}
+								replaceDisabled deleteOnMoveDisabled
+								{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
+							>
+								{bulletPoints}
+							</ItemBucket>
+						</BucketDispatchContext.Provider>
+						</BucketContext.Provider>
 					)}
 				</ul>
 			</div>
@@ -202,8 +212,23 @@ function ProjectUI(props: {
 	disableBucketFeatures?: boolean;
 }) {
 
+	// data from parent:
 	const data = useContext(CVContext)?.sections[props.sec_idx]?.items[props.item_idx];
 	const cv_dispatch = useContext(CVDispatchContext);
+
+	// bucket state:
+	const [bucket, bucketDispatch] = useReducer(bucketReducer, {
+		id: "experience",
+		items: data?.description?.map((item: string, i: number)=>({
+			id: `${data.title}-bp${i}`,
+			value: item
+		}))
+	})
+
+	useEffect(() => {
+		if(!bucket.items) return;
+		handleUpdate('description', bucket.items.map(I=>I.value));
+	}, [bucket.items]);
 
 	const handleUpdate = (field: keyof Experience, val: any) => {
 		cv_dispatch({ type: SET_ITEM, payload: {
@@ -218,10 +243,6 @@ function ProjectUI(props: {
 
 	const handleItemChange = (i: number, newVal: any) => {
 		data.description[i] = newVal;
-	};
-
-	const handleBucketUpdate = (newPoints) => {
-		handleUpdate('description', newPoints.map(I=>I.value));
 	};
 
 	if (!data) return null;
@@ -258,21 +279,17 @@ function ProjectUI(props: {
 			<div className="exp-content">
 				<ul>
 					{props.disableBucketFeatures ? bucket_items : (
+						<BucketContext.Provider value={bucket}>
+						<BucketDispatchContext.Provider value={bucketDispatch}>
 						<ItemBucket
-							bucket={{
-								id: `${data.title}-bucket`,
-								items: data.description.map((item: string, i: number)=>({
-									id: `${data.title}-bp${i}`,
-									value: item
-								}))
-							}}
 							type={"exp-points"}
-							onUpdate={handleBucketUpdate}
 							replaceDisabled deleteOnMoveDisabled
 							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
 						>
 							{bucket_items}
 						</ItemBucket>
+						</BucketDispatchContext.Provider>
+						</BucketContext.Provider>
 					)}
 				</ul>
 			</div>

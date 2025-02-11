@@ -1,11 +1,11 @@
 import "./Bucket.scss";
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import React, { useReducer } from "react";
+import React, { useContext, useReducer } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
 import { Item, DEFAULT_ITEM_TYPE, BucketTypes, Bucket } from "./types";
 import BucketItem from "./BucketItem";
 import { isEqual } from "lodash";
-import { ADD, BucketAction, bucketReducer, CHANGE, MOVE } from "./useBucket";
+import { ADD, BucketAction, BucketContext, BucketDispatchContext, bucketReducer, CHANGE, MOVE } from "./useBucket";
 
 // TODO: bucket should not have internal state. It should simply be a wrapper around the items that its passed.
 // At the moment, you being passes items. Then creating internal state. Then updating internal state, then notifying the parent of the change.
@@ -43,10 +43,8 @@ interface BucketItemContext {
 }
 
 function ItemBucket(props: {
-    bucket: Bucket;
     children: JSX.Element[];                // the bucket data d.n.n corresponding to the displayed items.
     type?: string;                          // by default, same as ID
-    onUpdate?: (newItems: Item[]) => void;  // when the `Bucket` data changes.
     deleteDisabled?: boolean;
     replaceDisabled?: boolean;
     dropDisabled?: boolean;
@@ -56,16 +54,14 @@ function ItemBucket(props: {
 }) {
     // ----------------- STATE -----------------
 
-    const [bucket, bucketDispatch] = useReducer(bucketReducer, { items: props.bucket.items });
+    // const [bucket, bucketDispatch] = useReducer(bucketReducer, { items: props.bucket.items });
+
+    const bucket = useContext(BucketContext);
+    const bucketDispatch = useContext(BucketDispatchContext);
+
     const [hoveredGap, setHoveredGap] = React.useState<number>(undefined);
 
-    React.useEffect(() => {
-        if (!bucket.items) return;
-        if (isEqual(bucket.items, props.bucket.items)) return;
-        props.onUpdate?.(bucket.items);
-    }, [bucket.items]);
-
-    const type = BucketTypes[props.type ?? props.bucket.id];
+    const type = BucketTypes[props.type ?? bucket.id];
 
     const getIdx = (id: any) => bucket.items.findIndex(I => I.id === id);
 
@@ -144,7 +140,7 @@ function ItemBucket(props: {
                 if (hoveredGap !== undefined) setHoveredGap(undefined);
 
                 // (optional) returned item will be the 'dropResult' and available in 'endDrag'
-                return { id: props.bucket.id };
+                return { id: bucket.id };
             },
             collect: (monitor) => ({
                 isHovered: !props.dropDisabled && monitor.isOver(),
@@ -170,13 +166,13 @@ function ItemBucket(props: {
             <div className={type.displayItemsClass}>
                 {bucket.items.map((I: Item, i: number) => {
                     return (
-                        <div key={`bucket-${props.bucket.id}-item-${i}`}>
+                        <div key={`bucket-${bucket.id}-item-${i}`}>
                             {i === 0 && (
                                 <DropGap isActive={hoveredGap === prevGap(i)} />
                             )}
-                            <BucketContext.Provider
+                            <BucketItemContext.Provider
                                 value={{
-                                    bucket_id: props.bucket.id,
+                                    bucket_id: bucket.id,
                                     item_type:
                                         type.item_type ?? DEFAULT_ITEM_TYPE,
                                     disableMove: props.moveItemDisabled,
@@ -188,7 +184,7 @@ function ItemBucket(props: {
                                 <BucketItem item={I}>
                                     {props.children[i]}
                                 </BucketItem>
-                            </BucketContext.Provider>
+                            </BucketItemContext.Provider>
                             <DropGap isActive={hoveredGap === nextGap(i)} />
                         </div>
                     );
@@ -198,5 +194,5 @@ function ItemBucket(props: {
     );
 }
 
-export const BucketContext = React.createContext<BucketItemContext>(null);
+export const BucketItemContext = React.createContext<BucketItemContext>(null);
 export default ItemBucket;

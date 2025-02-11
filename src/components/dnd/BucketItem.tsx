@@ -3,7 +3,7 @@ import { useDrag, useDrop } from "react-dnd";
 import React, { useContext } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
 import { Item } from "./types";
-import { BucketContext } from "./Bucket";
+import { BucketItemContext } from "./Bucket";
 import { ControlsBox, useHoverBuffer } from "../ControlsBox/ControlBox";
 
 /**
@@ -12,7 +12,7 @@ import { ControlsBox, useHoverBuffer } from "../ControlsBox/ControlBox";
 */
 export default function BucketItem(props: { item: Item, children: JSX.Element }) {
 
-    const bucketContext = useContext(BucketContext);
+    const bucketContext = useContext(BucketItemContext);
 
     // a reference to a drag handle
     const { ref, isHovered } = useHoverBuffer(15); // 40px buffer zone

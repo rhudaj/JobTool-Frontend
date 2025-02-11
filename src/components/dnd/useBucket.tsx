@@ -1,13 +1,11 @@
-import { Item } from "./types";
+import { Bucket, Item } from "./types";
 import { produce } from "immer";    // the 'immer' libraris version of 'useReducer'
+import { createContext } from 'react';
+
 
 export interface BucketAction {
     type: string;
     payload: any;
-};
-
-interface BucketState {
-    items: Item[];
 };
 
 /* Empty all values in an object (recursively) */
@@ -35,7 +33,7 @@ export const REMOVE = "REMOVE";        // id: any
 export const CHANGE = "CHANGE";        // id: any, newValue: any
 
 // Reducer function
-export const bucketReducer = (state: BucketState, action: BucketAction) => {
+export const bucketReducer = (state: Bucket, action: BucketAction) => {
 
     const getIdx = (id: any) => state.items.findIndex((I) => I.id === id);
 
@@ -74,3 +72,6 @@ export const bucketReducer = (state: BucketState, action: BucketAction) => {
         }
     });
 };
+
+export const BucketContext = createContext<Bucket>(null);
+export const BucketDispatchContext = createContext<React.Dispatch<BucketAction>>(null);
