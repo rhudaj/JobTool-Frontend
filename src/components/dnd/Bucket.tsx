@@ -4,7 +4,7 @@ import React, { useContext } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
 import { Item, DEFAULT_ITEM_TYPE, BucketTypes } from "./types";
 import BucketItem from "./BucketItem";
-import { ADD, BucketAction, BucketContext, BucketDispatchContext, CHANGE, MOVE } from "./useBucket";
+import { BucketAction, BucketContext, BucketActions } from "./useBucket";
 
 // Shows a gap between items when dragging over the bucket.
 function DropGap(props: { isActive: boolean }) {
@@ -37,6 +37,7 @@ interface BucketItemContext {
 function ItemBucket(props: {
     children: JSX.Element[];                // the bucket data d.n.n corresponding to the displayed items.
     type?: string;                          // by default, same as ID
+    isHorizontal?: boolean;                   // orientation of the bucket
     deleteDisabled?: boolean;
     replaceDisabled?: boolean;
     dropDisabled?: boolean;
@@ -47,8 +48,7 @@ function ItemBucket(props: {
     // ----------------- STATE -----------------
 
     // passed as context:
-    const bucket = useContext(BucketContext);
-    const bucketDispatch = useContext(BucketDispatchContext);
+    const [bucket, bucketDispatch] = useContext(BucketContext);
 
     // internal:
     const [hoveredGap, setHoveredGap] = React.useState<number>(undefined);
@@ -65,7 +65,7 @@ function ItemBucket(props: {
         isRight: boolean
     ) => {
         // Wether its "past half" depends on orientation of the bucket
-        const isPastHalf = type.isVertical ? isBelow : isRight;
+        const isPastHalf = props.isHorizontal ? isRight : isBelow;
 
         // Find the index of the item being hovered over:
         const hoveredIndex = getIdx(hoverId);
@@ -88,7 +88,7 @@ function ItemBucket(props: {
 
     const [{ isHovered }, dropRef] = useDrop(
         () => ({
-            accept: type.item_type ?? DEFAULT_ITEM_TYPE,
+            accept: props.type ?? DEFAULT_ITEM_TYPE,
             canDrop: () => !props.dropDisabled,
             drop: (
                 dropItem: Item,
@@ -98,7 +98,7 @@ function ItemBucket(props: {
 
                 // If the bucket is empty, just add the item.
                 if (bucket.items.length === 0) {
-                    bucketDispatch({ type: ADD, payload: { atIndex: 0, item: dropItem } });
+                    bucketDispatch({ type: BucketActions.ADD, payload: { atIndex: 0, item: dropItem } });
                     return;
                 }
 
@@ -113,11 +113,11 @@ function ItemBucket(props: {
 
                 if (nestedDropTarget?.id !== undefined) {
                     // nested item got the drop
-                    bucketDispatch({ type: CHANGE, payload: { id: nestedDropTarget.id, newValue: dropItem.value } });
+                    bucketDispatch({ type: BucketActions.CHANGE, payload: { id: nestedDropTarget.id, newValue: dropItem.value } });
                 } else if (notInBucket) {
                     // Not in the bucket yet, so add it.
                     // bucket.addItem(hoveredGap, dropItem);
-                    bucketDispatch({ type: ADD, payload: { atIndex: hoveredGap, item: dropItem } });
+                    bucketDispatch({ type: BucketActions.ADD, payload: { atIndex: hoveredGap, item: dropItem } });
                 } else if (!props.moveItemDisabled) {
                     // Its in the bucket already. Re-order.
                     // CLAMP index between 0 and props.items.length-1
@@ -125,7 +125,7 @@ function ItemBucket(props: {
                         Math.min(hoveredGap, bucket.items.length - 1),
                         0
                     );
-                    bucketDispatch({ type: MOVE, payload: { indexBefore: itemIndex, indexAfter: newIndex } });
+                    bucketDispatch({ type: BucketActions.MOVE, payload: { indexBefore: itemIndex, indexAfter: newIndex } });
                 }
                 // after drop, no need to display the gap
                 if (hoveredGap !== undefined) setHoveredGap(undefined);
@@ -164,7 +164,7 @@ function ItemBucket(props: {
                             <BucketItemContext.Provider
                                 value={{
                                     bucket_id: bucket.id,
-                                    item_type: type.item_type ?? DEFAULT_ITEM_TYPE,
+                                    item_type: props.type ?? DEFAULT_ITEM_TYPE,
                                     disableMove: props.moveItemDisabled,
                                     disableReplace: props.replaceDisabled,
                                     dispatch: bucketDispatch,

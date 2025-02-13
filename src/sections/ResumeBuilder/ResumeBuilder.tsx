@@ -5,13 +5,9 @@ import { NamedCV } from "job-tool-shared-types";
 import BackendAPI from "../../backend_api";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
-import InfoPad, {
-    CVInfo,
-    InfoPadHandle,
-} from "../../components/infoPad/infoPad";
+import InfoPad, { CVInfo, InfoPadHandle } from "../../components/infoPad/infoPad";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import useLogger from "../../hooks/logger";
 import SplitView from "../../components/SplitView/splitview";
 import CVEditor from "./CVEditor/cveditor";
 import * as util from "../../util/fileInOut";
@@ -23,88 +19,12 @@ import { usePopup } from "../../hooks/Popup/popup";
 import { useImmer } from "use-immer";
 import { isEqual } from "lodash";
 import { useCVs } from "./useCVs";
-
-import { CVContext, CVDispatchContext } from "./CVContext";
-import { cvReducer } from "./useCV";
+import { CVActions, cvReducer, CVContext } from "./useCV";
+import { useCVInfo } from "./useCVInfo";
 
 // Get settigns from .env file
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 const TEST_MODE = process.env.REACT_APP_TEST_MODE === "1";
-const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
-
-console.log("USE_BACKEND: ", USE_BACKEND, " TEST_MODE: ", TEST_MODE);
-
-/* ------------------------------------------------------------------
- *                       CV STATE MANAGER                           *
-------------------------------------------------------------------- */
-
-function useCVInfo() {
-    const [data, setData] = useState<CVInfo>(null);
-    const [status, setStatus] = useState<boolean>(false); // was the data fetched?
-
-    const log = useLogger("useCVInfo");
-
-    // FETCH the data:
-    const fetchData = () => {
-        if (USE_BACKEND) {
-            BackendAPI.request<undefined, CVInfo>({
-                method: "GET",
-                endpoint: "cv_info",
-                handleSuccess: (cv_info) => {
-                    setData(cv_info);
-                    setStatus(true);
-                },
-                handleError: (msg: string) => {
-                    setStatus(false);
-                    alert(msg);
-                },
-            });
-        } else {
-            // from the /public folder
-            fetch(SAMPLES_PATH + "cv_info.json")
-                .then((r) => r.json())
-                .then((cv_info) => {
-                    if (cv_info) {
-                        log(`got cv_info from ${SAMPLES_PATH}`);
-                        setData(cv_info);
-                        setStatus(true);
-                    } else {
-                        setStatus(false);
-                    }
-                });
-        }
-    };
-
-    const save2backend = (newData: CVInfo) => {
-        BackendAPI.request<CVInfo>({
-            method: "POST",
-            endpoint: "saveCVInfo",
-            body: newData,
-            handleSuccess: () => alert("Success! Saved cv info"),
-            handleError: alert,
-        });
-    };
-
-    const get = () => data;
-
-    // Extract the data from `cv_info` using the specified id
-    const itemFromId = (sec_id: string, item_id: string): any => {
-        const [groupId, itemId] = item_id.split("/", 2);
-        if (!data) return;
-        else if (!groupId) return;
-        else if (itemId) return data[sec_id][groupId][itemId];
-        else return data[sec_id][groupId]; // most likely 'default'
-    };
-
-    return {
-        status,
-        fetchData,
-        get,
-        setData,
-        itemFromId,
-        save2backend,
-    };
-}
 
 /* ------------------------------------------------------------------
  *                         SUB COMPONENTS                           *
@@ -277,40 +197,40 @@ function SavedCVs(props: {
  *                         ROOT COMPONENT                           *
 ------------------------------------------------------------------- */
 function ResumeBuilder() {
+
     // ---------------- STATE ----------------
 
     const cvs = useCVs();
-    const [CV, cv_dispatch] = useReducer(cvReducer, null);
-
-    // Fetch data on mount
-    useEffect(() => {
-        cvs.fetch();
-        cv_info.fetchData();
-    }, []);
-
-    // Set the current CV when the cvs status changes
-    useEffect(() => {
-        if (!cvs.status) return;
-        cv_dispatch({ type: "SET", payload: cvs.cur.data });
-    }, [cvs.status, cvs.cur]);
-
-    useEffect(()=>{
-        console.log("ResumeBuilder curCV UPDATED!!!", CV);
-    }, [CV])
-
     const cv_info = useCVInfo();
+    const [CV, cv_dispatch] = useReducer(cvReducer, null);
 
     const infoPad_ref = useRef<InfoPadHandle>(null);
 
     const [settingN, setSettingN] = useState(null); // null => none, 0 => SavedCVs, 1 => file settings
     const saveAsPDF = useComponent2PDF("cv-page");
 
-    // references to popup modal elements
+    // ref's to popups
     const exportPopup = usePopup();
     const savePopup = usePopup();
     const importPopup = usePopup();
     const deletePopup = usePopup();
     const saveTrainExPopup = usePopup();
+
+    // Fetch data on mount
+    useEffect(() => {
+        cvs.fetch();
+        cv_info.fetch();
+    }, []);
+
+    // Set the current CV when the cvs status changes
+    useEffect(() => {
+        if (!cvs.status) return;
+        cv_dispatch({ type: CVActions.SET, payload: cvs.cur.data });
+    }, [cvs.status, cvs.cur]);
+
+    useEffect(()=>{
+        console.log("ResumeBuilder curCV UPDATED!!!", CV);
+    }, [CV])
 
     // ---------------- CONTROLS ----------------
 
@@ -396,7 +316,7 @@ function ResumeBuilder() {
             onSaveCVInfoClicked: () => {
                 const new_cv_info: CVInfo = infoPad_ref.current.get();
                 cv_info.setData(new_cv_info);
-                cv_info.save2backend(new_cv_info);
+                cv_info.save(new_cv_info);
             },
             onImportFormComplete: (ncv: NamedCV) => {
                 cvs.add(ncv);
@@ -546,13 +466,11 @@ function ResumeBuilder() {
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
                     <PrintablePage page_id="cv-page">
-                        <CVContext.Provider value={CV}>
-                            <CVDispatchContext.Provider value={cv_dispatch}>
-                                <CVEditor />
-                            </CVDispatchContext.Provider>
+                        <CVContext.Provider value={[CV, cv_dispatch]}>
+                            <CVEditor />
                         </CVContext.Provider>
                     </PrintablePage>
-                    <InfoPad ref={infoPad_ref} info={cv_info.get()} />
+                    <InfoPad ref={infoPad_ref} info={cv_info.get} />
                 </SplitView>
             </DndProvider>
         </Section>

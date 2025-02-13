@@ -1,34 +1,40 @@
 import { CV } from "job-tool-shared-types";
-import {produce} from "immer"
+import {Draft, produce} from "immer"
+import { createContext } from 'react';
 
 interface CVAction {
     type: string;
     payload: any;
 };
 
-const SET = "SET";
-const SET_SECTION = "SET_SECTION";
-const SET_ITEM = "SET_ITEM";
+const ActionTypes = {
+    SET: "SET",
+    SET_SECTION: "SET_SECTION",
+    SET_ITEM: "SET_ITEM",
+} as const;
+
+type ActionMap = {
+    [K in keyof typeof ActionTypes]: (D: Draft<CV>, payload?: any) => void;
+};
+
+const actionHandlers: ActionMap = {
+    SET: (D, payload) => {
+        return payload;
+    },
+    SET_SECTION: (D, payload: { idx: number, section: any }) => {
+        D.sections[payload.idx] = payload.section;
+    },
+    SET_ITEM: (D, payload) => {
+        D.sections[payload.sec_idx].items[payload.item_idx] = payload.item;
+    },
+};
 
 // Reducer function
 const cvReducer = (state: CV, action: CVAction) => {
-    return produce(state, (D) => {
-        switch (action.type) {
-            case SET:   // set the whole CV
-                console.log("cvReducer -------- SET");
-                return action.payload;
-            case SET_SECTION:
-                console.log("cvReducer -------- SET_SECTION");
-                D.sections[action.payload.idx] = action.payload.section;
-                break;
-            case SET_ITEM:
-                console.log("cvReducer -------- SET_ITEM");
-                D.sections[action.payload.sec_idx].items[action.payload.item_idx] = action.payload.item;
-                break;
-            default:
-                return D;
-        }
-    });
+    console.log(`cvReducer -------- ${action.type}`);
+    return produce(state, (D) => actionHandlers[action.type]?.(D, action.payload));
 };
 
-export { cvReducer, CVAction, SET, SET_SECTION, SET_ITEM };
+const CVContext = createContext<[CV, React.Dispatch<CVAction>]>(null);
+
+export { cvReducer, CVAction, CVContext, ActionTypes as CVActions };

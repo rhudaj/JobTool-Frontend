@@ -1,12 +1,7 @@
 import { Bucket, Item } from "./types";
-import { produce } from "immer";    // the 'immer' libraris version of 'useReducer'
+import { Draft, produce } from "immer";    // the 'immer' libraris version of 'useReducer'
 import { createContext } from 'react';
-
-
-export interface BucketAction {
-    type: string;
-    payload: any;
-};
+import { CVState } from "../../sections/ResumeBuilder/useCVs";
 
 /* Empty all values in an object (recursively) */
 const emptyObject = (obj: any): any => {
@@ -26,58 +21,58 @@ const emptyObject = (obj: any): any => {
     }
 };
 
-export const SET = "SET";              // items: Item[]
-export const ADD = "ADD";              // atIndex: number, item?: Item
-export const ADD_BLANK = "ADD_BLANK";  // id: any, below: boolean
-export const MOVE = "MOVE"             // indexBefore: number, indexAfter: number
-export const REMOVE = "REMOVE";        // id: any
-export const CHANGE = "CHANGE";        // id: any, newValue: any
-
-// Reducer function
-export const bucketReducer = (state: Bucket, action: BucketAction) => {
-
-    const getIdx = (id: any) => state.items.findIndex((I) => I.id === id);
-
-    return produce(state, (D) => {
-        let args;
-        switch (action.type) {
-            case SET:  // set the whole CV
-                console.log("bucketReducer -------- SET");
-                args = action.payload as Item[];
-                D.items = args;
-                break;
-            case ADD:   // set the whole CV
-                console.log("bucketReducer -------- SET");
-                args = action.payload as { atIndex: number, item?: Item };
-                D.items.splice(args.atIndex, 0, args.item);
-                break;
-            case ADD_BLANK:
-                console.log("bucketReducer -------- ADD_BLANK");
-                args = action.payload as { id: any, below: boolean };
-                const index2add = getIdx(args.id) + (args.below ? 1 : 0);
-                D.items.splice(index2add, 0, emptyObject(D.items[0]));    // deep copy
-                break;
-            case MOVE:
-                console.log("bucketReducer -------- MOVE");
-                args = action.payload as { indexBefore: number, indexAfter: number };
-                const [movedItem] = D.items.splice(args.indexBefore, 1);
-                D.items.splice(args.indexAfter, 0, movedItem);
-                break;
-            case REMOVE:
-                console.log("bucketReducer -------- REMOVE");
-                args = action.payload as { id: any };
-                D.items.splice(getIdx(args.id), 1);
-                break;
-            case CHANGE:
-                console.log("bucketReducer -------- CHANGE");
-                args = action.payload as { id: any, newValue: any };
-                D.items[getIdx(args.id)].value = args.newValue;
-                break;
-            default:
-                return D;
-        }
-    });
+export interface BucketAction {
+    type: string;
+    payload: any;
 };
 
-export const BucketContext = createContext<Bucket>(null);
-export const BucketDispatchContext = createContext<React.Dispatch<BucketAction>>(null);
+const ActionTypes = {
+    SET: "SET", // items: Item[]
+    ADD: "ADD", // atIndex: number, item?: Item
+    ADD_BLANK: "ADD_BLANK", // id: any, below: boolean
+    MOVE: "MOVE",   // indexBefore: number, indexAfter: number
+    REMOVE: "REMOVE",   // id: any
+    CHANGE: "CHANGE",   // id: any, newValue: any
+} as const;
+
+type ActionMap = {
+    [K in keyof typeof ActionTypes]: (D: Draft<Bucket>, payload?: any) => void;
+};
+
+const getIdx = (id: any, items: Item[]) => items.findIndex((I) => I.id === id);
+
+const actionHandlers: ActionMap = {
+    SET: (D, payload) => {
+        D.items = payload;
+    },
+    ADD: (D, payload) => {
+        const { atIndex, item } = payload;
+        D.items.splice(atIndex, 0, item);
+    },
+    ADD_BLANK: (D, payload) => {
+        const { id, below } = payload;
+        const index2add = getIdx(id, D.items) + (below ? 1 : 0);
+        D.items.splice(index2add, 0, emptyObject(D.items[0]));    // deep copy
+    },
+    MOVE: (D, payload) => {
+        const { indexBefore, indexAfter } = payload;
+        const [movedItem] = D.items.splice(indexBefore, 1);
+        D.items.splice(indexAfter, 0, movedItem);
+    },
+    REMOVE: (D, payload) => {
+        const { id } = payload;
+        D.items.splice(getIdx(id, D.items), 1);
+    },
+    CHANGE: (D, payload) => {
+        const { id, newValue } = payload;
+        D.items[getIdx(id, D.items)].value = newValue;
+    },
+}
+
+// Reducer function
+export const bucketReducer = (state: Bucket, action: BucketAction) =>
+    produce(state, (D) => actionHandlers[action.type]?.(D, action.payload));
+
+const BucketContext = createContext<[Bucket, React.Dispatch<BucketAction>]>(null);
+
+export { BucketContext, ActionTypes as BucketActions };

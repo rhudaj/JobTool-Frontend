@@ -1,6 +1,6 @@
 import './versionedItem.sass'
 import { useEffect, useState } from "react";
-import { BucketType, BucketTypes, DynamicComponent, Item } from "../dnd/types";
+import { BucketTypeNames, DynamicComponent, Item } from "../dnd/types";
 import { StandaloneDragItem } from '../dnd/BucketItem';
 import TextEditDiv from '../TextEditDiv/texteditdiv';
 import { usePopup } from '../../hooks/Popup/popup';
@@ -218,7 +218,6 @@ export function VersionedItemUI(props: {
     if (!versions) return null;
 
     const version_str = `${props.obj?.id}/${versions[cur]?.id}`;
-    const bt: BucketType = BucketTypes[props.obj.item_type]; // needed since ATM, drag-item names arent synced
     const dnd_item: Item<string> = {id: version_str, value: versions[cur]?.value};
 
     return (
@@ -238,7 +237,7 @@ export function VersionedItemUI(props: {
             <div className='version-id-container'>
                 <p>{version_str}</p>
             </div>
-            <StandaloneDragItem item={dnd_item} item_type={bt.item_type} >
+            <StandaloneDragItem item={dnd_item} item_type={BucketTypeNames.VERSIONED_ITEMS} >
                 <DynamicComponent
                     key={cur} // force re-render when cur changes
                     type={props.obj.item_type}
