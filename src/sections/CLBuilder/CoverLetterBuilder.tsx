@@ -65,27 +65,10 @@ function CLBuilder(props: {}) {
 
     // ---------------- MODEL ----------------
 
-    const [paragraphs, setParagraphs] = useState<string[]>(null);
-    const [clInfo, setCLInfo] = useState<any>(null);
-
+    const [paragraphs, setParagraphs] = useState<string[]>([]);
     const jobPopup = usePopup();
 
     const saveAsPDF = useComponent2PDF("cl-page");
-
-    // Load data on mount
-    useEffect(() => {
-        if(process.env.REACT_APP_USE_BACKEND === "1") {
-            // Get the cl info
-            BackendAPI.request({
-                method: "GET",
-                endpoint: "cl_info",
-                handleSuccess: setCLInfo,
-                handleError: alert
-            })
-        } else {
-            setParagraphs([])
-        }
-    }, []);
 
     // ---------------- CONTROLLER ----------------
 

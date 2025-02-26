@@ -141,7 +141,6 @@ export function VersionedItemUI(props: {
     const [cur, setCur] = useState(0);
     const editNewItemPopup = usePopup();
 
-
     useEffect(()=> {
         setVersions(props.obj.versions)
     }, [props.obj.versions]);
