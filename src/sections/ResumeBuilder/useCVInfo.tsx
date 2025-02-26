@@ -1,4 +1,4 @@
-import { useCallback, useReducer } from "react";
+import { useCallback, useMemo, useReducer } from "react";
 import BackendAPI from "../../backend_api";
 import { CVInfo } from "../../components/infoPad/infoPad";
 import produce, { Draft } from "immer";
@@ -7,16 +7,11 @@ import produce, { Draft } from "immer";
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
 
-interface CVInfoState {
-    data: CVInfo;
-    status: boolean;
-};
 
 interface CVInfoAction {
     type: string;
     payload?: any;
 };
-
 
 const ActionTypes = {
     SET: "SET",
@@ -24,7 +19,7 @@ const ActionTypes = {
 } as const;
 
 type ActionMap = {
-    [K in keyof typeof ActionTypes]: (D: Draft<CVInfoState>, payload?: any) => void;
+    [K in keyof typeof ActionTypes]: (D: Draft<CVInfo>, payload?: any) => void;
 };
 
 const actionHandlers: ActionMap = {
@@ -37,21 +32,18 @@ const actionHandlers: ActionMap = {
 };
 
 // Reducer function
-const cvInfoReducer = (state: CVInfoState, action: CVInfoAction) => {
+const cvInfoReducer = (state: CVInfo, action: CVInfoAction) => {
     console.log(`cvInfoReducer -------- ${action.type}`);
     return produce(state, (D) => actionHandlers[action.type]?.(D, action.payload));
 };
 
 function useCVInfo() {
 
-    const [state, dispatch] = useReducer(cvInfoReducer, {
-        data: null,
-        status: false,
-    });
+    const [state, dispatch] = useReducer(cvInfoReducer, null);
 
     return {
-        status: state.status,
-        get: state.data,
+        get: state,
+        status: useMemo(()=> state !== null, [state]),
         fetch: useFetchCVInfo(dispatch),
         save: save2backend,
         setData: (newData: CVInfo) => dispatch({ type: ActionTypes.SET, payload: newData }),

@@ -141,8 +141,8 @@ export function VersionedItemUI(props: {
     const [cur, setCur] = useState(0);
     const editNewItemPopup = usePopup();
 
-
     useEffect(()=> {
+        if(!props.obj.versions) return
         setVersions(props.obj.versions)
     }, [props.obj.versions]);
 
@@ -208,17 +208,20 @@ export function VersionedItemUI(props: {
         )
     };
 
-
     const onSwitchVersion = () => {
         setCur(prev => (prev === versions.length - 1 ? 0 : prev + 1));
     };
 
     // ----------------- RENDER -----------------
 
-    if (!versions) return null;
+    if (!versions) return <div>No versions</div>;
 
-    const version_str = `${props.obj?.id}/${versions[cur]?.id}`;
-    const dnd_item: Item<string> = {id: version_str, value: versions[cur]?.value};
+    const version_str = `${props.obj?.id}/${versions[cur]?.id}`
+
+    const dnd_item: Item<string> = {
+        id: version_str,
+        value: versions[cur]?.value
+    }
 
     return (
         <div className="versioned-item-container">
@@ -247,6 +250,7 @@ export function VersionedItemUI(props: {
                         // TODO: cutoff drag events instead?
                     }}
                 />
+                {/* <div>{JSON.stringify(versions[cur]?.value)}</div> */}
             </StandaloneDragItem>
         </div>
     )

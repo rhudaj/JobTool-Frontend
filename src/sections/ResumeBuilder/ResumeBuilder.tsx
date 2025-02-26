@@ -193,9 +193,10 @@ function SavedCVs(props: {
     );
 }
 
-/* ------------------------------------------------------------------
- *                         ROOT COMPONENT                           *
-------------------------------------------------------------------- */
+// ------------------------------------------------------------------
+//                         ROOT COMPONENT
+// ------------------------------------------------------------------
+
 function ResumeBuilder() {
 
     // ---------------- STATE ----------------
@@ -412,7 +413,7 @@ function ResumeBuilder() {
         </div>,
     ];
 
-    if (!cvs.status || !cv_info.status) return null;
+    if (!cvs.status || !cv_info.status ) return null;
     return (
         <Section id="section-cv" heading="Resume Builder">
             {/* ------------ POPUPS ------------ */}

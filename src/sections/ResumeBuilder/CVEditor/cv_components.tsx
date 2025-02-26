@@ -11,6 +11,10 @@ import { BucketTypeNames, DynamicComponent } from "../../../components/dnd/types
 import { CVActions, CVContext } from "../useCV";
 import { BucketContext, bucketReducer } from "../../../components/dnd/useBucket";
 
+// TODO: atm InfoPad does not work because it does not supply CVContext
+// These components should not be handling CVContext
+// They have to use callbacks
+
 function SectionUI(props: { obj: CVSection; sec_idx: number }) {
 
 	// data from parent:
