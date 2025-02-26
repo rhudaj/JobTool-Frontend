@@ -1,7 +1,7 @@
 import './infoPad.sass';
 import React, { forwardRef, useImperativeHandle } from "react";
 import { InfoPadMap } from '../dnd/types';
-import { Item, Bucket } from '../dnd/types';
+import { Item } from '../dnd/types';
 import { VersionedItemUI, VersionedItem } from "../VersionedItem/versionedItem"
 import { useImmer } from 'use-immer';
 
