@@ -1,7 +1,7 @@
 import  useLogger  from "./hooks/logger";
 
 export interface Request<IN, OUT=null> {
-    method: "GET" | "POST",
+    method: "GET" | "POST" | "PUT" | "DELETE",
     endpoint: string,
     body?: IN,
     handleSuccess?: (data: OUT) => void,
@@ -14,7 +14,6 @@ interface Response<T> {
     msg?: string;
 };
 
-
 /**
  * BackendAPI class
  * @todo the user should have to construct one,
@@ -26,7 +25,7 @@ class BackendAPI {
 
     // Centralized request method
     private static async __request__<T>(
-        method: "GET" | "POST",
+        method: "GET" | "POST" | "PUT" | "DELETE",
         endpoint: string,
         body?: any,
     ): Promise<Response<T>|null> {

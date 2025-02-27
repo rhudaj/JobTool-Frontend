@@ -120,7 +120,7 @@ const useFetchCVs = (dispatch: React.Dispatch<CVsAction>) => {
         if (USE_BACKEND) {
             BackendAPI.request({
                 method: "GET",
-                endpoint: "all_cvs",
+                endpoint: "cvs",
                 handleSuccess: (cvList) =>
                     dispatch({ type: ActionTypes.SET_DATA, payload: cvList }),
                 handleError: () =>
@@ -161,7 +161,7 @@ const useFetchCVs = (dispatch: React.Dispatch<CVsAction>) => {
 const save2backend = (ncv: NamedCV) => {
     BackendAPI.request({
         method: "POST",
-        endpoint: "saveCV",
+        endpoint: "cvs",
         body: ncv,
         handleSuccess: () => alert("Saved CV!"),
         handleError: alert,

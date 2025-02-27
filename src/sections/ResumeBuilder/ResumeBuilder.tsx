@@ -279,19 +279,20 @@ function ResumeBuilder() {
             },
             onSaveTrainEx: (job: string) => {
                 console.log("onSaveTrainEx: job = ", job);
-                BackendAPI.request<{ job: string; ncv: NamedCV }>({
-                    method: "POST",
-                    endpoint: "saveCVTrainEx",
-                    body: {
-                        job: job,
-                        ncv: cvs.cur,
-                    },
-                    handleSuccess: () => {
-                        alert("Saved Training Example");
-                        saveTrainExPopup.close();
-                    },
-                    handleError: alert,
-                });
+                // TODO: this is not longer an endpoint. All annotations are sent together
+                // BackendAPI.request<{ job: string; ncv: NamedCV }>({
+                //     method: "POST",
+                //     endpoint: "saveCVTrainEx",
+                //     body: {
+                //         job: job,
+                //         ncv: cvs.cur,
+                //     },
+                //     handleSuccess: () => {
+                //         alert("Saved Training Example");
+                //         saveTrainExPopup.close();
+                //     },
+                //     handleError: alert,
+                // });
             },
         },
         settings: {

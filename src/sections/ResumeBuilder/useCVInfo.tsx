@@ -52,8 +52,8 @@ function useCVInfo() {
 
 const save2backend = (newData: CVInfo) => {
     BackendAPI.request<CVInfo>({
-        method: "POST",
-        endpoint: "saveCVInfo",
+        method: "PUT",
+        endpoint: "cv_info",
         body: newData,
         handleSuccess: () => alert("Success! Saved cv info"),
         handleError: alert,
