@@ -158,10 +158,10 @@ const useFetchCVs = (dispatch: React.Dispatch<CVsAction>) => {
 };
 
 // Save to backend
-const save2backend = (ncv: NamedCV) => {
+const save2backend = (ncv: NamedCV, overwrite: boolean) => {
     BackendAPI.request({
-        method: "POST",
-        endpoint: "cvs",
+        method: overwrite ? "PUT" : "POST",
+        endpoint: `cvs${overwrite ?? `/${ncv.name}`}`,
         body: ncv,
         handleSuccess: () => alert("Saved CV!"),
         handleError: alert,

@@ -54,7 +54,11 @@ function CVEditor() {
 			>
 				{/* SECTIONS -------------------------------------- */}
 				{CV.sections?.map((S: CVSection, i: number) =>
-					<UI.SectionUI key={i} obj={S} onUpdate={newSec => onSectionUpdate(i, newSec)} />
+					<UI.SectionUI
+						key={i}
+						obj={S}
+						onUpdate={newSec => onSectionUpdate(i, newSec)}
+					/>
 				)}
 			</ItemBucket>
 		</div>

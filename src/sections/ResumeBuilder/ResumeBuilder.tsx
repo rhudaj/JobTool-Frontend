@@ -2,7 +2,6 @@ import "./resumebuilder.sass";
 import { useEffect, useState, useRef, useReducer } from "react";
 import Section from "../../components/Section/Section";
 import { NamedCV } from "job-tool-shared-types";
-import BackendAPI from "../../backend_api";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
 import InfoPad, { CVInfo, InfoPadHandle } from "../../components/infoPad/infoPad";
@@ -246,21 +245,21 @@ function ResumeBuilder() {
                 if (cv) util.downloadAsJson(cv);
                 exportPopup.close();
             },
-            onSaveFormSubmit: (newName: string, newTags: string[]) => {
+            onSaveFormSubmit: (name: string, tags: string[]) => {
                 // first check that the cv has actually changed!
-
                 const edited_cv = cvs.cur.data;
-
                 if (isEqual(edited_cv, cvs.cur.data)) {
                     alert("No changes have been made to the CV!");
                     return;
                 }
-
-                cvs.save({
-                    name: newName,
-                    tags: newTags,
-                    data: edited_cv,
-                });
+                cvs.save(
+                    {
+                        name: name,
+                        tags: tags,
+                        data: edited_cv,
+                    },
+                    (name === cvs.cur.name)
+                );
                 savePopup.close();
             },
             onImportJsonFileChange: (
