@@ -30,7 +30,7 @@ const JobPopup = (props: {
     const onGenerateClicked = () => {
         BackendAPI.request<{ job_info: string }, string[]>({
             method: "POST",
-            endpoint: "genCL",
+            endpoint: "/AI/genCL",
             body: { job_info: jobTxt },
             handleSuccess: (data: string[]) => setResult(data),
             handleError: alert

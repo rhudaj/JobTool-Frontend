@@ -1,4 +1,3 @@
-import { CVSection } from "job-tool-shared-types";
 import { ExperienceUI, SectionUI, SummaryUI, ProjectUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
 import { VersionedItemUI } from "../VersionedItem/versionedItem";
 import TextEditDiv from "../TextEditDiv/texteditdiv";
@@ -17,10 +16,8 @@ interface Bucket<T=any> {
 };
 
 interface BucketType {
-    item_type?: string,
-    isVertical?: boolean,
+    layoutClass?: string,
     DisplayItem?: (props: { obj: any, onUpdate?: any }) => JSX.Element,
-    displayItemsClass?: string
 };
 
 /**
@@ -40,53 +37,45 @@ function DynamicComponent({ type, props }) {
     return <Component {...props} />;
 }
 
+const BucketTypeNames = {
+    SUMMARY: "summary",
+    EXPERIENCES: "experiences",
+    PROJECTS: "projects",
+    EXP_POINTS: "exp_points",
+    CL_INFO_PAD: "cl_info_pad",
+    SECTIONS: "sections",
+    CL_PARAGRAPHS: "cl_paragraphs",
+    VERSIONED_ITEMS: "versioned_items",
+};
 const BucketTypes: { [key: string]: BucketType } = {
     "summary": {
-        item_type: "summary",
-        isVertical: true,
         DisplayItem: SummaryUI,
     },
     "experiences": {
-        item_type: "experience",
-        isVertical: true,
-        displayItemsClass:"experiences",
+        layoutClass:"experiences",
         DisplayItem: ExperienceUI
     },
     "projects": {
-        item_type: "projects",
-        isVertical: true,
-        displayItemsClass:"experiences",
+        layoutClass:"experiences",
         DisplayItem: ProjectUI
     },
-    "exp-points": {
-        displayItemsClass: "exp-points",
-        isVertical: true,
+    "exp_points": {
+        layoutClass: "exp-points",
         DisplayItem: (props: {obj: string, onUpdate: any}) => (
             <li><TextEditDiv tv={props.obj} onUpdate={props.onUpdate} /></li>
         )
     },
-    "cl-info-pad": {
-        item_type: "cl-item",
-        isVertical: true,
-        displayItemsClass: "text-item-list",
+    "cl_info_pad": {
+        layoutClass: "text-item-list",
         DisplayItem: (props: {obj: string}) => <div className="text-item">{props.obj}</div>
     },
     "sections": {
-        item_type: "section",
-        isVertical: true,
-        displayItemsClass: "section",
+        layoutClass: "section",
         DisplayItem: SectionUI
     },
-    "cl-paragraphs": {
-        isVertical: true,
-        displayItemsClass: "cl-editor",
-        item_type: "cl-item",
+    "cl_paragraphs": {
+        layoutClass: "cl-editor",
         DisplayItem: (props: { obj: string, onUpdate: any })=> <TextEditDiv tv={props.obj} onUpdate={props.onUpdate}/>
-    },
-    "versioned_items": {
-        item_type: "versioned_item",
-        isVertical: true,
-        DisplayItem: VersionedItemUI,
     }
 };
 
@@ -95,7 +84,16 @@ const InfoPadMap = {
     "projects":     "projects",
     "experience":   "experiences",
     "education":    "experiences",
-    "paragraphs":   "cl-info-pad",
+    "paragraphs":   "cl_info_pad",
 }
 
-export { Item, Bucket, BucketType, DynamicComponent, DEFAULT_ITEM_TYPE, BucketTypes, InfoPadMap };
+export {
+    Item,
+    Bucket,
+    BucketType,
+    DynamicComponent,
+    DEFAULT_ITEM_TYPE,
+    BucketTypeNames,
+    BucketTypes,
+    InfoPadMap
+};

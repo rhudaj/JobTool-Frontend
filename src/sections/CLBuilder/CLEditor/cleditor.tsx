@@ -1,8 +1,8 @@
 import "./cleditor.sass"
-import { useEffect } from "react";
+import { useEffect, useReducer } from "react";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { useImmer } from "use-immer";
-import { DynamicComponent, Item } from "../../../components/dnd/types";
+import { BucketTypeNames, DynamicComponent, Item } from "../../../components/dnd/types";
 
 function CLEditor(props: {
     paragraphs: string[],
@@ -27,23 +27,18 @@ function CLEditor(props: {
     }
 
     return (
-        <ItemBucket
-            bucket={{
-                id: "cl-paragraphs",
-                items: pgs?.map((p: string, i: number) => ({
+            <ItemBucket
+                type={BucketTypeNames.CL_PARAGRAPHS}
+                id="cl-paragraphs"
+                items={pgs?.map((p: string, i: number) => ({
                     id: `cl-paragraph-${i}`,
                     value: p
-                }))
-            }}
-            type="cl-paragraphs"
-            onUpdate={handleBucketUpdate}
-        >
-            {
-                pgs?.map((p: string, i: number)=>
-                    <DynamicComponent key={i} type="cl-paragraphs" props={{obj: p}}/>
-                )
-            }
-        </ItemBucket>
+                }))}
+            >
+                {pgs?.map((p: string, i: number)=>
+                    <DynamicComponent key={i} type={BucketTypeNames.CL_PARAGRAPHS} props={{obj: p}}/>
+                )}
+            </ItemBucket>
     );
 }
 

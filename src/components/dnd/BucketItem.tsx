@@ -3,18 +3,19 @@ import { useDrag, useDrop } from "react-dnd";
 import React, { useContext } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
 import { Item } from "./types";
-import { BucketContext } from "./Bucket";
+import { BucketItemContext } from "./Bucket";
 import { ControlsBox, useHoverBuffer } from "../ControlsBox/ControlBox";
 
+/**
+ * This item should only ever be rendered inside a Bucket component.
+ * Because it requires the BucketContext to be present.
+*/
 export default function BucketItem(props: { item: Item, children: JSX.Element }) {
-
-    const bucketContext = useContext(BucketContext);
-
-    const { ref, isHovered } = useHoverBuffer(15); // 40px buffer zone
 
     // -------------------- STATE ---------------------
 
-    // const ref = React.useRef(null);
+    const bucketContext = useContext(BucketItemContext);
+    const { ref, isHovered } = useHoverBuffer(15); // ref' drag handle
 
     // -----------------DRAG FUNCTIONALITY-----------------
 
@@ -28,7 +29,7 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
             const dropResult: {id: any} = monitor.getDropResult();  // the bucket we dropped on
             // Cancelled/invalid drop || same bucket
             if(!dropResult || dropResult.id === bucketContext.bucket_id) return;
-            bucketContext.onRemove && bucketContext.onRemove(item.id);
+            bucketContext.dispatch({ type: "REMOVE", payload: { id: item.id } });
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging()
@@ -67,8 +68,6 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
         [props.item, bucketContext.onHover]
     );
 
-    drop(preview(ref));     // Inject the dnd props into the reference
-
     // Highlight the ref's border when controls hovered
     React.useEffect(()=>{
         if(isHovered) {
@@ -80,7 +79,13 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
         }
     }, [isHovered]);
 
+    drop(preview(ref));     // Inject the dnd props into the reference
+
     // -----------------RENDER-----------------
+
+    if(!bucketContext) {
+        throw new Error("BucketItem must be rendered inside a Bucket component.");
+    }
 
     const classNames = joinClassNames(
         "dnd-item-wrapper",
@@ -101,27 +106,32 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
                 {
                     id: "delete",
                     icon_class: "fa-solid fa-x",
-                    disabled: !Boolean(bucketContext.onDelete),
-                    onClick: ()=>bucketContext.onDelete(props.item.id)
+                    // disabled: !Boolean(bucketContext.onDelete),
+                    onClick: ()=>bucketContext.dispatch({type: "REMOVE", payload: { id: props.item.id }})
                 },
                 {
                     id: "add-above",
                     icon_class: "fa-solid fa-arrow-up",
-                    disabled: !Boolean(bucketContext.onAddItem),
-                    onClick: ()=>bucketContext.onAddItem(props.item.id, true)
+                    // disabled: !Boolean(bucketContext.onAddItem),
+                    // onClick: ()=>bucketContext.onAddItem(props.item.id, true)
+                    onClick: ()=>bucketContext.dispatch({type: "ADD_BLANK", payload: { id: props.item.id, below: false }})
+
                 },
                 {
                     id: "add-below",
                     icon_class: "fa-solid fa-arrow-down",
-                    disabled: !Boolean(bucketContext.onAddItem),
-                    onClick: ()=>bucketContext.onAddItem(props.item.id, false)
+                    // disabled: !Boolean(bucketContext.onAddItem),
+                    onClick: ()=>bucketContext.dispatch({type: "ADD_BLANK", payload: { id: props.item.id, below: true }})
                 }
             ]}/>}
         </div>
     );
 };
 
-// Drag only, can't be Dropped on. Only has Move Controls
+/**
+ * A standalone drag item that can be used outside of a bucket.
+ * It has no drop functionality, only drag.
+*/
 export function StandaloneDragItem(props: {
     item: Item,
     item_type: string,

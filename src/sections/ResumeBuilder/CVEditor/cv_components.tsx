@@ -1,82 +1,70 @@
 import "./cveditor.sass";
-import { Experience, Link, MonthYear, DateRange, CVSection, CV } from "job-tool-shared-types";
+import { Experience, Link, MonthYear, DateRange, CVSection } from "job-tool-shared-types";
 import TextEditDiv from "../../../components/TextEditDiv/texteditdiv";
 import { joinClassNames } from "../../../util/joinClassNames";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
-import { Item } from "../../../components/dnd/types";
-import useLogger from "../../../hooks/logger";
-import { useEffect } from "react";
-import { useImmer } from "use-immer";
 import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
+import { BucketTypeNames, DynamicComponent } from "../../../components/dnd/types";
 
+function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
 
-function SectionUI(props: {
-	obj: CVSection;
-	children: any[];
-	onUpdate?: (newObj: CVSection) => void;
-}) {
-	const [data, setData] = useImmer<CVSection>(null);
-
-	// parent --> this
-	useEffect(()=>{
-		if(props.obj.name === "education") {
-			log("education SectionUI received a new props.obj: ", props.obj);
-		}
-		if(!props.obj) return;
-		setData(props.obj);
-	}, [props.obj]);
-
-	// this --> parent
-	useEffect(()=>{
-		if(!data) return;
-		props.onUpdate?.(data);
-	}, [data]);
-
-	const log = useLogger("SectionUI");
-	const formatHeader = (s: string) => s.toUpperCase();
-
-	const handleBucketUpdate = (newItems: Item<string>[]) =>{
-		log("handleBucketUpdate: ", newItems);
-		setData(draft=>{
-			draft.items = newItems.map((I: Item) => I.value);
+	const onItemUpdate = (i: number, newVal: any) => {
+		const new_items = [...props.obj.items];
+		new_items[i] = newVal;
+		props.onUpdate?.({
+			...props.obj,
+			items: new_items
 		})
-	};
+	}
+
+	const onBucketUpdate = (newVals: any[]) => {
+		props.onUpdate?.({
+			...props.obj,
+			items: newVals
+		})
+	}
+
+	const data = props.obj;
 
 	if(!data) return null;
 	return (
 		<div className="section" >
 			<div className="sec-head">
-				<p>{formatHeader(data.name)}</p>
+				<p>{data.name.toUpperCase()}</p>
 				<hr />
 			</div>
 			<div id={`sec-${data.name}`} className="sec-content">
 				<ItemBucket
-					bucket={{
-						id: data.name,
-						items: data.items.map((item: any, i: number)=>({
-							id:    `${data.name}-${i}`,
-							value: item
-						}))
-					}}
+					id={data.name}
+					items={data.items?.map((item: any, i: number)=>({
+						id:    `${data.name}-${i}`,
+						value: item
+					}))}
 					type={data.bucket_type}
-					onUpdate={handleBucketUpdate}
+					onUpdate={onBucketUpdate}
 				>
-					{props.children}
+					{data.items?.map((item: any, i: number) =>
+						<DynamicComponent
+							key={`${i}-${i}`}
+							type={data.bucket_type}
+							props={{ obj: item, onUpdate: (newVal: any) => onItemUpdate(i, newVal) }}
+						/>
+					)}
 				</ItemBucket>
 			</div>
 		</div>
 	)
 }
 
-function SummaryUI(props: {
-	obj: any,
-	onUpdate?: (newObj: any) => void
-}) {
+function SummaryUI(props: { obj: any, onUpdate?: (newObj: any)=>void }) {
 
 	const handleUpdate = (key: string, newVal: any) => {
-		props.onUpdate?.({...props.obj, [key]: newVal});
+		props.onUpdate?.({
+			...props.obj,
+			[key]: newVal
+		});
 	};
 
 	return (
@@ -96,40 +84,36 @@ function SummaryUI(props: {
 
 // Note: we can make changes to this and it be local.
 function ExperienceUI(props: {
-	obj: Experience;
-	disableBucketFeatures?: boolean;
-	onUpdate?: (newObj: Experience) => void;
+	obj: Experience
+	onUpdate?: (newObj: any)=>void
+	disableBucketFeatures?: boolean
 }) {
 
-	const [data, setData] = useImmer(null);
-
-	// parent --> this
-	useEffect(()=>{
-		if(!props.obj) return;
-		setData(props.obj);
-	}, [props.obj]);
-
-	// this --> parent
-	useEffect(()=>{
-		if(!data) return;
-		props.onUpdate?.(data);
-	}, [data])
-
 	const handleUpdate = (field: keyof Experience, val: any) => {
-		setData(cur=>{
-			cur[field] = val;
-		})
+		props.onUpdate?.({
+			...props.obj,
+			[field]: val
+		});
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {
-		setData(cur=>{
-			cur.description[i] = newVal;
-		})
+		const new_description = [...props.obj.description];
+		new_description[i] = newVal;
+		handleUpdate('description', new_description);
 	};
 
-	if (!data) return null;
+	const onBucketUpdate = (newVals: any[]) => {
+		handleUpdate('description', newVals);
+	};
 
-	const bucket_items = data.description.map((item: string, i: number)=>(
+	const data = props.obj;
+
+	if (!data) {
+		console.log("ExperienceUI, data = ", data);
+		return null;
+	}
+
+	const bulletPoints = data.description.map((item: string, i: number)=>(
 		<li key={i}>
 			<TextEditDiv
 				tv={item}
@@ -172,23 +156,19 @@ function ExperienceUI(props: {
 			{/* ROW 2 */}
 			<div className="exp-content">
 				<ul>
-					{props.disableBucketFeatures ? bucket_items : (
+					{props.disableBucketFeatures ? bulletPoints : (
 						<ItemBucket
-							bucket={{
-								id: `${data.title}-bucket`,
-								items: data.description.map((item: string, i: number)=>({
-									id: `${data.title}-bp${i}`,
-									value: item
-								}))
-							}}
-							type={"exp-points"}
-							onUpdate={newPoints => handleUpdate('description', newPoints.map(I=>I.value))}
-							// By default, these are disabled
+							id="experience"
+							items={data?.description?.map((item: string, i: number)=>({
+								id: `${data.title}-bp${i}`,
+								value: item
+							}))}
+							type={BucketTypeNames.EXP_POINTS}
+							onUpdate={onBucketUpdate}
 							replaceDisabled deleteOnMoveDisabled
-							// Conditionally disabled
 							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
 						>
-							{bucket_items}
+							{bulletPoints}
 						</ItemBucket>
 					)}
 				</ul>
@@ -201,37 +181,30 @@ function ExperienceUI(props: {
 // dont show date.
 function ProjectUI(props: {
 	obj: Experience;
+	onUpdate?: (newObj: any)=>void
 	disableBucketFeatures?: boolean;
-	onUpdate?: (newObj: Experience) => void;
 }) {
 
-	const [data, setData] = useImmer(null);
-
-	// parent --> this
-	useEffect(()=>{
-		if(!props.obj) return;
-		setData(props.obj);
-	}, [props.obj]);
-
-	// this --> parent
-	useEffect(()=>{
-		if(!data) return;
-		props.onUpdate?.(data);
-	}, [data])
-
 	const handleUpdate = (field: keyof Experience, val: any) => {
-		setData(cur=>{
-			cur[field] = val;
-		})
+		props.onUpdate?.({
+			...props.obj,
+			[field]: val
+		});
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {
-		setData(cur=>{
-			cur.description[i] = newVal;
-		})
+		const new_description = [...props.obj.description];
+		new_description[i] = newVal;
+		handleUpdate('description', new_description);
 	};
 
-	if (!data) return null;
+	const onBucketUpdate = (newVals: any[]) => {
+		handleUpdate("description", newVals)
+	}
+
+	const data = props.obj;
+
+	if (!data) return <div>No project data</div>;
 
 	const bucket_items = data.description.map((item: string, i: number)=>(
 		<li key={i}>
@@ -266,18 +239,14 @@ function ProjectUI(props: {
 				<ul>
 					{props.disableBucketFeatures ? bucket_items : (
 						<ItemBucket
-							bucket={{
-								id: `${data.title}-bucket`,
-								items: data.description.map((item: string, i: number)=>({
-									id: `${data.title}-bp${i}`,
-									value: item
-								}))
-							}}
-							type={"exp-points"}
-							onUpdate={newPoints => handleUpdate('description', newPoints.map(I=>I.value))}
-							// By default, these are disabled
+							id="experience"
+							items={data?.description?.map((item: string, i: number)=>({
+								id: `${data.title}-bp${i}`,
+								value: item
+							}))}
+							type={BucketTypeNames.EXP_POINTS}
+							onUpdate={onBucketUpdate}
 							replaceDisabled deleteOnMoveDisabled
-							// Conditionally disabled
 							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
 						>
 							{bucket_items}

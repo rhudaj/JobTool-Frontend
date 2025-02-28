@@ -1,6 +1,6 @@
 import './versionedItem.sass'
 import { useEffect, useState } from "react";
-import { BucketType, BucketTypes, DynamicComponent, Item } from "../dnd/types";
+import { BucketTypeNames, DynamicComponent, Item } from "../dnd/types";
 import { StandaloneDragItem } from '../dnd/BucketItem';
 import TextEditDiv from '../TextEditDiv/texteditdiv';
 import { usePopup } from '../../hooks/Popup/popup';
@@ -142,6 +142,7 @@ export function VersionedItemUI(props: {
     const editNewItemPopup = usePopup();
 
     useEffect(()=> {
+        if(!props.obj.versions) return
         setVersions(props.obj.versions)
     }, [props.obj.versions]);
 
@@ -207,18 +208,20 @@ export function VersionedItemUI(props: {
         )
     };
 
-
     const onSwitchVersion = () => {
         setCur(prev => (prev === versions.length - 1 ? 0 : prev + 1));
     };
 
     // ----------------- RENDER -----------------
 
-    if (!versions) return null;
+    if (!versions) return <div>No versions</div>;
 
-    const version_str = `${props.obj?.id}/${versions[cur]?.id}`;
-    const bt: BucketType = BucketTypes[props.obj.item_type]; // needed since ATM, drag-item names arent synced
-    const dnd_item: Item<string> = {id: version_str, value: versions[cur]?.value};
+    const version_str = `${props.obj?.id}/${versions[cur]?.id}`
+
+    const dnd_item: Item<string> = {
+        id: version_str,
+        value: versions[cur]?.value
+    }
 
     return (
         <div className="versioned-item-container">
@@ -237,7 +240,7 @@ export function VersionedItemUI(props: {
             <div className='version-id-container'>
                 <p>{version_str}</p>
             </div>
-            <StandaloneDragItem item={dnd_item} item_type={bt.item_type} >
+            <StandaloneDragItem item={dnd_item} item_type={props.obj.item_type} >
                 <DynamicComponent
                     key={cur} // force re-render when cur changes
                     type={props.obj.item_type}
@@ -247,6 +250,7 @@ export function VersionedItemUI(props: {
                         // TODO: cutoff drag events instead?
                     }}
                 />
+                {/* <div>{JSON.stringify(versions[cur]?.value)}</div> */}
             </StandaloneDragItem>
         </div>
     )

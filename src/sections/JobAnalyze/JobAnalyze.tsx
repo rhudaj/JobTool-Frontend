@@ -1,5 +1,5 @@
 import "./jobanalyze.sass"
-import { JobInfo } from "job-tool-shared-types";
+import { JobInfo, NamedCV } from "job-tool-shared-types";
 import JIDisplay from "./JIDisplay/JIDisplay";
 import Section from "../../components/Section/Section";
 import SplitView from "../../components/SplitView/splitview";
@@ -13,9 +13,9 @@ function JobAnalyze() {
     const [jobText, setJobText] = useState<string>("");
 
     const saveAnnotation = () => {
-        BackendAPI.request<{ job_text: string, annotations: any[] }>({
+        BackendAPI.request<{ job_text: string, ncv?: NamedCV, annotations?: any[] }>({
             method: "POST",
-            endpoint: "save_annotation",
+            endpoint: "annotations",
             body: {
                 job_text: initJobText,
                 annotations: JIRef.current.get(),

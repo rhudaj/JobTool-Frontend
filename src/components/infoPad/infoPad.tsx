@@ -5,10 +5,12 @@ import { Item } from '../dnd/types';
 import { VersionedItemUI, VersionedItem } from "../VersionedItem/versionedItem"
 import { useImmer } from 'use-immer';
 
+// TODO: atm InfoPad does not work because it does not supply CVContext
+
 export interface CVInfo {
     [ secName: string ]: {                  // section name
-        [ groupName: string ]: {         // e.g. experience/project id
-            [ itemName: string ]: any;   // e.g. id: experience content
+        [ groupName: string ]: {            // e.g. experience/project id
+            [ itemName: string ]: any;      // e.g. id: experience content
         }
     }
 }
@@ -63,12 +65,10 @@ const InfoPad = forwardRef<InfoPadHandle, { info: CVInfo }>(({ info }, ref) => {
 
     // ----------------- STATE -----------------
 
-    const [cvInfo, setCVInfo] = useImmer<CVInfo>(null);
     const [sections, setSections] = useImmer(null);
 
     React.useEffect(() => {
         if (!info) return;
-        setCVInfo(info);
         setSections(Info2Sections(info));
     }, [info]);
 
@@ -87,18 +87,20 @@ const InfoPad = forwardRef<InfoPadHandle, { info: CVInfo }>(({ info }, ref) => {
 
     // ----------------- VIEW -----------------
 
-    if (!cvInfo || !sections) return <div id="info-pad">no CV info found</div>;
+    if (!sections) {
+        return <div id="info-pad">no CV info found</div>;
+    }
     return (
         <div id="info-pad">
             {sections.map((sec, sec_idx: number) => (
                 <div key={sec_idx} className="info-pad-section">
                     <h2>{sec.secName.toUpperCase()}</h2>
                     <div className='section-items'>
-                        {sec.items.map((I: VersionedItem, item_idx) =>
+                        {sec.items.map((vi: VersionedItem, i: number) =>
                             <VersionedItemUI
-                                key={item_idx}
-                                obj={I}
-                                onUpdate={(newVI)=>onVersionedItemUpdate(newVI, sec_idx, item_idx)}
+                                key={i}
+                                obj={vi}
+                                onUpdate={(newVI)=>onVersionedItemUpdate(newVI, sec_idx, i)}
                             />
                         )}
                     </div>
