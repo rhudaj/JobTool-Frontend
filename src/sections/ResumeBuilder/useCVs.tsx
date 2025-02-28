@@ -2,7 +2,6 @@ import { CV, NamedCV } from "job-tool-shared-types";
 import BackendAPI from "../../backend_api";
 import { create } from 'zustand'
 import { produce } from 'immer' // simplify changing nested state
-import { createContext } from 'react'
 import { isEqual } from "lodash";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
@@ -68,12 +67,17 @@ const useCvsStore = create<State & Actions>((set, get) => ({
         set({ curIdx: idx })
     },
     delCur: () => {
-        log(`delCur()`)
+        // NOTE: must get idx/name before calling set()
+        const idx = get().curIdx
+        const name = get().ncvs[idx].name
+        log(`delete(name: ${name})`)
         set(produce(state => {
             state.ncvs.splice(state.curIdx, 1)
             state.trackMods.splice(state.curIdx, 1)
             state.curIdx = 0
         }))
+        // for backend
+        deleteFromBackend(name)
     },
 }))
 
@@ -96,6 +100,12 @@ const fetchFromBackend = async (): Promise<NamedCV[]> => {
             )
         )
     }
+}
+
+const deleteFromBackend = (name: string) => {
+    BackendAPI.request({ method: "DELETE", endpoint: `cvs/${name}` })
+    .then(() => alert("Success! Deleted cv info"))
+    .catch(alert)
 }
 
 const save2backend = (ncv: NamedCV, overwrite: boolean) => {
