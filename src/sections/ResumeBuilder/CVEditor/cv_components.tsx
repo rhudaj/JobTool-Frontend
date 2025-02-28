@@ -5,35 +5,28 @@ import { joinClassNames } from "../../../util/joinClassNames";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
-import { useEffect } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
-import { BucketTypeNames, DynamicComponent, Item } from "../../../components/dnd/types";
-import { useImmer } from "use-immer";
+import { BucketTypeNames, DynamicComponent } from "../../../components/dnd/types";
 
-// TODO: atm InfoPad does not work because it does not supply CVContext
-// These components should not be handling CVContext
-// They have to use callbacks
-function SectionUI(props: { obj: CVSection; onUpdate?: (newObj: any)=>void }) {
+function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
 
-	const [data, setData] = useImmer(null);
-
-	// parent -> data
-	useEffect(()=> setData(props.obj), [props.obj])
-
-	// data -> parent
-	useEffect(() => props.onUpdate?.(data), [data])
-
-	// children -> data
 	const onItemUpdate = (i: number, newVal: any) => {
-		setData(draft => {
-			draft.items[i] = newVal;
+		const new_items = [...props.obj.items];
+		new_items[i] = newVal;
+		props.onUpdate?.({
+			...props.obj,
+			items: new_items
 		})
 	}
+
 	const onBucketUpdate = (newVals: any[]) => {
-		setData(draft => {
-			draft.items = newVals
+		props.onUpdate?.({
+			...props.obj,
+			items: newVals
 		})
 	}
+
+	const data = props.obj;
 
 	if(!data) return null;
 	return (
@@ -67,17 +60,10 @@ function SectionUI(props: { obj: CVSection; onUpdate?: (newObj: any)=>void }) {
 
 function SummaryUI(props: { obj: any, onUpdate?: (newObj: any)=>void }) {
 
-	// data from parent:
-	const [data, setData] = useImmer(props.obj);
-
-	useEffect(() => {
-		if(!data) return;
-		props.onUpdate?.(data);
-	}, [data]);
-
 	const handleUpdate = (key: string, newVal: any) => {
-		setData(draft => {
-			draft[key] = newVal;
+		props.onUpdate?.({
+			...props.obj,
+			[key]: newVal
 		});
 	};
 
@@ -103,28 +89,24 @@ function ExperienceUI(props: {
 	disableBucketFeatures?: boolean
 }) {
 
-	const [data, setData] = useImmer(props.obj);
-
-	useEffect(() => {
-		if(!data) return;
-		props.onUpdate?.(data);
-	}, [data]);
-
 	const handleUpdate = (field: keyof Experience, val: any) => {
-		setData(draft => {
-			draft[field] = val;
+		props.onUpdate?.({
+			...props.obj,
+			[field]: val
 		});
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {
-		setData(draft => {
-			draft.description[i] = newVal;
-		});
+		const new_description = [...props.obj.description];
+		new_description[i] = newVal;
+		handleUpdate('description', new_description);
 	};
 
 	const onBucketUpdate = (newVals: any[]) => {
 		handleUpdate('description', newVals);
 	};
+
+	const data = props.obj;
 
 	if (!data) {
 		console.log("ExperienceUI, data = ", data);
@@ -203,29 +185,26 @@ function ProjectUI(props: {
 	disableBucketFeatures?: boolean;
 }) {
 
-	// data from parent:
-	const [data, setData] = useImmer(props.obj);
-
-	useEffect(() => {
-		if(!data) return
-		props.onUpdate?.(data)
-	}, [data]);
-
 	const handleUpdate = (field: keyof Experience, val: any) => {
-		setData(draft => {
-			draft[field] = val;
+		props.onUpdate?.({
+			...props.obj,
+			[field]: val
 		});
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {
-		data.description[i] = newVal;
+		const new_description = [...props.obj.description];
+		new_description[i] = newVal;
+		handleUpdate('description', new_description);
 	};
 
 	const onBucketUpdate = (newVals: any[]) => {
 		handleUpdate("description", newVals)
 	}
 
-	if (!data) return null;
+	const data = props.obj;
+
+	if (!data) return <div>No project data</div>;
 
 	const bucket_items = data.description.map((item: string, i: number)=>(
 		<li key={i}>

@@ -17,7 +17,7 @@ import TextItems from "../../components/TextItems/TextItems";
 import { usePopup } from "../../hooks/Popup/popup";
 import { useImmer } from "use-immer";
 import { useCvsStore } from "./useCVs";
-import { useCVInfo } from "./useCVInfo";
+import { useCvInfoStore } from "./useCVInfo";
 import { useShallow } from 'zustand/react/shallow'
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
@@ -209,15 +209,15 @@ function ResumeBuilder() {
     const cur_cv = useCvsStore(useShallow(s => s.ncvs[s.curIdx]));
 
     useEffect(() => {
-        console.log(`ResumeBuilder: current CV changed: ${cur_cv?.name}`);
+        console.log(`ResumeBuilder: current CV changed: ${cur_cv?.name}:`, cur_cv);
     }, [cur_cv])
 
-    const cv_info = useCVInfo();
+    const cvInfoState = useCvInfoStore();
 
     // Fetch data on mount
     useEffect(() => {
         cvsState.fetch();
-        cv_info.fetch();
+        cvInfoState.fetch();
     }, []);
 
     const infoPad_ref = useRef<InfoPadHandle>(null);
@@ -287,7 +287,7 @@ function ResumeBuilder() {
                 ev: React.ChangeEvent<HTMLInputElement>
             ) => {
                 util.jsonFileImport(ev, ({ name, data }) =>
-                    cv_info.setData(data)
+                    cvInfoState.set(data)
                 );
             },
             onExportClicked: () => {
@@ -298,8 +298,8 @@ function ResumeBuilder() {
             },
             onSaveCVInfoClicked: () => {
                 const new_cv_info: CVInfo = infoPad_ref.current.get();
-                cv_info.setData(new_cv_info);
-                cv_info.save(new_cv_info);
+                cvInfoState.set(new_cv_info);
+                // cv_info.save(new_cv_info);
             },
             onImportFormComplete: (ncv: NamedCV) => {
                 cvsState.add(ncv);
@@ -384,7 +384,7 @@ function ResumeBuilder() {
         ),
     ];
 
-    if ( !cvsState.status || !cv_info.status ) return null;
+    if ( !cvsState.status || !cvInfoState.status ) return null;
     return (
         <Section id="section-cv" heading="Resume Builder">
             {/* ------------ POPUPS ------------ */}
@@ -438,9 +438,9 @@ function ResumeBuilder() {
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
                     <PrintablePage page_id="cv-page">
-                        {cur_cv.data && <CVEditor cv={cur_cv.data} onUpdate={cvsState.update} /> }
+                        <CVEditor cv={cur_cv.data} onUpdate={cvsState.update} />
                     </PrintablePage>
-                    <InfoPad ref={infoPad_ref} info={cv_info.get} />
+                    <InfoPad ref={infoPad_ref} info={cvInfoState.cv_info} />
                 </SplitView>
             </DndProvider>
         </Section>

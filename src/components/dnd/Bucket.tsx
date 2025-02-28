@@ -34,7 +34,7 @@ interface BucketItemContext {
     ) => void;
 }
 
-let just_set = false
+let just_set = false; // TODO: hacky but neccessary
 function ItemBucket(props: {
     id: string
     items: Item[]
@@ -52,11 +52,27 @@ function ItemBucket(props: {
 }) {
     // ----------------- STATE -----------------
 
-    const [bucket, bucketDispatch] = useReducer(bucketReducer, { id: props.id, items: props.items })
+    const [bucket, bucketDispatch] = useReducer(bucketReducer, { id: "", items: [] })
 
+    // parent -> bucket
+    useEffect(() => {
+        just_set = true
+        bucketDispatch({
+            type: BucketActions.SET,
+            payload: {
+                id: props.id,
+                items: props.items
+            } })
+    }, [props.items, props.id])
+
+    // bucket -> parent
     useEffect(()=>{
+        if(just_set) {
+            just_set = false
+            return
+        }
         props.onUpdate?.(bucket.items.map(I=>I.value))
-    }, [bucket?.items])
+    }, [bucket.items])
 
     const [hoveredGap, setHoveredGap] = React.useState<number>(undefined);
 
@@ -94,7 +110,6 @@ function ItemBucket(props: {
                     bucketDispatch({ type: BucketActions.CHANGE, payload: { id: nestedDropTarget.id, newValue: dropItem.value } });
                 } else if (notInBucket) {
                     // Not in the bucket yet, so add it.
-                    // bucket.addItem(hoveredGap, dropItem);
                     bucketDispatch({ type: BucketActions.ADD, payload: { atIndex: hoveredGap, item: dropItem } });
                 } else if (!props.moveItemDisabled) {
                     // Its in the bucket already. Re-order.

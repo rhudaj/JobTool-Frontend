@@ -26,7 +26,7 @@ export interface BucketAction {
 };
 
 const ActionTypes = {
-    SET: "SET", // items: Item[]
+    SET: "SET", // id: string, items: Item[]
     ADD: "ADD", // atIndex: number, item?: Item
     ADD_BLANK: "ADD_BLANK", // id: any, below: boolean
     MOVE: "MOVE",   // indexBefore: number, indexAfter: number
@@ -42,7 +42,9 @@ const getIdx = (id: any, items: Item[]) => items.findIndex((I) => I.id === id);
 
 const actionHandlers: ActionMap = {
     SET: (D, payload) => {
-        D.items = payload;
+        const { id, items } = payload;
+        D.id = id;
+        D.items = items;
     },
     ADD: (D, payload) => {
         const { atIndex, item } = payload;

@@ -3,6 +3,7 @@ import { CV, CVSection, Link } from "job-tool-shared-types";
 import * as UI from "./cv_components"
 import ItemBucket from "../../../components/dnd/Bucket";
 import { BucketTypeNames } from "../../../components/dnd/types";
+import { useEffect } from "react";
 
 /**
  * Cares only about the current CV being edited.
@@ -14,16 +15,20 @@ function CVEditor(props: {
 	onUpdate?: (cv: CV) => void
 }) {
 
+	useEffect(() => {
+		console.log("CVEditor: new cv: ", props.cv);
+	}, [props.cv]);
+
 	const onSectionUpdate = (idx: number, section: CVSection) => {
-		// setCv(D => { D.sections[idx] = section })
+		const new_sections = [...props.cv.sections];
+		new_sections[idx] = section;
 		props.onUpdate?.({
 			...props.cv,
-			sections: props.cv.sections.map((S, i) => i === idx ? section : S)
+			sections: new_sections
 		})
 	};
 
 	const onBucketUpdate = (newVals: CVSection[]) => {
-		// setCv(D => { D.sections = newVals })
 		props.onUpdate?.({
 			...props.cv,
 			sections: newVals

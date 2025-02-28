@@ -72,8 +72,10 @@ const useCvsStore = create<State & Actions>((set, get) => ({
         const idx = get().curIdx;
         set(produce((state) => {
             const cur = state.ncvs?.[idx]?.data;
-            if (isEqual(cv, cur)) return; // Avoid redundant updates
-            log(`update(cv: ${cv.header_info.name})`);
+            if (isEqual(cv, cur)) {
+                return; // Avoid redundant updates
+            }
+            log(`update(cv: ${cv}`);
             state.ncvs[idx].data = cv;
             state.trackMods[idx] = true;
         }));
