@@ -1,5 +1,5 @@
 import './versionedItem.sass'
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BucketTypeNames, DynamicComponent, Item } from "../dnd/types";
 import { StandaloneDragItem } from '../dnd/BucketItem';
 import TextEditDiv from '../TextEditDiv/texteditdiv';
@@ -122,6 +122,7 @@ function EditExistingItem(props: {
 };
 
 // MAIN COMPONENT
+// TODO: create a reducer
 
 /**
  * You can flip through versions, but
@@ -139,7 +140,6 @@ export function VersionedItemUI(props: {
     // ----------------- STATE -----------------
     const [versions, setVersions] = useImmer<Item<any>[]>(null);
     const [cur, setCur] = useState(0);
-    const editNewItemPopup = usePopup();
 
     useEffect(()=> {
         if(!props.obj.versions) return
@@ -149,21 +149,24 @@ export function VersionedItemUI(props: {
     // Alert parent when state changes
     useEffect(()=>{
         if(!versions) return;
+        if(isEqual(versions, props.obj.versions)) return
         props.onUpdate({
             ...props.obj,
             versions: versions
         })
     }, [versions])
 
+    const editNewItemPopup = usePopup();
+
     // ----------------- CONTROLS -----------------
 
     const onSaveNew = (newItem: Item) => {
+        console.log("Added a new item version!");
         setVersions(draft => {
             draft.push(newItem);
         });
         setCur(prev => prev + 1); // Ensure cur updates in sync
         editNewItemPopup.close();
-        console.log("Added a new item version!");
     };
 
     const onSaveChanges = (modifiedItem: Item) => {
@@ -247,10 +250,8 @@ export function VersionedItemUI(props: {
                     props={{
                         obj: versions[cur]?.value,
                         disableBucketFeatures: true     // applies to any item with a Bucket component
-                        // TODO: cutoff drag events instead?
                     }}
                 />
-                {/* <div>{JSON.stringify(versions[cur]?.value)}</div> */}
             </StandaloneDragItem>
         </div>
     )

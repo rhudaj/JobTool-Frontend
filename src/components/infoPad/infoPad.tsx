@@ -4,6 +4,7 @@ import { InfoPadMap } from '../dnd/types';
 import { Item } from '../dnd/types';
 import { VersionedItemUI, VersionedItem } from "../VersionedItem/versionedItem"
 import { useImmer } from 'use-immer';
+import { isEqual } from 'lodash';
 
 // TODO: atm InfoPad does not work because it does not supply CVContext
 
@@ -54,28 +55,38 @@ const Sections2Info = (sections: { secName: string; items: VersionedItem<any>[] 
     return info;
 };
 
-
-
 export interface InfoPadHandle {
 	get: () => CVInfo;
 }
 
 // MAIN COMPONENT
-const InfoPad = forwardRef<InfoPadHandle, { info: CVInfo }>(({ info }, ref) => {
+function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void }) {
 
     // ----------------- STATE -----------------
 
     const [sections, setSections] = useImmer(null);
 
-    React.useEffect(() => {
-        if (!info) return;
-        setSections(Info2Sections(info));
-    }, [info]);
+    const firstLoad = React.useRef(true);
 
-    // give parent access to CV
-    useImperativeHandle(ref, () => ({
-        get: () => { return Sections2Info(sections)  }
-    }));
+    // Sync `sections` only when `info` changes, but don't overwrite user edits
+    React.useEffect(() => {
+        if (!props.info || !firstLoad.current) return;
+        setSections(Info2Sections(props.info));
+        firstLoad.current = false;  // Prevents overwriting user changes later
+    }, [props.info])
+
+    // Call `onUpdate` only when `sections` have been edited
+    React.useEffect(() => {
+        if (!sections || !props.info) return
+        const newInfo = Sections2Info(sections);
+        if (!isEqual(newInfo, props.info)) {
+            props.onUpdate(newInfo);
+            console.log("UPDATE!!!")
+        } else  {
+            console.log("CAUGHT")
+        }
+    }, [sections, props.onUpdate]);
+
 
     // ----------------- CONTROLS -----------------
 
@@ -108,6 +119,6 @@ const InfoPad = forwardRef<InfoPadHandle, { info: CVInfo }>(({ info }, ref) => {
             ))}
         </div>
     )
-});
+};
 
 export default InfoPad;

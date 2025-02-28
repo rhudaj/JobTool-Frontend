@@ -40,6 +40,7 @@ const useCvInfoStore = create<State & Actions>((set, get) => ({
     set: (newData: CVInfo) => {
         log("set");
         set({ cv_info: newData });
+        save2backend(newData);
     }
 }))
 
@@ -67,4 +68,4 @@ const fetchFromBackend = async (): Promise<CVInfo> =>
         fetch(SAMPLES_PATH + "cv_info.json").then(r => r.json())
     )
 
-export { useCvInfoStore, save2backend };
+export { useCvInfoStore };

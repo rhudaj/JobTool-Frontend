@@ -17,7 +17,7 @@ import TextItems from "../../components/TextItems/TextItems";
 import { usePopup } from "../../hooks/Popup/popup";
 import { useImmer } from "use-immer";
 import { useCvsStore, save2backend as saveCv2backend } from "./useCVs";
-import { useCvInfoStore, save2backend as saveCvInfo2backend } from "./useCVInfo";
+import { useCvInfoStore } from "./useCVInfo";
 import { useShallow } from 'zustand/react/shallow'
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
@@ -220,8 +220,6 @@ function ResumeBuilder() {
         cvInfoState.fetch();
     }, []);
 
-    const infoPad_ref = useRef<InfoPadHandle>(null);
-
     const [settingN, setSettingN] = useState(null); // null => none, 0 => SavedCVs, 1 => file settings
     const saveAsPDF = useComponent2PDF("cv-page");
 
@@ -293,11 +291,6 @@ function ResumeBuilder() {
             },
             onSaveCurCVClicked: () => {
                 savePopup.open(popup_content.save);
-            },
-            onSaveCVInfoClicked: () => {
-                const new_cv_info: CVInfo = infoPad_ref.current.get();
-                cvInfoState.set(new_cv_info);
-                // cv_info.save(new_cv_info);
             },
             onImportFormComplete: (ncv: NamedCV) => {
                 cvsState.add(ncv);
@@ -373,9 +366,6 @@ function ResumeBuilder() {
                         <button onClick={CONTROLS.settings.onSaveCurCVClicked}>
                             Save Current CV
                         </button>
-                        <button onClick={CONTROLS.settings.onSaveCVInfoClicked}>
-                            Save CV Info
-                        </button>
                     </>
                 )}
             </div>
@@ -438,7 +428,7 @@ function ResumeBuilder() {
                     <PrintablePage page_id="cv-page">
                         <CVEditor cv={cur_cv.data} onUpdate={cvsState.update} />
                     </PrintablePage>
-                    <InfoPad ref={infoPad_ref} info={cvInfoState.cv_info} />
+                    <InfoPad info={cvInfoState.cv_info} onUpdate={cvInfoState.set} />
                 </SplitView>
             </DndProvider>
         </Section>
