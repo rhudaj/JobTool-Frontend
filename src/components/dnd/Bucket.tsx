@@ -1,10 +1,10 @@
 import "./Bucket.scss";
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useReducer } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
-import { Item, DEFAULT_ITEM_TYPE, BucketTypes } from "./types";
+import { Item, DEFAULT_ITEM_TYPE, BucketTypes, Bucket } from "./types";
 import BucketItem from "./BucketItem";
-import { BucketAction, BucketContext, BucketActions } from "./useBucket";
+import { BucketAction, BucketContext, BucketActions, bucketReducer } from "./useBucket";
 
 // Shows a gap between items when dragging over the bucket.
 function DropGap(props: { isActive: boolean }) {
@@ -34,21 +34,30 @@ interface BucketItemContext {
     ) => void;
 }
 
+let just_set = false
 function ItemBucket(props: {
-    children: JSX.Element[];                // the bucket data d.n.n corresponding to the displayed items.
-    type?: string;                          // by default, same as ID
-    isHorizontal?: boolean;                   // orientation of the bucket
-    deleteDisabled?: boolean;
-    replaceDisabled?: boolean;
-    dropDisabled?: boolean;
-    deleteOnMoveDisabled?: boolean;
-    addItemDisabled?: boolean;
-    moveItemDisabled?: boolean;
+    id: string
+    items: Item[]
+    type?: string                       // by default, same as ID
+    onUpdate?: (newVals: any[]) => void
+    children: JSX.Element[]             // the bucket data d.n.n corresponding to the displayed items.
+    isHorizontal?: boolean              // orientation of the bucket
+    // TODO: put inside 'disable_options' object
+    deleteDisabled?: boolean
+    replaceDisabled?: boolean
+    dropDisabled?: boolean
+    deleteOnMoveDisabled?: boolean
+    addItemDisabled?: boolean
+    moveItemDisabled?: boolean
 }) {
     // ----------------- STATE -----------------
 
-    // passed as context:
-    const [bucket, bucketDispatch] = useContext(BucketContext);
+    const [bucket, bucketDispatch] = useReducer(bucketReducer, { id: props.id, items: props.items })
+
+    useEffect(()=>{
+        console.log("New bucket.items: ", bucket?.items)
+        props.onUpdate?.(bucket.items.map(I=>I.value))
+    }, [bucket?.items])
 
     // internal:
     const [hoveredGap, setHoveredGap] = React.useState<number>(undefined);
@@ -57,34 +66,6 @@ function ItemBucket(props: {
 
     const type = BucketTypes[props.type ?? bucket.id];
     const getIdx = (id: any) => bucket.items.findIndex(I => I.id === id);
-
-    const onItemHover = (
-        hoverId: string,
-        dragId: string,
-        isBelow: boolean,
-        isRight: boolean
-    ) => {
-        // Wether its "past half" depends on orientation of the bucket
-        const isPastHalf = props.isHorizontal ? isRight : isBelow;
-
-        // Find the index of the item being hovered over:
-        const hoveredIndex = getIdx(hoverId);
-        const dragIndex = getIdx(dragId);
-
-        // Find the corresponding gap:
-        let gapIndex = isPastHalf
-            ? nextGap(hoveredIndex)
-            : prevGap(hoveredIndex);
-
-        const diff = dragIndex - gapIndex;
-
-        // Is the gap is around the current dragItem ?
-        if (diff === 0 || diff === -1) {
-            gapIndex = undefined;
-        }
-
-        setHoveredGap(gapIndex); // Only sets the new value if they differ (by VALUE)
-    };
 
     const [{ isHovered }, dropRef] = useDrop(
         () => ({
@@ -138,12 +119,40 @@ function ItemBucket(props: {
             }),
         }),
         // dependency array - if any of these values change, the above object will be recreated.
-        [bucket.items, hoveredGap]
+        [bucket?.items, hoveredGap]
     );
+
+    const onItemHover = (
+        hoverId: string,
+        dragId: string,
+        isBelow: boolean,
+        isRight: boolean
+    ) => {
+        // Wether its "past half" depends on orientation of the bucket
+        const isPastHalf = props.isHorizontal ? isRight : isBelow;
+
+        // Find the index of the item being hovered over:
+        const hoveredIndex = getIdx(hoverId);
+        const dragIndex = getIdx(dragId);
+
+        // Find the corresponding gap:
+        let gapIndex = isPastHalf
+            ? nextGap(hoveredIndex)
+            : prevGap(hoveredIndex);
+
+        const diff = dragIndex - gapIndex;
+
+        // Is the gap is around the current dragItem ?
+        if (diff === 0 || diff === -1) {
+            gapIndex = undefined;
+        }
+
+        setHoveredGap(gapIndex); // Only sets the new value if they differ (by VALUE)
+    };
 
     // -----------------RENDER-----------------
 
-    if (!bucket.items || props.children.length !== bucket.items.length)
+    if (!bucket?.items || props.children.length !== bucket.items.length)
         return null;
 
     const classes = joinClassNames("bucket-wrapper", isHovered ? "hover" : "");

@@ -1,12 +1,11 @@
 import "./cveditor.sass";
-import { CV, CVSection } from "job-tool-shared-types";
+import { CVSection } from "job-tool-shared-types";
 import * as UI from "./cv_components"
 import ItemBucket from "../../../components/dnd/Bucket";
 import { useContext, useEffect, useReducer, useRef } from "react";
 import { BucketContext, bucketReducer } from "../../../components/dnd/useBucket";
 import { CVActions, CVContext } from "../useCV";
-import { BucketTypeNames } from "../../../components/dnd/types";
-import { isEqual } from "lodash";
+import { BucketTypeNames, Item } from "../../../components/dnd/types";
 
 /**
  * Cares only about the current CV being edited.
@@ -16,39 +15,20 @@ function CVEditor() {
 
 	const [CV, cv_dispatch] = useContext(CVContext);
 
-	const [bucket, bucketDispatch] = useReducer(bucketReducer, { id: "sections", items: [] });
-
-	const justSet = useRef(false);
-
-	useEffect(()=>{
-		if(justSet.current) {
-			justSet.current = false;
-			return;
-		}
-		bucketDispatch({
-			type: CVActions.SET,
-			payload: CV?.sections?.map((S: CVSection)=>({
-				id: S.name,
-				value: S
-			}))
-		});
-	}, [CV?.sections]);
-
-	useEffect(()=>{
-		justSet.current = true;
-		cv_dispatch({
-			type: CVActions.SET,
-			payload: {
-				...CV,
-				sections: bucket.items.map((i: any)=>i.value)
-			}
-		})
-	}, [bucket.items]);
-
 	const onSectionUpdate = (idx: number, section: CVSection) => {
 		cv_dispatch({
 			type: CVActions.SET_SECTION,
 			payload: { idx, section }
+		});
+	};
+
+	const onBucketUpdate = (newVals: CVSection[]) => {
+		cv_dispatch({
+			type: CVActions.SET,
+			payload: {
+				...CV,
+				sections: newVals
+			}
 		});
 	};
 
@@ -63,14 +43,21 @@ function CVEditor() {
 				{CV.header_info?.links?.map((l,i) => <UI.LinkUI key={i} {...l} /> )}
 			</div>
 			{/* SECTION BUCKET --------------------------------------*/}
-			<BucketContext.Provider value={[bucket, bucketDispatch]}>
-				<ItemBucket type={BucketTypeNames.SECTIONS} addItemDisabled>
-					{/* SECTIONS -------------------------------------- */}
-					{CV.sections?.map((S: CVSection, i: number) =>
-						<UI.SectionUI key={i} obj={S} onUpdate={newSec => onSectionUpdate(i, newSec)} />
-					)}
-				</ItemBucket>
-			</BucketContext.Provider>
+			<ItemBucket
+				id="sections"
+				items={CV?.sections?.map((S: CVSection)=>({
+					id: S.name,
+					value: S
+				}))}
+				type={BucketTypeNames.SECTIONS}
+				onUpdate={onBucketUpdate}
+				addItemDisabled
+			>
+				{/* SECTIONS -------------------------------------- */}
+				{CV.sections?.map((S: CVSection, i: number) =>
+					<UI.SectionUI key={i} obj={S} onUpdate={newSec => onSectionUpdate(i, newSec)} />
+				)}
+			</ItemBucket>
 		</div>
 	);
 };
