@@ -21,9 +21,7 @@ import { useCVs } from "./useCVs";
 import { CVActions, cvReducer, CVContext } from "./useCV";
 import { useCVInfo } from "./useCVInfo";
 
-// Get settigns from .env file
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
-const TEST_MODE = process.env.REACT_APP_TEST_MODE === "1";
 
 /* ------------------------------------------------------------------
  *                         SUB COMPONENTS                           *
@@ -229,7 +227,8 @@ function ResumeBuilder() {
     }, [cvs.status, cvs.cur]);
 
     useEffect(()=>{
-        console.log("ResumeBuilder curCV UPDATED!!!", CV);
+        console.log("ResumeBuilder curCV UPDATED!!!");
+        cvs.setCurModified(CV)
     }, [CV])
 
     // ---------------- CONTROLS ----------------
@@ -275,24 +274,7 @@ function ResumeBuilder() {
             onDeleteCV: () => {
                 cvs.deleteCur();
                 deletePopup.close();
-            },
-            onSaveTrainEx: (job: string) => {
-                console.log("onSaveTrainEx: job = ", job);
-                // TODO: this is not longer an endpoint. All annotations are sent together
-                // BackendAPI.request<{ job: string; ncv: NamedCV }>({
-                //     method: "POST",
-                //     endpoint: "saveCVTrainEx",
-                //     body: {
-                //         job: job,
-                //         ncv: cvs.cur,
-                //     },
-                //     handleSuccess: () => {
-                //         alert("Saved Training Example");
-                //         saveTrainExPopup.close();
-                //     },
-                //     handleError: alert,
-                // });
-            },
+            }
         },
         settings: {
             onPlusClicked: () => {
@@ -322,10 +304,7 @@ function ResumeBuilder() {
             onImportFormComplete: (ncv: NamedCV) => {
                 cvs.add(ncv);
                 importPopup.close();
-            },
-            onSaveTrainExClicked: () => {
-                saveTrainExPopup.open(popup_content.saveTrainEx);
-            },
+            }
         },
         settings_ui: {
             onClickFileSettings: () => {
@@ -366,10 +345,7 @@ function ResumeBuilder() {
                 <p>Are you sure you want to delete?</p>
                 <button onClick={CONTROLS.popups.onDeleteCV}>Yes</button>
             </div>
-        ),
-        saveTrainEx: (
-            <SaveTrainingExampleForm onSave={CONTROLS.popups.onSaveTrainEx} />
-        ),
+        )
     };
 
     const settings = [
@@ -405,11 +381,6 @@ function ResumeBuilder() {
                     </button>
                 </>
             )}
-            {TEST_MODE ? (
-                <button onClick={CONTROLS.settings.onSaveTrainExClicked}>
-                    Save Train Example
-                </button>
-            ) : null}
         </div>,
     ];
 

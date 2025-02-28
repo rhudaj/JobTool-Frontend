@@ -2,6 +2,7 @@ import { CV, NamedCV } from "job-tool-shared-types";
 import { useCallback, useReducer, useMemo } from "react";
 import { Draft, produce } from "immer";
 import BackendAPI from "../../backend_api";
+import { isEqual } from "lodash";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
@@ -26,7 +27,7 @@ const ActionTypes = {
     SET_CURRENT: "SET_CURRENT",
     ADD_CV: "ADD_CV",
     DELETE_CV: "DELETE_CV",
-    MODIFY_CUR: "MARK_MODIFIED",
+    MODIFY_CUR: "MODIFY_CUR",
     SET_STATUS: "SET_STATUS",
 } as const;
 
@@ -55,10 +56,14 @@ const actionHandlers: ActionMap = {
         D.cur = 0;
     },
     MODIFY_CUR: (D, payload) => {
-        if (payload.cv) {
-            D.data[D.cur].data = payload.cv;
-            D.trackMods[D.cur] = true;
-        }
+        // first check if equal:
+        const cur = D.data[D.cur].data as CV;
+        const _new = payload.cv as CV;
+        if (isEqual(cur, _new)) return;
+        // if not, update and mark as modified
+        if(!cur) return;
+        D.data[D.cur].data = payload.cv;
+        D.trackMods[D.cur] = true;
     },
     SET_STATUS: (D, payload) => {
         D.status = payload;
@@ -107,9 +112,9 @@ const useCVs = () => {
         add: (cv: NamedCV) => dispatch({ type: ActionTypes.ADD_CV, payload: cv }),
         selectCur: (idx: number) => dispatch({ type: ActionTypes.SET_CURRENT, payload: idx }),
         deleteCur: () => dispatch({ type: ActionTypes.DELETE_CV }),
-        setCurModified: (isMod: boolean, cv: CV) => dispatch({
+        setCurModified: (cv: CV) => dispatch({
             type: ActionTypes.MODIFY_CUR,
-            payload: { isModified: isMod, cv },
+            payload: { cv },
         }),
     };
 };
