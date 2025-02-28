@@ -55,7 +55,6 @@ function ItemBucket(props: {
     const [bucket, bucketDispatch] = useReducer(bucketReducer, { id: props.id, items: props.items })
 
     useEffect(()=>{
-        console.log("New bucket.items: ", bucket?.items)
         props.onUpdate?.(bucket.items.map(I=>I.value))
     }, [bucket?.items])
 

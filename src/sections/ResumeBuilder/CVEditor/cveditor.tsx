@@ -1,50 +1,51 @@
 import "./cveditor.sass";
-import { CVSection } from "job-tool-shared-types";
+import { CV, CVSection, Link } from "job-tool-shared-types";
 import * as UI from "./cv_components"
 import ItemBucket from "../../../components/dnd/Bucket";
-import { useContext } from "react";
-import { CVActions, CVContext } from "../useCV";
 import { BucketTypeNames } from "../../../components/dnd/types";
 
 /**
  * Cares only about the current CV being edited.
  * Requires a CVContext and a CVDispatchContext to be provided.
 */
-function CVEditor() {
-
-	const [CV, cv_dispatch] = useContext(CVContext);
+// TODO: pass a context instead
+function CVEditor(props: {
+	cv: CV,
+	onUpdate?: (cv: CV) => void
+}) {
 
 	const onSectionUpdate = (idx: number, section: CVSection) => {
-		cv_dispatch({
-			type: CVActions.SET_SECTION,
-			payload: { idx, section }
-		});
+		// setCv(D => { D.sections[idx] = section })
+		props.onUpdate?.({
+			...props.cv,
+			sections: props.cv.sections.map((S, i) => i === idx ? section : S)
+		})
 	};
 
 	const onBucketUpdate = (newVals: CVSection[]) => {
-		cv_dispatch({
-			type: CVActions.SET,
-			payload: {
-				...CV,
-				sections: newVals
-			}
-		});
+		// setCv(D => { D.sections = newVals })
+		props.onUpdate?.({
+			...props.cv,
+			sections: newVals
+		})
 	};
 
 	// -------------- VIEW --------------
 
-	if (!CV) return null;
+	const cv = props.cv;
+
+	if (!cv) return null;
 	return (
 		<div id="cv-editor">
 			{/* HEADER INFO --------------------------------------*/}
-			<div id="full-name" key="name">{CV.header_info.name}</div>
+			<div id="full-name" key="name">{cv.header_info.name}</div>
 			<div id="link-list">
-				{CV.header_info?.links?.map((l,i) => <UI.LinkUI key={i} {...l} /> )}
+				{cv.header_info?.links?.map((l: Link, i: number) => <UI.LinkUI key={i} {...l} /> )}
 			</div>
 			{/* SECTION BUCKET --------------------------------------*/}
 			<ItemBucket
 				id="sections"
-				items={CV?.sections?.map((S: CVSection)=>({
+				items={cv.sections.map((S: CVSection)=>({
 					id: S.name,
 					value: S
 				}))}
@@ -53,7 +54,7 @@ function CVEditor() {
 				addItemDisabled
 			>
 				{/* SECTIONS -------------------------------------- */}
-				{CV.sections?.map((S: CVSection, i: number) =>
+				{cv.sections.map((S: CVSection, i: number) =>
 					<UI.SectionUI
 						key={i}
 						obj={S}

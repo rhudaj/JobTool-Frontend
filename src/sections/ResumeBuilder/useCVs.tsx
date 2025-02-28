@@ -1,135 +1,49 @@
 import { CV, NamedCV } from "job-tool-shared-types";
-import { useCallback, useReducer, useMemo } from "react";
-import { Draft, produce } from "immer";
 import BackendAPI from "../../backend_api";
+import { create } from 'zustand'
+import { produce } from 'immer' // simplify changing nested state
+import { createContext } from 'react'
 import { isEqual } from "lodash";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
 const CVS_PATH = `${SAMPLES_PATH}/CVs`;
 
-interface CVState {
-    data: NamedCV[];
-    status: boolean;
-    cur: number;
-    trackMods: boolean[];
+interface State {
+    ncvs: NamedCV[]
+    status: boolean
+    curIdx: number
+    trackMods: boolean[]
 }
 
-interface CVsAction {
-    type: string;
-    payload?: any;
+interface Actions {
+    fetch: () => Promise<void>
+    update: (cv: CV) => void
+    add: (cv: NamedCV) => void
+    setCur: (idx: number) => void
+    delCur: () => void
 }
 
-// TODO: turn this into a map; from string to callback
+const log = (msg: string) => console.log(`[cvs state] ${msg}`)
 
-const ActionTypes = {
-    SET_DATA: "SET_DATA",
-    SET_CURRENT: "SET_CURRENT",
-    ADD_CV: "ADD_CV",
-    DELETE_CV: "DELETE_CV",
-    MODIFY_CUR: "MODIFY_CUR",
-    SET_STATUS: "SET_STATUS",
-} as const;
-
-type ActionMap = {
-    [K in keyof typeof ActionTypes]: (D: Draft<CVState>, payload?: any) => void;
-};
-
-const actionHandlers: ActionMap = {
-    SET_DATA: (D, payload) => {
-        D.data = payload;
-        D.trackMods = new Array(payload.length).fill(false);
-        D.cur = 0;
-        D.status = true;
-    },
-    SET_CURRENT: (D, payload) => {
-        D.cur = payload;
-    },
-    ADD_CV: (D, payload) => {
-        D.data.unshift(payload);
-        D.trackMods.unshift(false);
-        D.cur = 0;
-    },
-    DELETE_CV: (D) => {
-        D.data.splice(D.cur, 1);
-        D.trackMods.splice(D.cur, 1);
-        D.cur = 0;
-    },
-    MODIFY_CUR: (D, payload) => {
-        // first check if equal:
-        const cur = D.data[D.cur].data as CV;
-        const _new = payload.cv as CV;
-        if (isEqual(cur, _new)) return;
-        // if not, update and mark as modified
-        if(!cur) return;
-        D.data[D.cur].data = payload.cv;
-        D.trackMods[D.cur] = true;
-    },
-    SET_STATUS: (D, payload) => {
-        D.status = payload;
-    },
-};
-
-// Reducer function
-const cvsReducer = (state: CVState, action: CVsAction) => {
-    console.log(`cvsReducer -------- ${action.type}`);
-    return produce(state, (D) => {
-        actionHandlers[action.type]?.(D, action.payload);
-    });
-};
-
-// Main Hook
-const useCVs = () => {
-
-    const [state, dispatch] = useReducer(cvsReducer, {
-        data: [],
-        status: false,
-        cur: null,
-        trackMods: [],
-    });
-
-    return {
-        // GETTERS ------------------------------------------------------
-        status: state.status,
-        curIdx: state.cur,
-        mods: state.trackMods,
-        cvNames: useMemo(
-            () => state.data.map((cv) => cv.name),
-            [state.data]
-        ),
-        cur: useMemo(
-            () => state.data[state.cur] || null,
-            [state.data, state.cur]
-        ),
-        isModified: useCallback(
-            (idx = state.cur) => state.trackMods[idx],
-            [state.trackMods, state.cur]
-        ),
-        // SETTERS ------------------------------------------------------
-        dispatch,
-        save: save2backend,
-        fetch: useFetchCVs(dispatch),
-        add: (cv: NamedCV) => dispatch({ type: ActionTypes.ADD_CV, payload: cv }),
-        selectCur: (idx: number) => dispatch({ type: ActionTypes.SET_CURRENT, payload: idx }),
-        deleteCur: () => dispatch({ type: ActionTypes.DELETE_CV }),
-        setCurModified: (cv: CV) => dispatch({
-            type: ActionTypes.MODIFY_CUR,
-            payload: { cv },
-        }),
-    };
-};
-
-// Fetching logic moved to a separate hook
-const useFetchCVs = (dispatch: React.Dispatch<CVsAction>) => {
-    return useCallback(() => {
+// A store for CVState
+const useCvsStore = create<State & Actions>((set, get) => ({
+    ncvs: [],
+    status: false,
+    curIdx: null,
+    trackMods: [],
+    // SETTERS ------------------------------------------------------
+    fetch: async () => {
         if (USE_BACKEND) {
             BackendAPI.request({
                 method: "GET",
                 endpoint: "cvs",
-                handleSuccess: (cvList) =>
-                    dispatch({ type: ActionTypes.SET_DATA, payload: cvList }),
-                handleError: () =>
-                    dispatch({ type: ActionTypes.SET_STATUS, payload: false }),
+                handleSuccess: (cvList) => {
+                    set({ ncvs: cvList, status: true, curIdx: 0 });
+                },
+                handleError: () => {
+                    set({ status: false });
+                }
             });
         } else {
             const sampleFiles = [
@@ -144,25 +58,48 @@ const useFetchCVs = (dispatch: React.Dispatch<CVsAction>) => {
             )
                 .then((cvArr) => {
                     if (cvArr.length) {
-                        dispatch({
-                            type: ActionTypes.SET_DATA,
-                            payload: cvArr,
-                        });
+                        set({ ncvs: cvArr, status: true, curIdx: 0 });
                     } else {
-                        dispatch({
-                            type: ActionTypes.SET_STATUS,
-                            payload: false,
-                        });
+                        set({ status: false });
                     }
                 })
                 .catch(() =>
-                    dispatch({ type: ActionTypes.SET_STATUS, payload: false })
+                    set({ status: false })
                 );
         }
-    }, [dispatch]);
-};
+    },
+    update: (cv: CV) => {
+        const idx = get().curIdx;
+        set(produce((state) => {
+            const cur = state.ncvs?.[idx]?.data;
+            if (isEqual(cv, cur)) return; // Avoid redundant updates
+            log(`update(cv: ${cv.header_info.name})`);
+            state.ncvs[idx].data = cv;
+            state.trackMods[idx] = true;
+        }));
+    },
+    add: (cv) => {
+        log(`add(cv: ${cv.name})`)
+        set(produce(state => {
+            state.ncvs.unshift(cv)
+            state.trackMods.unshift(false)
+            state.curIdx = 0
+        }))
+    },
+    setCur: (idx) => {
+        log(`setCur(idx: ${idx})`)
+        set({ curIdx: idx })
+    },
+    delCur: () => {
+        log(`delCur()`)
+        set(produce(state => {
+            state.ncvs.splice(state.curIdx, 1)
+            state.trackMods.splice(state.curIdx, 1)
+            state.curIdx = 0
+        }))
+    },
+}))
 
-// Save to backend
 const save2backend = (ncv: NamedCV, overwrite: boolean) => {
     BackendAPI.request({
         method: overwrite ? "PUT" : "POST",
@@ -173,4 +110,7 @@ const save2backend = (ncv: NamedCV, overwrite: boolean) => {
     });
 };
 
-export { useCVs, CVState, CVsAction, ActionTypes as CVsActionTypes };
+// stores a CV object
+const cvContext = createContext<CV>(null);
+
+export { useCvsStore, cvContext };

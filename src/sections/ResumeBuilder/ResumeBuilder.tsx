@@ -1,5 +1,5 @@
 import "./resumebuilder.sass";
-import { useEffect, useState, useRef, useReducer } from "react";
+import { useEffect, useState, useRef } from "react";
 import Section from "../../components/Section/Section";
 import { NamedCV } from "job-tool-shared-types";
 import PrintablePage from "../../components/PagePrint/pageprint";
@@ -16,10 +16,9 @@ import TextEditDiv from "../../components/TextEditDiv/texteditdiv";
 import TextItems from "../../components/TextItems/TextItems";
 import { usePopup } from "../../hooks/Popup/popup";
 import { useImmer } from "use-immer";
-import { isEqual } from "lodash";
-import { useCVs } from "./useCVs";
-import { CVActions, cvReducer, CVContext } from "./useCV";
+import { useCvsStore } from "./useCVs";
 import { useCVInfo } from "./useCVInfo";
+import { useShallow } from 'zustand/react/shallow'
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 
@@ -162,26 +161,34 @@ const SaveTrainingExampleForm = (props: { onSave: (job: string) => void }) => {
     );
 };
 
-function SavedCVs(props: {
-    cvNames: string[];
-    curIdx: number;
-    onChange: (idx: number) => void;
-    onAdd?: () => void;
-    isModified?: boolean[];
-}) {
-    const curName = props.cvNames ? props.cvNames[props.curIdx] : "";
+/**
+ * Displays the list of saved CVs.
+ * And allows the user to select one (change state.curIdx)
+ */
+function SavedCVsUI() {
+
+    const cvsState = useCvsStore();
+    const cvNames = useCvsStore(useShallow(state => state.ncvs.map(cv => cv.name)));
+        // useShallow => cvNames updates ONLY when output of the selector does
+    const curName = cvNames ? cvNames[cvsState.curIdx] : "";
+
+    const onThumbnailClick = (idx: number) => {
+        // only update if different
+        if (idx === cvsState.curIdx) return;
+        cvsState.setCur(idx);
+    }
 
     return (
         <div className="cv-thumnail-container">
-            {props.cvNames?.map((name, idx) => (
+            {cvNames?.map((name: string, i: number) => (
                 <div
-                    key={name} // TODO: ensure names are unique
+                    key={name}
                     className={joinClassNames(
                         "cv-thumbnail",
                         name === curName ? "active" : "",
-                        props.isModified?.[idx] ? "is-modified" : ""
+                        cvsState.trackMods[i] ? "is-modified" : ""
                     )}
-                    onClick={() => props.onChange(idx)}
+                    onClick={()=>onThumbnailClick(i)}
                 >
                     {name}
                 </div>
@@ -198,9 +205,20 @@ function ResumeBuilder() {
 
     // ---------------- STATE ----------------
 
-    const cvs = useCVs();
+    const cvsState = useCvsStore();
+    const cur_cv = useCvsStore(useShallow(s => s.ncvs[s.curIdx]));
+
+    useEffect(() => {
+        console.log(`ResumeBuilder: current CV changed: ${cur_cv?.name}`);
+    }, [cur_cv])
+
     const cv_info = useCVInfo();
-    const [CV, cv_dispatch] = useReducer(cvReducer, null);
+
+    // Fetch data on mount
+    useEffect(() => {
+        cvsState.fetch();
+        cv_info.fetch();
+    }, []);
 
     const infoPad_ref = useRef<InfoPadHandle>(null);
 
@@ -214,65 +232,47 @@ function ResumeBuilder() {
     const deletePopup = usePopup();
     const saveTrainExPopup = usePopup();
 
-    // Fetch data on mount
-    useEffect(() => {
-        cvs.fetch();
-        cv_info.fetch();
-    }, []);
-
-    // Set the current CV when the cvs status changes
-    useEffect(() => {
-        if (!cvs.status) return;
-        cv_dispatch({ type: CVActions.SET, payload: cvs.cur.data });
-    }, [cvs.status, cvs.cur]);
-
-    useEffect(()=>{
-        console.log("ResumeBuilder curCV UPDATED!!!");
-        cvs.setCurModified(CV)
-    }, [CV])
-
     // ---------------- CONTROLS ----------------
 
     const CONTROLS = {
         popups: {
             onPDFClicked: () => {
-                saveAsPDF(cvs.cur?.name);
+                saveAsPDF(cur_cv?.name);
                 exportPopup.close();
             },
             onJsonClicked: () => {
-                const cv = cvs.cur;
-                if (cv) util.downloadAsJson(cv);
+                if (cur_cv) util.downloadAsJson(cur_cv);
                 exportPopup.close();
             },
             onSaveFormSubmit: (name: string, tags: string[]) => {
+                // TODO: fix/figure out since cur_cv is based on cvs
                 // first check that the cv has actually changed!
-                const edited_cv = cvs.cur.data;
-                if (isEqual(edited_cv, cvs.cur.data)) {
-                    alert("No changes have been made to the CV!");
-                    return;
-                }
-                cvs.save(
-                    {
-                        name: name,
-                        tags: tags,
-                        data: edited_cv,
-                    },
-                    (name === cvs.cur.name)
-                );
-                savePopup.close();
+                // if (isEqual(edited_cv, cvs.cur.data)) {
+                //     alert("No changes have been made to the CV!");
+                //     return;
+                // }
+                // cvs.save(
+                //     {
+                //         name: name,
+                //         tags: tags,
+                //         data: edited_cv,
+                //     },
+                //     (name === cvs.cur.name)
+                // );
+                // savePopup.close();
             },
             onImportJsonFileChange: (
                 e: React.ChangeEvent<HTMLInputElement>
             ) => {
-                util.jsonFileImport(e, cvs.add);
+                util.jsonFileImport(e, cvsState.add);
                 importPopup.close();
             },
             onPasteJson: (json_str: string, name: string) => {
                 const cv = JSON.parse(json_str);
-                cvs.add(cv);
+                cvsState.add(cv);
             },
             onDeleteCV: () => {
-                cvs.deleteCur();
+                cvsState.delCur(); // NOTE: only deletes locally
                 deletePopup.close();
             }
         },
@@ -302,7 +302,7 @@ function ResumeBuilder() {
                 cv_info.save(new_cv_info);
             },
             onImportFormComplete: (ncv: NamedCV) => {
-                cvs.add(ncv);
+                cvsState.add(ncv);
                 importPopup.close();
             }
         },
@@ -328,8 +328,8 @@ function ResumeBuilder() {
         ),
         save: (
             <SaveForm
-                name={cvs.cur?.name}
-                tags={cvs.cur?.tags}
+                name={cur_cv?.name}
+                tags={cur_cv?.tags}
                 onSave={CONTROLS.popups.onSaveFormSubmit}
             />
         ),
@@ -350,41 +350,41 @@ function ResumeBuilder() {
 
     const settings = [
         // FILE:
-        <SubSection id="ss-named-cvs" heading="My Resumes">
-            <div id="named-cvs-controls">
-                <div onClick={CONTROLS.settings.onPlusClicked}>+</div>
-                <div onClick={CONTROLS.settings.onMinusClicked}>-</div>
+        (
+            <SubSection id="ss-named-cvs" heading="My Resumes">
+                <div id="named-cvs-controls">
+                    <div onClick={CONTROLS.settings.onPlusClicked}>+</div>
+                    <div onClick={CONTROLS.settings.onMinusClicked}>-</div>
+                </div>
+                <SavedCVsUI />
+            </SubSection>
+        ),
+        // File CONTROLS:
+        (
+            <div id="file-controls">
+                <div style={{ display: "flex", gap: "10rem" }}>
+                    <p>New Saved Items from JSON:</p>
+                    <input
+                        type="file"
+                        accept=".json"
+                        onChange={CONTROLS.settings.onSavedItemsFileChanged}
+                    />
+                </div>
+                {USE_BACKEND && (
+                    <>
+                        <button onClick={CONTROLS.settings.onSaveCurCVClicked}>
+                            Save Current CV
+                        </button>
+                        <button onClick={CONTROLS.settings.onSaveCVInfoClicked}>
+                            Save CV Info
+                        </button>
+                    </>
+                )}
             </div>
-            <SavedCVs
-                cvNames={cvs.cvNames}
-                curIdx={cvs.curIdx}
-                onChange={cvs.selectCur}
-                isModified={cvs.mods}
-            />
-        </SubSection>, // File CONTROLS:
-        <div id="file-controls">
-            <div style={{ display: "flex", gap: "10rem" }}>
-                <p>New Saved Items from JSON:</p>
-                <input
-                    type="file"
-                    accept=".json"
-                    onChange={CONTROLS.settings.onSavedItemsFileChanged}
-                />
-            </div>
-            {USE_BACKEND && (
-                <>
-                    <button onClick={CONTROLS.settings.onSaveCurCVClicked}>
-                        Save Current CV
-                    </button>
-                    <button onClick={CONTROLS.settings.onSaveCVInfoClicked}>
-                        Save CV Info
-                    </button>
-                </>
-            )}
-        </div>,
+        ),
     ];
 
-    if (!cvs.status || !cv_info.status ) return null;
+    if ( !cvsState.status || !cv_info.status ) return null;
     return (
         <Section id="section-cv" heading="Resume Builder">
             {/* ------------ POPUPS ------------ */}
@@ -417,8 +417,8 @@ function ResumeBuilder() {
             <div id="display-info">
                 <div>
                     <span className="descr">Name:</span>{" "}
-                    {cvs.cur?.name}
-                    {cvs.isModified() && (
+                    {cur_cv?.name}
+                    {cvsState.trackMods[cvsState.curIdx] && (
                         <span className="is-modified-status">
                             {"(modified)"}
                         </span>
@@ -426,7 +426,7 @@ function ResumeBuilder() {
                 </div>
                 <div>
                     <span className="descr">Tags:</span>
-                    {cvs.cur?.tags?.join(", ")}
+                    {cur_cv?.tags?.join(", ")}
                 </div>
                 <div className="export-container">
                     <button onClick={CONTROLS.settings.onExportClicked}>
@@ -438,9 +438,7 @@ function ResumeBuilder() {
             <DndProvider backend={HTML5Backend}>
                 <SplitView>
                     <PrintablePage page_id="cv-page">
-                        <CVContext.Provider value={[CV, cv_dispatch]}>
-                            <CVEditor />
-                        </CVContext.Provider>
+                        {cur_cv.data && <CVEditor cv={cur_cv.data} onUpdate={cvsState.update} /> }
                     </PrintablePage>
                     <InfoPad ref={infoPad_ref} info={cv_info.get} />
                 </SplitView>

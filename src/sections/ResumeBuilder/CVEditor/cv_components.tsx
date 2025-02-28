@@ -13,35 +13,33 @@ import { useImmer } from "use-immer";
 // TODO: atm InfoPad does not work because it does not supply CVContext
 // These components should not be handling CVContext
 // They have to use callbacks
-
 function SectionUI(props: { obj: CVSection; onUpdate?: (newObj: any)=>void }) {
 
-	const [data, setData] = useImmer(props.obj);
+	const [data, setData] = useImmer(null);
+
+	// parent -> data
+	useEffect(()=> setData(props.obj), [props.obj])
 
 	// data -> parent
-	useEffect(() => {
-		props.onUpdate?.(data);
-	}, [data]);
+	useEffect(() => props.onUpdate?.(data), [data])
 
+	// children -> data
 	const onItemUpdate = (i: number, newVal: any) => {
 		setData(draft => {
 			draft.items[i] = newVal;
-		});
-	};
-
+		})
+	}
 	const onBucketUpdate = (newVals: any[]) => {
 		setData(draft => {
 			draft.items = newVals
 		})
 	}
 
-	const formatHeader = (s: string) => s.toUpperCase();
-
 	if(!data) return null;
 	return (
 		<div className="section" >
 			<div className="sec-head">
-				<p>{formatHeader(data.name)}</p>
+				<p>{data.name.toUpperCase()}</p>
 				<hr />
 			</div>
 			<div id={`sec-${data.name}`} className="sec-content">
@@ -60,7 +58,6 @@ function SectionUI(props: { obj: CVSection; onUpdate?: (newObj: any)=>void }) {
 							type={data.bucket_type}
 							props={{ obj: item, onUpdate: (newVal: any) => onItemUpdate(i, newVal) }}
 						/>
-						// <div>{`item-${i}`}</div>
 					)}
 				</ItemBucket>
 			</div>

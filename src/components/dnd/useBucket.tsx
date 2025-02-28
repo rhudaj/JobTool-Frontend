@@ -1,7 +1,6 @@
 import { Bucket, Item } from "./types";
 import { Draft, produce } from "immer";    // the 'immer' libraris version of 'useReducer'
 import { createContext } from 'react';
-import { CVState } from "../../sections/ResumeBuilder/useCVs";
 
 /* Empty all values in an object (recursively) */
 const emptyObject = (obj: any): any => {

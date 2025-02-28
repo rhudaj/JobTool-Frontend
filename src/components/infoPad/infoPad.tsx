@@ -68,7 +68,6 @@ const InfoPad = forwardRef<InfoPadHandle, { info: CVInfo }>(({ info }, ref) => {
     const [sections, setSections] = useImmer(null);
 
     React.useEffect(() => {
-        console.log("got info", info);
         if (!info) return;
         setSections(Info2Sections(info));
     }, [info]);
