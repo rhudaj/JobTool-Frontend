@@ -20,7 +20,7 @@ function SectionUI(props: { obj: CVSection; onUpdate?: (newObj: any)=>void }) {
 
 	// data -> parent
 	useEffect(() => {
-		props.onUpdate(data);
+		props.onUpdate?.(data);
 	}, [data]);
 
 	const onItemUpdate = (i: number, newVal: any) => {

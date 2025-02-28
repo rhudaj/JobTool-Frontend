@@ -59,12 +59,10 @@ function ItemBucket(props: {
         props.onUpdate?.(bucket.items.map(I=>I.value))
     }, [bucket?.items])
 
-    // internal:
     const [hoveredGap, setHoveredGap] = React.useState<number>(undefined);
 
     // ----------------- DND RELATED -----------------
 
-    const type = BucketTypes[props.type ?? bucket.id];
     const getIdx = (id: any) => bucket.items.findIndex(I => I.id === id);
 
     const [{ isHovered }, dropRef] = useDrop(
@@ -128,6 +126,7 @@ function ItemBucket(props: {
         isBelow: boolean,
         isRight: boolean
     ) => {
+
         // Wether its "past half" depends on orientation of the bucket
         const isPastHalf = props.isHorizontal ? isRight : isBelow;
 
@@ -163,7 +162,7 @@ function ItemBucket(props: {
             className={classes}
             onMouseLeave={() => setHoveredGap(undefined)}
         >
-            <div className={type.displayItemsClass}>
+            <div className={BucketTypes[props.type ?? bucket.id].layoutClass}>
                 {bucket.items.map((I: Item, i: number) => {
                     return (
                         <div key={`bucket-${bucket.id}-item-${i}`}>

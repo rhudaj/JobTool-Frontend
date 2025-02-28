@@ -2,10 +2,9 @@ import "./cveditor.sass";
 import { CVSection } from "job-tool-shared-types";
 import * as UI from "./cv_components"
 import ItemBucket from "../../../components/dnd/Bucket";
-import { useContext, useEffect, useReducer, useRef } from "react";
-import { BucketContext, bucketReducer } from "../../../components/dnd/useBucket";
+import { useContext } from "react";
 import { CVActions, CVContext } from "../useCV";
-import { BucketTypeNames, Item } from "../../../components/dnd/types";
+import { BucketTypeNames } from "../../../components/dnd/types";
 
 /**
  * Cares only about the current CV being edited.

@@ -240,7 +240,7 @@ export function VersionedItemUI(props: {
             <div className='version-id-container'>
                 <p>{version_str}</p>
             </div>
-            <StandaloneDragItem item={dnd_item} item_type={BucketTypeNames.VERSIONED_ITEMS} >
+            <StandaloneDragItem item={dnd_item} item_type={props.obj.item_type} >
                 <DynamicComponent
                     key={cur} // force re-render when cur changes
                     type={props.obj.item_type}
