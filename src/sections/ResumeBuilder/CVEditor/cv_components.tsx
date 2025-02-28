@@ -5,23 +5,19 @@ import { joinClassNames } from "../../../util/joinClassNames";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
-import { useContext, useEffect, useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
 import { BucketTypeNames, DynamicComponent } from "../../../components/dnd/types";
-import { CVActions, CVContext } from "../useCV";
 import { BucketContext, bucketReducer } from "../../../components/dnd/useBucket";
+import { useImmer } from "use-immer";
 
 // TODO: atm InfoPad does not work because it does not supply CVContext
 // These components should not be handling CVContext
 // They have to use callbacks
 
-function SectionUI(props: { obj: CVSection; sec_idx: number }) {
+function SectionUI(props: { obj: CVSection; onUpdate?: (newObj: any)=>void }) {
 
-	// data from parent:
-	const [cv, cv_dispatch] = useContext(CVContext);
-	const data = cv?.sections?.[props.sec_idx];
-
-	// bucket state:
+	const [data, setData] = useImmer(props.obj);
 	const [bucket, bucketDispatch] = useReducer(bucketReducer, {
 		id: data?.name,
 		items: data?.items?.map((item: any, i: number)=>({
@@ -30,16 +26,23 @@ function SectionUI(props: { obj: CVSection; sec_idx: number }) {
 		}))
 	})
 
+	// bucket -> data
 	useEffect(() => {
-		console.log("SectionUI, bucket.items CHANGED!!!");
-		cv_dispatch({ type: CVActions.SET_SECTION, payload: {
-			idx: props.sec_idx,
-			section: {
-				...data,
-				items: bucket.items.map(I=>I.value)
-			}
-		}});
+		setData(draft => {
+			draft.items = bucket.items.map(I=>I.value);
+		});
 	}, [bucket.items]);
+
+	// data -> parent
+	useEffect(() => {
+		props.onUpdate(data);
+	}, [data]);
+
+	const onItemUpdate = (i: number, newVal: any) => {
+		setData(draft => {
+			draft.items[i] = newVal;
+		});
+	};
 
 	const formatHeader = (s: string) => s.toUpperCase();
 
@@ -57,7 +60,7 @@ function SectionUI(props: { obj: CVSection; sec_idx: number }) {
 							<DynamicComponent
 								key={`${i}-${i}`}
 								type={data.bucket_type}
-								props={{ obj: item, sec_idx: props.sec_idx, item_idx: i }}
+								props={{ obj: item, onUpdate: (newVal: any) => onItemUpdate(i, newVal) }}
 							/>
 						)}
 					</ItemBucket>
@@ -67,21 +70,20 @@ function SectionUI(props: { obj: CVSection; sec_idx: number }) {
 	)
 }
 
-function SummaryUI(props: { obj: any, sec_idx: number, item_idx: number }) {
+function SummaryUI(props: { obj: any, onUpdate?: (newObj: any)=>void }) {
 
 	// data from parent:
-	const [cv, cv_dispatch] = useContext(CVContext) ?? [];
-	const data = cv?.sections?.[props.sec_idx];
+	const [data, setData] = useImmer(props.obj);
+
+	useEffect(() => {
+		if(!data) return;
+		props.onUpdate?.(data);
+	}, [data]);
 
 	const handleUpdate = (key: string, newVal: any) => {
-		cv_dispatch({ type: CVActions.SET_ITEM, payload: {
-			sec_idx: props.sec_idx,
-			item_idx: props.item_idx,
-			item: {
-				...data.items[props.item_idx],
-				[key]: newVal
-			}
-		}});
+		setData(draft => {
+			draft[key] = newVal;
+		});
 	};
 
 	return (
@@ -101,14 +103,17 @@ function SummaryUI(props: { obj: any, sec_idx: number, item_idx: number }) {
 
 // Note: we can make changes to this and it be local.
 function ExperienceUI(props: {
-	obj: Experience;
-	sec_idx: number;	// TODO: dont do this
-	item_idx: number;
-	disableBucketFeatures?: boolean;
+	obj: Experience
+	onUpdate?: (newObj: any)=>void
+	disableBucketFeatures?: boolean
 }) {
 
-	const [cv, cv_dispatch] = useContext(CVContext) ?? [];
-	const data = cv?.sections[props.sec_idx]?.items[props.item_idx];
+	const [data, setData] = useImmer(props.obj);
+
+	useEffect(() => {
+		if(!data) return;
+		props.onUpdate?.(data);
+	}, [data]);
 
 	// bucket state:
 	const [bucket, bucketDispatch] = useReducer(bucketReducer, {
@@ -119,15 +124,23 @@ function ExperienceUI(props: {
 		}))
 	})
 
+	useEffect(() => {
+		if(!bucket.items) return;
+		handleUpdate('description', bucket.items.map(I=>I.value));
+	}, [bucket.items]);
+
 	const handleUpdate = (field: keyof Experience, val: any) => {
-		cv_dispatch({ type: CVActions.SET_ITEM, payload: {
-			sec_idx: props.sec_idx,
-			item_idx: props.item_idx,
-			item: {
-				...data,
-				[field]: val
-			}
-		}});
+		// cv_dispatch({ type: CVActions.SET_ITEM, payload: {
+		// 	sec_idx: props.sec_idx,
+		// 	item_idx: props.item_idx,
+		// 	item: {
+		// 		...data,
+		// 		[field]: val
+		// 	}
+		// }});
+		setData(draft => {
+			draft[field] = val;
+		});
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {
@@ -207,14 +220,17 @@ function ExperienceUI(props: {
 // dont show date.
 function ProjectUI(props: {
 	obj: Experience;
-	sec_idx: number;	// TODO: dont do this
-	item_idx: number;
+	onUpdate?: (newObj: any)=>void
 	disableBucketFeatures?: boolean;
 }) {
 
 	// data from parent:
-	const [cv, cv_dispatch] = useContext(CVContext)  ?? [];
-	const data = cv?.sections[props.sec_idx]?.items[props.item_idx];
+	const [data, setData] = useImmer(props.obj);
+
+	useEffect(() => {
+		if(!data) return
+		props.onUpdate?.(data)
+	}, [data]);
 
 	// bucket state:
 	const [bucket, bucketDispatch] = useReducer(bucketReducer, {
@@ -231,14 +247,9 @@ function ProjectUI(props: {
 	}, [bucket.items]);
 
 	const handleUpdate = (field: keyof Experience, val: any) => {
-		cv_dispatch({ type: CVActions.SET_ITEM, payload: {
-			sec_idx: props.sec_idx,
-			item_idx: props.item_idx,
-			item: {
-				...data,
-				[field]: val
-			}
-		}});
+		setData(draft => {
+			draft[field] = val;
+		});
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {

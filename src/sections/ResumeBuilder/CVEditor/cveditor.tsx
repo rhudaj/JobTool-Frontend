@@ -45,6 +45,13 @@ function CVEditor() {
 		})
 	}, [bucket.items]);
 
+	const onSectionUpdate = (idx: number, section: CVSection) => {
+		cv_dispatch({
+			type: CVActions.SET_SECTION,
+			payload: { idx, section }
+		});
+	};
+
 	// -------------- VIEW --------------
 
 	if (!CV) return null;
@@ -60,7 +67,7 @@ function CVEditor() {
 				<ItemBucket type={BucketTypeNames.SECTIONS} addItemDisabled>
 					{/* SECTIONS -------------------------------------- */}
 					{CV.sections?.map((S: CVSection, i: number) =>
-						<UI.SectionUI key={i} obj={S} sec_idx={i} />
+						<UI.SectionUI key={i} obj={S} onUpdate={newSec => onSectionUpdate(i, newSec)} />
 					)}
 				</ItemBucket>
 			</BucketContext.Provider>
