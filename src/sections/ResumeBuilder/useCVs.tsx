@@ -34,36 +34,14 @@ const useCvsStore = create<State & Actions>((set, get) => ({
     trackMods: [],
     // SETTERS ------------------------------------------------------
     fetch: async () => {
-        if (USE_BACKEND) {
-            BackendAPI.request({ method: "GET", endpoint: "cvs" })
-            .then((cvList) => {
-                set({ ncvs: cvList, status: true, curIdx: 0 });
-            })
-            .catch(() => {
-                set({ status: false });
-            })
-        } else {
-            const sampleFiles = [
-                "sample_resume1.json",
-                "sample_resume2.json",
-                "sample_resume3.json",
-            ];
-            Promise.all(
-                sampleFiles.map((file) =>
-                    fetch(`${CVS_PATH}/${file}`).then((r) => r.json())
-                )
-            )
-                .then((cvArr) => {
-                    if (cvArr.length) {
-                        set({ ncvs: cvArr, status: true, curIdx: 0 });
-                    } else {
-                        set({ status: false });
-                    }
-                })
-                .catch(() =>
-                    set({ status: false })
-                );
-        }
+        fetchFromBackend()
+        .then((cvList) => {
+            set({ ncvs: cvList, status: true, curIdx: 0 });
+        })
+        .catch(() => {
+            set({ status: false });
+            alert("Failed to fetch CVs")
+        })
     },
     update: (cv: CV) => {
         const idx = get().curIdx;
@@ -99,10 +77,31 @@ const useCvsStore = create<State & Actions>((set, get) => ({
     },
 }))
 
+// ---------------------------------------------------------------
+//                             IN / OUT
+// ---------------------------------------------------------------
+
+const fetchFromBackend = async (): Promise<NamedCV[]> => {
+    if(USE_BACKEND) {
+        return BackendAPI.request<undefined, NamedCV[]>({ method: "GET", endpoint: "cvs" })
+    } else {
+        const sampleFiles = [
+            "sample_resume1.json",
+            "sample_resume2.json",
+            "sample_resume3.json",
+        ];
+        return Promise.all(
+            sampleFiles.map((file) =>
+                fetch(`${CVS_PATH}/${file}`).then((r) => r.json())
+            )
+        )
+    }
+}
+
 const save2backend = (ncv: NamedCV, overwrite: boolean) => {
     BackendAPI.request({
         method: overwrite ? "PUT" : "POST",
-        endpoint: `cvs${overwrite ?? `/${ncv.name}`}`,
+        endpoint: `cvs${overwrite ? `/${ncv.name}` : ""}`,
         body: ncv
     })
     .then(() => alert("Success! Saved cv info"))

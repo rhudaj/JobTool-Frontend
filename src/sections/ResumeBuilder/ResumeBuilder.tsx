@@ -16,8 +16,8 @@ import TextEditDiv from "../../components/TextEditDiv/texteditdiv";
 import TextItems from "../../components/TextItems/TextItems";
 import { usePopup } from "../../hooks/Popup/popup";
 import { useImmer } from "use-immer";
-import { useCvsStore } from "./useCVs";
-import { useCvInfoStore } from "./useCVInfo";
+import { useCvsStore, save2backend as saveCv2backend } from "./useCVs";
+import { useCvInfoStore, save2backend as saveCvInfo2backend } from "./useCVInfo";
 import { useShallow } from 'zustand/react/shallow'
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
@@ -245,21 +245,19 @@ function ResumeBuilder() {
                 exportPopup.close();
             },
             onSaveFormSubmit: (name: string, tags: string[]) => {
-                // TODO: fix/figure out since cur_cv is based on cvs
                 // first check that the cv has actually changed!
-                // if (isEqual(edited_cv, cvs.cur.data)) {
-                //     alert("No changes have been made to the CV!");
-                //     return;
-                // }
-                // cvs.save(
-                //     {
-                //         name: name,
-                //         tags: tags,
-                //         data: edited_cv,
-                //     },
-                //     (name === cvs.cur.name)
-                // );
-                // savePopup.close();
+                if (!cvsState.trackMods[cvsState.curIdx]) {
+                    alert("No changes have been made to the CV!");
+                    return;
+                }
+                // if it has, check wether new/update
+                const overwrite = name === cur_cv.name;
+                saveCv2backend({
+                    name: name,
+                    tags: tags,
+                    data: cur_cv.data,
+                }, overwrite)
+                savePopup.close();
             },
             onImportJsonFileChange: (
                 e: React.ChangeEvent<HTMLInputElement>
