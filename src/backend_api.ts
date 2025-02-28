@@ -3,9 +3,7 @@ import  useLogger  from "./hooks/logger";
 export interface Request<IN, OUT=null> {
     method: "GET" | "POST" | "PUT" | "DELETE",
     endpoint: string,
-    body?: IN,
-    handleSuccess?: (data: OUT) => void,
-    handleError?: (msg: string) => void,
+    body?: IN
 }
 
 interface Response<T> {
@@ -56,10 +54,10 @@ class BackendAPI {
         return ReturnObj; // data may be null
     }
 
-    public static async request<IN=any, OUT=any>(req: Request<IN, OUT>) {
+    public static async request<IN=any, OUT=any>(req: Request<IN, OUT>): Promise<OUT> {
         const resp: Response<OUT> = await this.__request__<OUT>(req.method, req.endpoint, req.body);
-        if(resp.status) req.handleSuccess?.(resp.data);
-        else            req.handleError?.(resp.msg);
+        if(resp.status) return resp.data;
+        else return Promise.reject(resp.msg);
     };
 }
 

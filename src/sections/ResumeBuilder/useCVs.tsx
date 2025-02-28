@@ -35,16 +35,13 @@ const useCvsStore = create<State & Actions>((set, get) => ({
     // SETTERS ------------------------------------------------------
     fetch: async () => {
         if (USE_BACKEND) {
-            BackendAPI.request({
-                method: "GET",
-                endpoint: "cvs",
-                handleSuccess: (cvList) => {
-                    set({ ncvs: cvList, status: true, curIdx: 0 });
-                },
-                handleError: () => {
-                    set({ status: false });
-                }
-            });
+            BackendAPI.request({ method: "GET", endpoint: "cvs" })
+            .then((cvList) => {
+                set({ ncvs: cvList, status: true, curIdx: 0 });
+            })
+            .catch(() => {
+                set({ status: false });
+            })
         } else {
             const sampleFiles = [
                 "sample_resume1.json",
@@ -106,13 +103,12 @@ const save2backend = (ncv: NamedCV, overwrite: boolean) => {
     BackendAPI.request({
         method: overwrite ? "PUT" : "POST",
         endpoint: `cvs${overwrite ?? `/${ncv.name}`}`,
-        body: ncv,
-        handleSuccess: () => alert("Saved CV!"),
-        handleError: alert,
-    });
+        body: ncv
+    })
+    .then(() => alert("Success! Saved cv info"))
+    .catch(alert)
 };
 
 // stores a CV object
-const cvContext = createContext<CV>(null);
 
-export { useCvsStore, cvContext };
+export { useCvsStore, save2backend };

@@ -31,10 +31,10 @@ const JobPopup = (props: {
         BackendAPI.request<{ job_info: string }, string[]>({
             method: "POST",
             endpoint: "/AI/genCL",
-            body: { job_info: jobTxt },
-            handleSuccess: (data: string[]) => setResult(data),
-            handleError: alert
-        });
+            body: { job_info: jobTxt }
+        })
+        .then((data: string[]) => setResult(data))
+        .catch(alert)
     };
 
     const onContinueClicked = () => {

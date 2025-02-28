@@ -5,6 +5,9 @@ import { create } from "zustand";
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
 
+// ------------------------------------------------------
+//                          STATE
+// ------------------------------------------------------
 
 interface State {
     cv_info: CVInfo
@@ -25,30 +28,14 @@ const useCvInfoStore = create<State & Actions>((set, get) => ({
     // SETTERS ------------------------------------------------------
     fetch: async () => {
         log("fetch");
-        if (USE_BACKEND) {
-            BackendAPI.request<undefined, CVInfo>({
-                method: "GET",
-                endpoint: "cv_info",
-                handleSuccess: (cv_info) => {
-                    set({ cv_info: cv_info, status: true })
-                },
-                handleError: (msg: string) => {
-                    set({ status: false })
-                    alert(msg)
-                },
-            });
-        } else {
-            // from the /public folder
-            fetch(SAMPLES_PATH + "cv_info.json")
-                .then(r => r.json())
-                .then(cv_info => {
-                    if (cv_info) {
-                        set({ cv_info: cv_info, status: true });
-                    } else {
-                        set({ status: false });
-                    }
-                })
-        }
+        fetchFromBackend()
+        .then(cv_info => {
+            set({ cv_info: cv_info, status: true })
+        })
+        .catch(msg => {
+            set({ status: false })
+            alert(msg)
+        })
     },
     set: (newData: CVInfo) => {
         log("set");
@@ -56,16 +43,28 @@ const useCvInfoStore = create<State & Actions>((set, get) => ({
     }
 }))
 
+// ------------------------------------------------------
+//                   BACKEND CONNECTION
+// ------------------------------------------------------
 
-const save2backend = (newData: CVInfo) => {
+const save2backend = (cv_info: CVInfo) => {
     BackendAPI.request<CVInfo>({
         method: "PUT",
         endpoint: "cv_info",
-        body: newData,
-        handleSuccess: () => alert("Success! Saved cv info"),
-        handleError: alert,
-    });
+        body: cv_info,
+    })
+    .then(() => alert("Success! Saved cv info"))
+    .catch(alert)
 };
 
+const fetchFromBackend = async (): Promise<CVInfo> =>
+    USE_BACKEND ? (
+        BackendAPI.request<undefined, CVInfo>({
+            method: "GET",
+            endpoint: "cv_info",
+        })
+    ) : (
+        fetch(SAMPLES_PATH + "cv_info.json").then(r => r.json())
+    )
 
-export { useCvInfoStore };
+export { useCvInfoStore, save2backend };

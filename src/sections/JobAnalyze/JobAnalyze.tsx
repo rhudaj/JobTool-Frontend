@@ -19,10 +19,11 @@ function JobAnalyze() {
             body: {
                 job_text: initJobText,
                 annotations: JIRef.current.get(),
-            },
-            handleSuccess: () => alert("Success!"),
-            handleError: alert,
-        });
+            }
+        })
+        .then(() => alert("Success!"))
+        .catch(alert)
+
     };
 
     useEffect(()=>{
