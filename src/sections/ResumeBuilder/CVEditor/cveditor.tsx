@@ -3,21 +3,11 @@ import { CV, CVSection, Link } from "job-tool-shared-types";
 import * as UI from "./cv_components"
 import ItemBucket from "../../../components/dnd/Bucket";
 import { BucketTypeNames } from "../../../components/dnd/types";
-import { useEffect } from "react";
 
-/**
- * Cares only about the current CV being edited.
- * Requires a CVContext and a CVDispatchContext to be provided.
-*/
-// TODO: pass a context instead
 function CVEditor(props: {
 	cv: CV,
 	onUpdate?: (cv: CV) => void
 }) {
-
-	useEffect(() => {
-		console.log("CVEditor: new cv: ", props.cv);
-	}, [props.cv]);
 
 	const onSectionUpdate = (idx: number, section: CVSection) => {
 		const new_sections = [...props.cv.sections];
