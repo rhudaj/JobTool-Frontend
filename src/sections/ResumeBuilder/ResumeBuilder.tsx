@@ -296,14 +296,6 @@ function ResumeBuilder() {
                 cvsState.add(ncv);
                 importPopup.close();
             }
-        },
-        settings_ui: {
-            onClickFileSettings: () => {
-                setSettingN((prev) => (prev === 1 ? null : 1));
-            },
-            onClickSelectSettings: () => {
-                setSettingN((prev) => (prev === 0 ? null : 0));
-            },
         }
     };
 
@@ -339,39 +331,6 @@ function ResumeBuilder() {
         )
     };
 
-    const settings = [
-        // FILE:
-        (
-            <SubSection id="ss-named-cvs" heading="My Resumes">
-                <div id="named-cvs-controls">
-                    <div onClick={CONTROLS.settings.onPlusClicked}>+</div>
-                    <div onClick={CONTROLS.settings.onMinusClicked}>-</div>
-                </div>
-                <SavedCVsUI />
-            </SubSection>
-        ),
-        // File CONTROLS:
-        (
-            <div id="file-controls">
-                <div style={{ display: "flex", gap: "10rem" }}>
-                    <p>New Saved Items from JSON:</p>
-                    <input
-                        type="file"
-                        accept=".json"
-                        onChange={CONTROLS.settings.onSavedItemsFileChanged}
-                    />
-                </div>
-                {USE_BACKEND && (
-                    <>
-                        <button onClick={CONTROLS.settings.onSaveCurCVClicked}>
-                            Save Current CV
-                        </button>
-                    </>
-                )}
-            </div>
-        ),
-    ];
-
     if ( !cvsState.status || !cvInfoState.status ) return null;
     return (
         <Section id="section-cv" heading="Resume Builder">
@@ -383,25 +342,15 @@ function ResumeBuilder() {
                 deletePopup.PopupComponent,
                 saveTrainExPopup.PopupComponent,
             ]}
-            {/* ------------ SETTINGS ------------ */}
-            <div>
-                <div className="resume-builder-controls">
-                    <div
-                        className={settingN === 1 ? "selected" : ""}
-                        onClick={CONTROLS.settings_ui.onClickFileSettings}
-                    >
-                        File
-                    </div>
-                    <div
-                        className={settingN === 0 ? "selected" : ""}
-                        onClick={CONTROLS.settings_ui.onClickSelectSettings}
-                    >
-                        Select
-                    </div>
+            {/* ------------ VIEW SAVED CVs ------------ */}
+            <SubSection id="ss-named-cvs" heading="My Resumes">
+                <div id="named-cvs-controls">
+                    <div onClick={CONTROLS.settings.onPlusClicked}>+</div>
+                    <div onClick={CONTROLS.settings.onMinusClicked}>-</div>
                 </div>
-                {settingN !== null && settings[settingN]}
-            </div>
-            {/* ------------ DISPLAY THE CURRENT CV's META INFO ------------ */}
+                <SavedCVsUI />
+            </SubSection>
+            {/* ------------ CUR CV INFO, SAVE/EXPORT BUTTONS ------------ */}
             <div id="display-info">
                 <div>
                     <span className="descr">Name:</span>{" "}
@@ -420,6 +369,13 @@ function ResumeBuilder() {
                     <button onClick={CONTROLS.settings.onExportClicked}>
                         Export
                     </button>
+                    {USE_BACKEND && (
+                        <>
+                            <button onClick={CONTROLS.settings.onSaveCurCVClicked}>
+                                Save
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
             {/* ------------ CV EDITOR ------------ */}
