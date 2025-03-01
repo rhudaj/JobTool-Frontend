@@ -11,6 +11,7 @@ const DEFAULT_GROUP = "other"
  * Displays the list of saved CVs.
  * And allows the user to select one (change state.curIdx)
  */
+// TODO: only works for 1 level of nesting
 export default function SavedCVsUI() {
 
     const cvsState = useCvsStore();
