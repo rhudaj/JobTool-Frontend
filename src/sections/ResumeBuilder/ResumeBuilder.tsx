@@ -19,6 +19,7 @@ import { useImmer } from "use-immer";
 import { useCvsStore, save2backend as saveCv2backend } from "./useCVs";
 import { useCvInfoStore } from "./useCVInfo";
 import { useShallow } from 'zustand/react/shallow'
+import SavedCVsUI from "./savedCVs/savedCVs";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 
@@ -161,42 +162,6 @@ const SaveTrainingExampleForm = (props: { onSave: (job: string) => void }) => {
     );
 };
 
-/**
- * Displays the list of saved CVs.
- * And allows the user to select one (change state.curIdx)
- */
-function SavedCVsUI() {
-
-    const cvsState = useCvsStore();
-    const cvNames = useCvsStore(useShallow(state => state.ncvs.map(cv => cv.name)));
-        // useShallow => cvNames updates ONLY when output of the selector does
-    const curName = cvNames ? cvNames[cvsState.curIdx] : "";
-
-    const onThumbnailClick = (idx: number) => {
-        // only update if different
-        if (idx === cvsState.curIdx) return;
-        cvsState.setCur(idx);
-    }
-
-    return (
-        <div className="cv-thumnail-container">
-            {cvNames?.map((name: string, i: number) => (
-                <div
-                    key={name}
-                    className={joinClassNames(
-                        "cv-thumbnail",
-                        name === curName ? "active" : "",
-                        cvsState.trackMods[i] ? "is-modified" : ""
-                    )}
-                    onClick={()=>onThumbnailClick(i)}
-                >
-                    {name}
-                </div>
-            ))}
-        </div>
-    );
-}
-
 // ------------------------------------------------------------------
 //                         ROOT COMPONENT
 // ------------------------------------------------------------------
@@ -207,10 +172,6 @@ function ResumeBuilder() {
 
     const cvsState = useCvsStore();
     const cur_cv = useCvsStore(useShallow(s => s.ncvs[s.curIdx]));
-
-    useEffect(() => {
-        console.log(`ResumeBuilder: current CV changed: ${cur_cv?.name}:`, cur_cv);
-    }, [cur_cv])
 
     const cvInfoState = useCvInfoStore();
 
@@ -345,7 +306,6 @@ function ResumeBuilder() {
             <SubSection id="ss-named-cvs" heading="My Resumes">
                 <div id="named-cvs-controls">
                     <div onClick={CONTROLS.settings.onPlusClicked}>+</div>
-                    <div onClick={CONTROLS.settings.onMinusClicked}>-</div>
                 </div>
                 <SavedCVsUI />
             </SubSection>
@@ -368,6 +328,7 @@ function ResumeBuilder() {
                     <button onClick={CONTROLS.settings.onExportClicked}>
                         Export
                     </button>
+                    <button onClick={CONTROLS.settings.onMinusClicked}>Delete</button>
                     {USE_BACKEND && (
                         <>
                             <button onClick={CONTROLS.settings.onSaveCurCVClicked}>

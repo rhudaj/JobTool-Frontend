@@ -1,0 +1,30 @@
+.cv-groups-container
+
+    display: flex
+    gap: 40rem
+
+    width: 100%
+    overflow-x: scroll
+
+    .cv-thumbnail
+        width: max-content
+        white-space: nowrap
+
+        font-size: 10rem
+        color: rgb(207, 207, 207) // when not selected
+
+        padding: 2rem
+
+        &:hover
+            transform: scale(1.05)
+
+        &.active
+            color: white
+            background-color: #2a2a2a
+        &.is-modified
+            background-color: #ffb0b0
+
+    .cv-group
+        .group-list
+            padding-top: 5rem
+            padding-left: 5rem
