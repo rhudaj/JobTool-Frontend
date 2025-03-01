@@ -1,5 +1,9 @@
 import  useLogger  from "./hooks/logger";
 
+const TEST = process.env.REACT_APP_TEST_MODE === "1"
+
+console.log("BackendAPI.tsx: TEST MODE IS", TEST ? "ON" : "OFF")
+
 export interface Request<IN, OUT=null> {
     method: "GET" | "POST" | "PUT" | "DELETE",
     endpoint: string,
@@ -55,6 +59,14 @@ class BackendAPI {
     }
 
     public static async request<IN=any, OUT=any>(req: Request<IN, OUT>): Promise<OUT> {
+
+        // In test mode, don't make POST/PUT/DELETE requests
+        if(TEST && (req.method !== "GET")) {
+            this.log(`TEST MODE: ${req.method} request to ${req.endpoint} blocked`);
+            return Promise.reject("TEST MODE: POST/PUT/DELETE requests are disabled");
+        }
+
+
         const resp: Response<OUT> = await this.__request__<OUT>(req.method, req.endpoint, req.body);
         if(resp.status) return resp.data;
         else return Promise.reject(resp.msg);

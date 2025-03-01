@@ -1,5 +1,5 @@
 import './versionedItem.sass'
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BucketTypeNames, DynamicComponent, Item } from "../dnd/types";
 import { StandaloneDragItem } from '../dnd/BucketItem';
 import TextEditDiv from '../TextEditDiv/texteditdiv';
@@ -122,7 +122,59 @@ function EditExistingItem(props: {
 };
 
 // MAIN COMPONENT
-// TODO: create a reducer
+
+const useVIState = () => {
+    const [versions, setItems] = useImmer<Item<any>[]>([]);
+    const [cur, setCur] = useState(0);
+    return {
+        // getters --------------------------------
+        versions,
+        cur,
+        curVersion: useMemo(()=>versions[cur], [cur, versions]),
+        status: useMemo(()=>versions.length > 0, [versions]),
+        getCopyCur: (): Item => {
+            return {...versions[cur]};
+        },
+        // setters --------------------------------
+        init: (items: Item[]) => {
+            console.log("Initializing versions to: ", items);
+            if(!items) {
+                console.debug("CAUGHT !items")
+                return
+            }
+            if(isEqual(versions, items)) {
+                console.debug("CAUGHT isEqual")
+                return
+            }
+            setItems(items);
+            setCur(0);
+        },
+        addNew: (newItem: Item) => {
+            setItems(D => {
+                D.push(newItem);
+            });
+            setCur(prev => prev + 1);
+            console.log("Added a new item version!");
+        },
+        editCur: (newItem: Item) => {
+            setItems(D => {
+                D[cur] = newItem;
+            });
+            console.log("Edited the current item version!");
+        },
+        delCur: () => {
+            console.log(`Deleting cur item (${versions[cur].id})`);
+            setItems(D => {
+                D.splice(cur, 1);
+            });
+            setCur(0);
+            console.log("Deleted the current item version!");
+        },
+        switchVersion: () => {
+            setCur(prev => (prev === versions.length - 1 ? 0 : prev + 1));
+        }
+    };
+}
 
 /**
  * You can flip through versions, but
@@ -138,64 +190,45 @@ export function VersionedItemUI(props: {
 }) {
 
     // ----------------- STATE -----------------
-    const [versions, setVersions] = useImmer<Item<any>[]>(null);
-    const [cur, setCur] = useState(0);
+
+    const state = useVIState();
 
     useEffect(()=> {
-        if(!props.obj.versions) return
-        setVersions(props.obj.versions)
+        state.init(props.obj.versions);
     }, [props.obj.versions]);
 
     // Alert parent when state changes
     useEffect(()=>{
-        if(!versions) return;
-        if(isEqual(versions, props.obj.versions)) return
+        if(!state.status) {
+            console.debug("CAUGHT !state.versions")
+            return;
+        }
+        if(isEqual(state.versions, props.obj.versions)) {
+            console.debug("CAUGHT isEqual")
+            return
+        }
+        console.debug("UPDATE", state.versions)
         props.onUpdate({
             ...props.obj,
-            versions: versions
+            versions: state.versions
         })
-    }, [versions])
+    }, [state.versions])
 
     const editNewItemPopup = usePopup();
 
     // ----------------- CONTROLS -----------------
 
-    const onSaveNew = (newItem: Item) => {
-        console.log("Added a new item version!");
-        setVersions(draft => {
-            draft.push(newItem);
-        });
-        setCur(prev => prev + 1); // Ensure cur updates in sync
-        editNewItemPopup.close();
-    };
-
-    const onSaveChanges = (modifiedItem: Item) => {
-        // Assumes that the modifiedItem is at the `cur` index
-        setVersions(draft=>{
-            draft[cur] = modifiedItem;
-        });
-        editNewItemPopup.close();
-    };
-
-    const onDeleteCur = () => {
-        console.log(`Deleting cur item (${versions[cur].id})`);
-        setVersions(draft=>{
-            draft.splice(cur, 1);
-        })
-        setCur(0);
-        editNewItemPopup.close();
-    };
-
     const openEditNewItemPopup = () => {
-        // create a copy of the current version.
-        const copy = {...versions[cur]};
+        const copy = state.getCopyCur();
         copy.id += "_copy";
-        // Open the popup
         editNewItemPopup.open(
             <EditNewItem
                 startingItem={copy}
                 item_type={props.obj.item_type}
-                onSave={onSaveNew}
+                onSave={(newItem: Item) => {
+                    state.addNew(newItem)
+                    editNewItemPopup.close()
+                }}
             />
         )
     };
@@ -203,27 +236,33 @@ export function VersionedItemUI(props: {
     const openEditExistingPopup = () => {
         editNewItemPopup.open(
             <EditExistingItem
-                item={versions[cur]}
+                item={state.curVersion}
                 item_type={props.obj.item_type}
-                onSaveChanges={onSaveChanges}
-                onDeleteItem={onDeleteCur}
+                onSaveChanges={(modifiedItem: Item) => {
+                    state.editCur(modifiedItem);
+                    editNewItemPopup.close();
+                }}
+                onDeleteItem={() => {
+                    state.delCur();
+                    editNewItemPopup.close();
+                }}
             />
         )
     };
 
-    const onSwitchVersion = () => {
-        setCur(prev => (prev === versions.length - 1 ? 0 : prev + 1));
-    };
-
     // ----------------- RENDER -----------------
 
-    if (!versions) return <div>No versions</div>;
+    if (!state.versions) return <div>No versions</div>;
 
-    const version_str = `${props.obj?.id}/${versions[cur]?.id}`
+    const _cur = state.curVersion
+
+    if (!_cur) return <div>No current version</div>;
+
+    const version_str = `${props.obj?.id}/${state.curVersion?.id}`
 
     const dnd_item: Item<string> = {
         id: version_str,
-        value: versions[cur]?.value
+        value: state.curVersion?.value
     }
 
     return (
@@ -235,7 +274,7 @@ export function VersionedItemUI(props: {
                 isVertical={true}
                 controls={[
                     { id: "edit", icon_class: "fa-solid fa-pen", onClick: openEditExistingPopup },
-                    { id:"switch", icon_class: "fa-solid fa-right-left", onClick: onSwitchVersion },
+                    { id:"switch", icon_class: "fa-solid fa-right-left", onClick: state.switchVersion },
                     { id: "new", icon_class: "fa-solid fa-plus", onClick: openEditNewItemPopup }
                 ]}
             />
@@ -245,14 +284,14 @@ export function VersionedItemUI(props: {
             </div>
             <StandaloneDragItem item={dnd_item} item_type={props.obj.item_type} >
                 <DynamicComponent
-                    key={cur} // force re-render when cur changes
+                    key={state.cur} // force re-render when cur changes
                     type={props.obj.item_type}
                     props={{
-                        obj: versions[cur]?.value,
+                        obj: state.curVersion?.value,
                         disableBucketFeatures: true     // applies to any item with a Bucket component
                     }}
                 />
             </StandaloneDragItem>
         </div>
     )
-};
+}
