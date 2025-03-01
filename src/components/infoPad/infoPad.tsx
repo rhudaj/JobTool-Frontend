@@ -1,5 +1,5 @@
 import './infoPad.sass';
-import React, { forwardRef, useImperativeHandle } from "react";
+import React, { useCallback } from "react";
 import { InfoPadMap } from '../dnd/types';
 import { Item } from '../dnd/types';
 import { VersionedItemUI, VersionedItem } from "../VersionedItem/versionedItem"
@@ -55,55 +55,49 @@ const Sections2Info = (sections: { secName: string; items: VersionedItem<any>[] 
     return info;
 };
 
-export interface InfoPadHandle {
-	get: () => CVInfo;
-}
-
 // MAIN COMPONENT
 function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void }) {
 
     // ----------------- STATE -----------------
 
-    const [sections, setSections] = useImmer(null);
-
-    const firstLoad = React.useRef(true);
+    const [state, setState] = useImmer({
+        sections: [],
+        status: false // only true if the user made changes
+    });
 
     // Sync `sections` only when `info` changes, but don't overwrite user edits
     React.useEffect(() => {
-        if (!props.info || !firstLoad.current) return;
-        setSections(Info2Sections(props.info));
-        firstLoad.current = false;  // Prevents overwriting user changes later
+        setState(D=>{
+            D.sections = Info2Sections(props.info)
+            D.status = false
+        })
     }, [props.info])
 
     // Call `onUpdate` only when `sections` have been edited
     React.useEffect(() => {
-        if (!sections || !props.info) return
-        const newInfo = Sections2Info(sections);
-        if (!isEqual(newInfo, props.info)) {
-            props.onUpdate(newInfo);
-            console.log("UPDATE!!!")
-        } else  {
-            console.log("CAUGHT")
-        }
-    }, [sections, props.onUpdate]);
+        if (!state.status) return // not changed by user
+        console.debug('InfoPad: sections updated');
+        props.onUpdate( Sections2Info(state.sections) );
+    }, [state.sections]);
 
 
     // ----------------- CONTROLS -----------------
 
     const onVersionedItemUpdate = (newVI: VersionedItem, sec_idx, item_idx) => {
-        setSections(cur=>{
-            cur[sec_idx].items[item_idx] = newVI;
+        setState(D=>{
+            D.sections[sec_idx].items[item_idx] = newVI
+            D.status = true
         })
     }
 
     // ----------------- VIEW -----------------
 
-    if (!sections) {
+    if (!state.sections) {
         return <div id="info-pad">no CV info found</div>;
     }
     return (
         <div id="info-pad">
-            {sections.map((sec, sec_idx: number) => (
+            {state.sections.map((sec, sec_idx: number) => (
                 <div key={sec_idx} className="info-pad-section">
                     <h2>{sec.secName.toUpperCase()}</h2>
                     <div className='section-items'>

@@ -4,7 +4,7 @@ import Section from "../../components/Section/Section";
 import { NamedCV } from "job-tool-shared-types";
 import PrintablePage from "../../components/PagePrint/pageprint";
 import useComponent2PDF from "../../hooks/component2pdf";
-import InfoPad, { CVInfo, InfoPadHandle } from "../../components/infoPad/infoPad";
+import InfoPad from "../../components/infoPad/infoPad";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import SplitView from "../../components/SplitView/splitview";
@@ -220,7 +220,6 @@ function ResumeBuilder() {
         cvInfoState.fetch();
     }, []);
 
-    const [settingN, setSettingN] = useState(null); // null => none, 0 => SavedCVs, 1 => file settings
     const saveAsPDF = useComponent2PDF("cv-page");
 
     // ref's to popups

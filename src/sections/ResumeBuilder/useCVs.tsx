@@ -35,7 +35,7 @@ const useCvsStore = create<State & Actions>((set, get) => ({
     fetch: async () => {
         fetchFromBackend()
         .then((cvList) => {
-            set({ ncvs: cvList, status: true, curIdx: 0 });
+            set({ ncvs: cvList, curIdx: 0, status: true });
         })
         .catch(() => {
             set({ status: false });
