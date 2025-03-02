@@ -10,7 +10,6 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import SplitView from "../../components/SplitView/splitview";
 import CVEditor from "./CVEditor/cveditor";
 import * as util from "../../util/fileInOut";
-import { joinClassNames } from "../../util/joinClassNames";
 import SubSection from "../../components/Section/SubSection";
 import TextEditDiv from "../../components/TextEditDiv/texteditdiv";
 import TextItems from "../../components/TextItems/TextItems";
@@ -143,6 +142,25 @@ const ImportForm = (props: { onComplete: (ncv: NamedCV) => void }) => {
     );
 };
 
+const FindReplaceForm = (props: { cb: (find: string, replace: string) => void }) => {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const form = e.target as HTMLFormElement;
+        const find = (form.elements.namedItem("find") as HTMLInputElement).value;
+        const replace = (form.elements.namedItem("replace") as HTMLInputElement).value;
+        props.cb(find, replace);
+    };
+
+    return (
+        <form className="popup-content" id="find-replace" onSubmit={handleSubmit}>
+            <p>Find and Replace</p>
+            <input type="text" name="find" placeholder="find" />
+            <input type="text" name="replace" placeholder="replace" />
+            <button type="submit">Go</button>
+        </form>
+    );
+};
+
 // If TEST_MODE is enabled
 const SaveTrainingExampleForm = (props: { onSave: (job: string) => void }) => {
     const [job, setJob] = useState<string>(null);
@@ -188,7 +206,7 @@ function ResumeBuilder() {
     const savePopup = usePopup();
     const importPopup = usePopup();
     const deletePopup = usePopup();
-    const saveTrainExPopup = usePopup();
+    const findReplacePopup = usePopup();
 
     // ---------------- CONTROLS ----------------
 
@@ -198,10 +216,12 @@ function ResumeBuilder() {
                 saveAsPDF(cur_cv?.name);
                 exportPopup.close();
             },
+
             onJsonClicked: () => {
                 if (cur_cv) util.downloadAsJson(cur_cv);
                 exportPopup.close();
             },
+
             onSaveFormSubmit: (name: string, tags: string[]) => {
                 // first check that the cv has actually changed!
                 if (!cvsState.trackMods[cvsState.curIdx]) {
@@ -217,44 +237,43 @@ function ResumeBuilder() {
                 }, overwrite)
                 savePopup.close();
             },
+
             onImportJsonFileChange: (
                 e: React.ChangeEvent<HTMLInputElement>
             ) => {
                 util.jsonFileImport(e, cvsState.add);
                 importPopup.close();
             },
+
             onPasteJson: (json_str: string, name: string) => {
                 const cv = JSON.parse(json_str);
                 cvsState.add(cv);
             },
+            
             onDeleteCV: () => {
                 cvsState.delCur(); // NOTE: only deletes locally
                 deletePopup.close();
             }
         },
         settings: {
-            onPlusClicked: () => {
-                importPopup.open(popup_content.import);
-            },
-            onMinusClicked: () => {
-                deletePopup.open(popup_content.delete);
-            },
-            onSavedItemsFileChanged: (
-                ev: React.ChangeEvent<HTMLInputElement>
-            ) => {
-                util.jsonFileImport(ev, ({ name, data }) =>
-                    cvInfoState.set(data)
-                );
-            },
-            onExportClicked: () => {
-                exportPopup.open(popup_content.export);
-            },
-            onSaveCurCVClicked: () => {
-                savePopup.open(popup_content.save);
-            },
+
             onImportFormComplete: (ncv: NamedCV) => {
                 cvsState.add(ncv);
                 importPopup.close();
+            },
+
+            onFindAndReplace: (find: string, replace: string) => {
+                try {
+                    cvsState.update(
+                        JSON.parse(
+                            JSON.stringify(cur_cv.data)
+                            .replaceAll(find, replace)
+                        )
+                    );
+                } catch(err: unknown) {
+                    alert("Invalid find/replace strings");
+                }
+                findReplacePopup.close();
             }
         }
     };
@@ -288,7 +307,11 @@ function ResumeBuilder() {
                 <p>Are you sure you want to delete?</p>
                 <button onClick={CONTROLS.popups.onDeleteCV}>Yes</button>
             </div>
-        )
+        ),
+
+        findReplace: (
+            <FindReplaceForm cb={CONTROLS.settings.onFindAndReplace} />
+        ),
     };
 
     if ( !cvsState.status || !cvInfoState.status ) return null;
@@ -300,12 +323,12 @@ function ResumeBuilder() {
                 savePopup.PopupComponent,
                 importPopup.PopupComponent,
                 deletePopup.PopupComponent,
-                saveTrainExPopup.PopupComponent,
+                findReplacePopup.PopupComponent,
             ]}
             {/* ------------ VIEW SAVED CVs ------------ */}
             <SubSection id="ss-named-cvs" heading="My Resumes">
                 <div id="named-cvs-controls">
-                    <div onClick={CONTROLS.settings.onPlusClicked}>+</div>
+                    <div onClick={()=>importPopup.open(popup_content.import)}>+</div>
                 </div>
                 <SavedCVsUI />
             </SubSection>
@@ -325,13 +348,12 @@ function ResumeBuilder() {
                     {cur_cv?.tags?.join(", ")}
                 </div>
                 <div className="export-container">
-                    <button onClick={CONTROLS.settings.onExportClicked}>
-                        Export
-                    </button>
-                    <button onClick={CONTROLS.settings.onMinusClicked}>Delete</button>
+                    <button onClick={()=>exportPopup.open(popup_content.export)}>Export</button>
+                    <button onClick={()=>deletePopup.open(popup_content.delete)}>Delete</button>
+                    <button onClick={()=>findReplacePopup.open(popup_content.findReplace)}>Find/Replace</button>
                     {USE_BACKEND && (
                         <>
-                            <button onClick={CONTROLS.settings.onSaveCurCVClicked}>
+                            <button onClick={()=>savePopup.open(popup_content.save)}>
                                 Save
                             </button>
                         </>
