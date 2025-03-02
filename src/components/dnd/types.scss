@@ -1,10 +1,4 @@
-@import "../../sections/ResumeBuilder/CVEditor/cveditor.sass"; // for $experiences-gap
 // TODO: should not have to import
-
-.experiences {
-    display: grid;
-    row-gap: $experiences-gap;
-}
 
 .text-item {
     border: 0.5rem dashed black;

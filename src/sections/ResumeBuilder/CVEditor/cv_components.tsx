@@ -7,6 +7,7 @@ import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
 import { BucketTypeNames, DynamicComponent } from "../../../components/dnd/types";
+import { Styles } from "./styles";
 
 function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
 
@@ -29,13 +30,20 @@ function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
 	const data = props.obj;
 
 	if(!data) return null;
+
+	const sectionStyle = {
+		rowGap: Styles.sec_row_gap,
+		fontSize: Styles.p_font,
+		lineHeight: Styles.text_line_height // NOTE: before it was on .section > *
+	}
+
 	return (
-		<div className="section" >
+		<div className="section" style={sectionStyle}>
 			<div className="sec-head">
 				<p>{data.name.toUpperCase()}</p>
-				<hr />
+				<hr style={{height: Styles.sec_head_line_height, borderBottomWidth: Styles.hr_line_width}}/>
 			</div>
-			<div id={`sec-${data.name}`} className="sec-content">
+			<div id={`sec-${data.name}`} className="sec-content" style={{gap: Styles.sec_head_line_gap}}>
 				<ItemBucket
 					id={data.name}
 					items={data.items?.map((item: any, i: number)=>({
@@ -154,7 +162,7 @@ function ExperienceUI(props: {
 				</div>
 			</div>
 			{/* ROW 2 */}
-			<div className="exp-content">
+			<div className="exp-content" style={{paddingLeft: Styles.exp_indent}}>
 				<ul>
 					{props.disableBucketFeatures ? bulletPoints : (
 						<ItemBucket
@@ -302,12 +310,10 @@ function DateUI(props: { obj: DateRange, onUpdate?: any }) {
 
 function LinkUI(props: Link) {
 	return (
-		<div className="link">
-			<a className="link" href={props.url}>
-				<i className={props.icon} />
-				{ props.text && <TextEditDiv tv={props.text} id="link-text" /> }
-			</a>
-		</div>
+		<a className="link" style={{gap: Styles.link_col_gap}} href={props.url}>
+			<i className={props.icon} />
+			{ props.text && <TextEditDiv tv={props.text} id="link-text" /> }
+		</a>
 	);
 }
 

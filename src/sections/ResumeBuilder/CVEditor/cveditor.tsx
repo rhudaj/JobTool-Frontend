@@ -3,6 +3,7 @@ import { CV, CVSection, Link } from "job-tool-shared-types";
 import * as UI from "./cv_components"
 import ItemBucket from "../../../components/dnd/Bucket";
 import { BucketTypeNames } from "../../../components/dnd/types";
+import { Styles as S } from "./styles";
 
 function CVEditor(props: {
 	cv: CV,
@@ -30,11 +31,16 @@ function CVEditor(props: {
 	const cv = props.cv;
 
 	if (!cv) return null;
+
+	const page_padding = {
+		padding: `${S.page_padding_top}  ${S.page_padding_sides}`,
+	}
+
 	return (
-		<div id="cv-editor">
+		<div id="cv-editor" style={page_padding}>
 			{/* HEADER INFO --------------------------------------*/}
-			<div id="full-name" key="name">{cv.header_info.name}</div>
-			<div id="link-list">
+			<div id="full-name" style={{fontSize: S.name_font}}>{cv.header_info.name}</div>
+			<div id="link-list" style={{fontSize: S.p_font}}>
 				{cv.header_info?.links?.map((l: Link, i: number) => <UI.LinkUI key={i} {...l} /> )}
 			</div>
 			{/* SECTION BUCKET --------------------------------------*/}

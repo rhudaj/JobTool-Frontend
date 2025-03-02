@@ -70,7 +70,7 @@ const BucketTypes: { [key: string]: BucketType } = {
         DisplayItem: (props: {obj: string}) => <div className="text-item">{props.obj}</div>
     },
     "sections": {
-        layoutClass: "section",
+        layoutClass: "sections",
         DisplayItem: SectionUI
     },
     "cl_paragraphs": {
