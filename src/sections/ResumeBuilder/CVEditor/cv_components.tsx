@@ -7,7 +7,6 @@ import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
 import { BucketTypeNames, DynamicComponent } from "../../../components/dnd/types";
-// import { useStyleStore } from "./styles_old";
 import { StyleManager } from "./styles";
 
 function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {

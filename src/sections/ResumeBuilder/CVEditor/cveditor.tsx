@@ -3,7 +3,6 @@ import { CV, CVSection, Link } from "job-tool-shared-types";
 import * as UI from "./cv_components"
 import ItemBucket from "../../../components/dnd/Bucket";
 import { BucketTypeNames } from "../../../components/dnd/types";
-// import { useStyleStore } from "./styles_old";
 import { StyleManager } from "./styles";
 
 function CVEditor(props: {
