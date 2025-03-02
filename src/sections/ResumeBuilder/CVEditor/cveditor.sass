@@ -1,4 +1,5 @@
 // PAGE RELATED:
+// TODO: decouple these
 $base-font-size: 0.26cqw
 $bullet-point-gap:      calc(3 * $base-font-size)
 $experiences-gap:       calc(5 * $base-font-size)
@@ -19,7 +20,6 @@ $sections_row_gap:      calc(5 * $base-font-size)
 
 #cv-editor
     height: 100% // take up the whole page
-    // padding: $page-padding-top  $page-padding-sides
     color: black
     font-family: 'Arial Narrow Bold', sans-serif
     overflow: hidden
@@ -31,10 +31,8 @@ $sections_row_gap:      calc(5 * $base-font-size)
     .section
         display: flex
         flex-direction: column
-        // row-gap: $sec-row-gap
         .sec-head
             display: flex
-            // gap: $sec-head-line-gap
             & > :first-child
                 width: min-content
             & > :last-child
@@ -51,9 +49,6 @@ $sections_row_gap:      calc(5 * $base-font-size)
                 .hi-row-1, .hi-row-2
                     display: flex
                     justify-content: space-between
-            // second child
-            .exp-content
-                // padding-left: $exp-indent
 
 
 .divider
@@ -74,10 +69,8 @@ $sections_row_gap:      calc(5 * $base-font-size)
 .sec-head
     font-weight: bold
 
-hr
-    // HORIZONTAL LINE ACROSS CENTER OF DIV
+hr // HORIZONTAL LINE ACROSS CENTER OF DIV
     border: none
-    // height: $sec-head-line-height
     border-bottom: solid black
     align-self: center
 
@@ -105,7 +98,6 @@ hr
 .link
     display: flex
     white-space: nowrap
-    // gap: $link-col-gap
     text-decoration: none
     color: black
 
@@ -113,12 +105,10 @@ hr
 
 #full-name
     text-align: center
-    // font-size: $name-font
     white-space: nowrap
     font-weight: bolder
 
 #link-list
-    // font-size: $p-font
     display: flex
     justify-content: center
     gap: 1em
