@@ -7,9 +7,13 @@ import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
 import { BucketTypeNames, DynamicComponent } from "../../../components/dnd/types";
-import { Styles } from "./styles";
+// import { useStyleStore } from "./styles_old";
+import { StyleManager } from "./styles";
 
 function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
+
+	// const Styles = useStyleStore().getComputedStyles();
+	const Styles = StyleManager.getAll();
 
 	const onItemUpdate = (i: number, newVal: any) => {
 		const new_items = [...props.obj.items];
@@ -96,6 +100,10 @@ function ExperienceUI(props: {
 	onUpdate?: (newObj: any)=>void
 	disableBucketFeatures?: boolean
 }) {
+
+	// const Styles = useStyleStore().getComputedStyles();
+	const Styles = StyleManager.getAll();
+
 
 	const handleUpdate = (field: keyof Experience, val: any) => {
 		props.onUpdate?.({
@@ -193,17 +201,20 @@ function ProjectUI(props: {
 	disableBucketFeatures?: boolean;
 }) {
 
+	// const Styles = useStyleStore().getComputedStyles();
+	const Styles = StyleManager.getAll();
+
 	const handleUpdate = (field: keyof Experience, val: any) => {
 		props.onUpdate?.({
 			...props.obj,
 			[field]: val
-		});
+		})
 	};
 
 	const handleItemChange = (i: number, newVal: any) => {
-		const new_description = [...props.obj.description];
-		new_description[i] = newVal;
-		handleUpdate('description', new_description);
+		const new_description = [...props.obj.description]
+		new_description[i] = newVal
+		handleUpdate('description', new_description)
 	};
 
 	const onBucketUpdate = (newVals: any[]) => {
@@ -212,7 +223,7 @@ function ProjectUI(props: {
 
 	const data = props.obj;
 
-	if (!data) return <div>No project data</div>;
+	if (!data) return <div>No project data</div>
 
 	const bucket_items = data.description.map((item: string, i: number)=>(
 		<li key={i}>
@@ -243,7 +254,7 @@ function ProjectUI(props: {
 				</div>
 			</div>
 			{/* ROW 2 */}
-			<div className="exp-content">
+			<div className="exp-content" style={{paddingLeft: Styles.exp_indent}}>
 				<ul>
 					{props.disableBucketFeatures ? bucket_items : (
 						<ItemBucket
@@ -309,6 +320,8 @@ function DateUI(props: { obj: DateRange, onUpdate?: any }) {
 }
 
 function LinkUI(props: Link) {
+	// const Styles = useStyleStore().getComputedStyles();
+	const Styles = StyleManager.getAll();
 	return (
 		<a className="link" style={{gap: Styles.link_col_gap}} href={props.url}>
 			<i className={props.icon} />

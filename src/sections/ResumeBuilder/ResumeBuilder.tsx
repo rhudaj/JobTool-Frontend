@@ -19,6 +19,7 @@ import { useCvsStore, save2backend as saveCv2backend } from "./useCVs";
 import { useCvInfoStore } from "./useCVInfo";
 import { useShallow } from 'zustand/react/shallow'
 import SavedCVsUI from "./savedCVs/savedCVs";
+import { StyleManager } from "./CVEditor/styles";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 
@@ -161,6 +162,31 @@ const FindReplaceForm = (props: { cb: (find: string, replace: string) => void })
     );
 };
 
+const StylesForm = () => {
+
+    const handleUpdate = (key: string, val: number) => {
+        console.log(`(Styles) Updating ${key} to ${val}`);
+        StyleManager.set(key as any, val);
+    };
+
+    return (
+        <form className="popup-content" id="styles-form">
+            {
+                Object.entries(StyleManager.getAll()).map(([key, val]) => (
+                    <div key={key}>
+                        <p>{key}</p>
+                        <input 
+                            type="number"
+                            defaultValue={StyleManager.styles[key]}
+                            onBlur={(e) => handleUpdate(key, Number(e.target.value))}
+                        />
+                    </div>
+                ))
+            }
+        </form>
+    )
+};
+
 // If TEST_MODE is enabled
 const SaveTrainingExampleForm = (props: { onSave: (job: string) => void }) => {
     const [job, setJob] = useState<string>(null);
@@ -270,20 +296,22 @@ function ResumeBuilder() {
     };
 
     // ref's to popups
-    const exportPopup = usePopup((
+    const exportPopup = usePopup(
         <div className="popup-content export-popup">
             <h2>Export As</h2>
             <button onClick={CONTROLS.popups.onPDFClicked}>PDF</button>
             <button onClick={CONTROLS.popups.onJsonClicked}>JSON</button>
         </div>
-    ));
-    const savePopup = usePopup((
+    )
+
+    const savePopup = usePopup(
         <SaveForm
             name={cur_cv?.name}
             tags={cur_cv?.tags}
             onSave={CONTROLS.popups.onSaveFormSubmit}
         />
-    ))
+    )
+
     const importPopup = usePopup(
         <div className="popup-content" id="import-popup">
             <ImportForm
@@ -291,15 +319,19 @@ function ResumeBuilder() {
             />
         </div>
     )
+
     const deletePopup = usePopup(
         <div className="popup-content">
             <p>Are you sure you want to delete?</p>
             <button onClick={CONTROLS.popups.onDeleteCV}>Yes</button>
         </div>
     )
+
     const findReplacePopup = usePopup(
         <FindReplaceForm cb={CONTROLS.settings.onFindAndReplace} />
     )
+
+    const updateStylesPopup = usePopup(<StylesForm/>)
 
     // ---------------- VIEW ----------------
 
@@ -313,6 +345,7 @@ function ResumeBuilder() {
                 importPopup.PopupComponent,
                 deletePopup.PopupComponent,
                 findReplacePopup.PopupComponent,
+                updateStylesPopup.PopupComponent,
             ]}
             {/* ------------ VIEW SAVED CVs ------------ */}
             <SubSection id="ss-named-cvs" heading="My Resumes">
@@ -340,6 +373,7 @@ function ResumeBuilder() {
                     <button onClick={exportPopup.open}>Export</button>
                     <button onClick={deletePopup.open}>Delete</button>
                     <button onClick={findReplacePopup.open}>Find/Replace</button>
+                    <button onClick={updateStylesPopup.open}>Styles</button>
                     {USE_BACKEND && (
                         <>
                             <button onClick={savePopup.open}>

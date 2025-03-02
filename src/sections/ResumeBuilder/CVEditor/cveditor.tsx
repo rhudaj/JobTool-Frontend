@@ -3,12 +3,16 @@ import { CV, CVSection, Link } from "job-tool-shared-types";
 import * as UI from "./cv_components"
 import ItemBucket from "../../../components/dnd/Bucket";
 import { BucketTypeNames } from "../../../components/dnd/types";
-import { Styles as S } from "./styles";
+// import { useStyleStore } from "./styles_old";
+import { StyleManager } from "./styles";
 
 function CVEditor(props: {
 	cv: CV,
 	onUpdate?: (cv: CV) => void
 }) {
+
+	// const S = useStyleStore().getComputedStyles();
+	const S = StyleManager.getAll();
 
 	const onSectionUpdate = (idx: number, section: CVSection) => {
 		const new_sections = [...props.cv.sections];
