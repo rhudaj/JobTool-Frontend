@@ -1,5 +1,5 @@
 import './popup.sass'
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, ReactNode, useRef } from "react";
 import { createPortal } from "react-dom";
 
 interface PopupProps {
@@ -8,19 +8,6 @@ interface PopupProps {
 }
 
 const PopupUI = ({ onClose, children }: PopupProps) => {
-    // Close on Escape key
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
-                onClose();
-            }
-        };
-        document.addEventListener("keydown", handleKeyDown);
-        return () => {
-            document.removeEventListener("keydown", handleKeyDown);
-        };
-    }, [onClose]);
-
     return createPortal(
         <div className="popup-overlay">
             <div className="popup-div">
@@ -32,10 +19,15 @@ const PopupUI = ({ onClose, children }: PopupProps) => {
     );
 };
 
-export const usePopup = () => {
-    const [popup, setPopup] = useState<ReactNode | null>(null);
+export const usePopup = (content?: ReactNode) => {
+    const [popup, setPopup] = useState<ReactNode>(null);
+    const contentRef = useRef(content);
 
-    const open = (content: ReactNode) => {
+    const open = (content?: ReactNode|any) => {
+        // If they passed a valid react component, use that instead
+        if(content && !content.$$typeof) {
+            content = contentRef.current
+        }
         console.log("opening popup...")
         setPopup(
             <PopupUI onClose={close}>{content}</PopupUI>

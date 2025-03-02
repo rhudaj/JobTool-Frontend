@@ -201,15 +201,6 @@ function ResumeBuilder() {
 
     const saveAsPDF = useComponent2PDF("cv-page");
 
-    // ref's to popups
-    const exportPopup = usePopup();
-    const savePopup = usePopup();
-    const importPopup = usePopup();
-    const deletePopup = usePopup();
-    const findReplacePopup = usePopup();
-
-    // ---------------- CONTROLS ----------------
-
     const CONTROLS = {
         popups: {
             onPDFClicked: () => {
@@ -249,7 +240,7 @@ function ResumeBuilder() {
                 const cv = JSON.parse(json_str);
                 cvsState.add(cv);
             },
-            
+
             onDeleteCV: () => {
                 cvsState.delCur(); // NOTE: only deletes locally
                 deletePopup.close();
@@ -278,41 +269,39 @@ function ResumeBuilder() {
         }
     };
 
-    // ---------------- VIEW ----------------
-
-    const popup_content = {
-        export: (
-            <div className="popup-content export-popup">
-                <h2>Export As</h2>
-                <button onClick={CONTROLS.popups.onPDFClicked}>PDF</button>
-                <button onClick={CONTROLS.popups.onJsonClicked}>JSON</button>
-            </div>
-        ),
-        save: (
-            <SaveForm
-                name={cur_cv?.name}
-                tags={cur_cv?.tags}
-                onSave={CONTROLS.popups.onSaveFormSubmit}
+    // ref's to popups
+    const exportPopup = usePopup((
+        <div className="popup-content export-popup">
+            <h2>Export As</h2>
+            <button onClick={CONTROLS.popups.onPDFClicked}>PDF</button>
+            <button onClick={CONTROLS.popups.onJsonClicked}>JSON</button>
+        </div>
+    ));
+    const savePopup = usePopup((
+        <SaveForm
+            name={cur_cv?.name}
+            tags={cur_cv?.tags}
+            onSave={CONTROLS.popups.onSaveFormSubmit}
+        />
+    ))
+    const importPopup = usePopup(
+        <div className="popup-content" id="import-popup">
+            <ImportForm
+                onComplete={CONTROLS.settings.onImportFormComplete}
             />
-        ),
-        import: (
-            <div className="popup-content" id="import-popup">
-                <ImportForm
-                    onComplete={CONTROLS.settings.onImportFormComplete}
-                />
-            </div>
-        ),
-        delete: (
-            <div className="popup-content">
-                <p>Are you sure you want to delete?</p>
-                <button onClick={CONTROLS.popups.onDeleteCV}>Yes</button>
-            </div>
-        ),
+        </div>
+    )
+    const deletePopup = usePopup(
+        <div className="popup-content">
+            <p>Are you sure you want to delete?</p>
+            <button onClick={CONTROLS.popups.onDeleteCV}>Yes</button>
+        </div>
+    )
+    const findReplacePopup = usePopup(
+        <FindReplaceForm cb={CONTROLS.settings.onFindAndReplace} />
+    )
 
-        findReplace: (
-            <FindReplaceForm cb={CONTROLS.settings.onFindAndReplace} />
-        ),
-    };
+    // ---------------- VIEW ----------------
 
     if ( !cvsState.status || !cvInfoState.status ) return null;
     return (
@@ -328,7 +317,7 @@ function ResumeBuilder() {
             {/* ------------ VIEW SAVED CVs ------------ */}
             <SubSection id="ss-named-cvs" heading="My Resumes">
                 <div id="named-cvs-controls">
-                    <div onClick={()=>importPopup.open(popup_content.import)}>+</div>
+                    <div onClick={importPopup.open}>+</div>
                 </div>
                 <SavedCVsUI />
             </SubSection>
@@ -348,12 +337,12 @@ function ResumeBuilder() {
                     {cur_cv?.tags?.join(", ")}
                 </div>
                 <div className="export-container">
-                    <button onClick={()=>exportPopup.open(popup_content.export)}>Export</button>
-                    <button onClick={()=>deletePopup.open(popup_content.delete)}>Delete</button>
-                    <button onClick={()=>findReplacePopup.open(popup_content.findReplace)}>Find/Replace</button>
+                    <button onClick={exportPopup.open}>Export</button>
+                    <button onClick={deletePopup.open}>Delete</button>
+                    <button onClick={findReplacePopup.open}>Find/Replace</button>
                     {USE_BACKEND && (
                         <>
-                            <button onClick={()=>savePopup.open(popup_content.save)}>
+                            <button onClick={savePopup.open}>
                                 Save
                             </button>
                         </>
