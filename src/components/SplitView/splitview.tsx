@@ -1,8 +1,7 @@
 import { ReactElement, useRef, useState } from "react";
 import "./splitview.sass"
-import { joinClassNames } from "../../util/joinClassNames";
 
-function SplitView(props: {
+export function SplitView(props: {
     children: [ReactElement, ReactElement]
 }) {
     const bounds_ref = useRef(null);
@@ -59,5 +58,3 @@ function SplitView(props: {
         </div>
     );
 };
-
-export default SplitView;

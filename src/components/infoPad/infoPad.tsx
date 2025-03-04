@@ -56,7 +56,7 @@ const Sections2Info = (sections: { secName: string; items: VersionedItem<any>[] 
 };
 
 // MAIN COMPONENT
-function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void }) {
+export function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void }) {
 
     // ----------------- STATE -----------------
 
@@ -114,5 +114,3 @@ function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void }) {
         </div>
     )
 };
-
-export default InfoPad;

@@ -1,16 +1,19 @@
 import "./resumebuilder.sass";
-import { useCallback, useEffect, useMemo } from "react";
-import Section from "../../components/Section/Section";
+import { useEffect } from "react";
+// import Section from "../../components/Section/Section";
 import { NamedCV } from "job-tool-shared-types";
-import PrintablePage from "../../components/PagePrint/pageprint";
-import useComponent2PDF from "../../hooks/component2pdf";
-import InfoPad from "../../components/infoPad/infoPad";
+// import PrintablePage from "../../components/PrintablePage/PrintablePage";
+import { useComponent2PDF } from "../../hooks";
+// import InfoPad from "../../components/infoPad/infoPad";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import SplitView from "../../components/SplitView/splitview";
+// import SplitView from "../../components/SplitView/splitview";
 import CVEditor from "./CVEditor/cveditor";
 import * as util from "../../util/fileInOut";
-import SubSection from "../../components/Section/SubSection";
+// import SubSection from "../../components/Section/SubSection";
+
+import { Section, SubSection, SplitView, InfoPad, PrintablePage } from "../../components"
+
 import { usePopup } from "../../hooks/popup";
 import { useCvsStore, save2backend as saveCv2backend } from "./useCVs";
 import { useCvInfoStore } from "./useCVInfo";

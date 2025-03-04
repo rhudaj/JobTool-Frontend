@@ -1,10 +1,10 @@
-import useLogger from "./logger";
+import { useLogger } from "./logger";
 
 /**
  *  Print a react component as a pdf
  * @param element_id of the react component you wish to print as pdf
  */
-const useComponent2PDF = (element_id: string) => {
+export const useComponent2PDF = (element_id: string) => {
 
     const [ log, warn, error ] = useLogger("component2pdf\n\t");
 
@@ -57,6 +57,3 @@ const useComponent2PDF = (element_id: string) => {
 
     return saveAsPDF
 };
-
-
-export default useComponent2PDF;

@@ -1,8 +1,7 @@
 import "./jobanalyze.sass"
-import { JobInfo, NamedCV } from "job-tool-shared-types";
+import { NamedCV } from "job-tool-shared-types";
 import JIDisplay from "./JIDisplay/JIDisplay";
-import Section from "../../components/Section/Section";
-import SplitView from "../../components/SplitView/splitview";
+import { Section, SplitView }  from "../../components";
 import BackendAPI from "../../backend_api";
 import { useEffect, useRef, useState } from "react";
 

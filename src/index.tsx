@@ -1,22 +1,20 @@
 import "./index.sass";
 import ReactDOM from "react-dom/client";
-import ResumeBuilder from "./sections/ResumeBuilder/ResumeBuilder";
-import CLBuilder from "./sections/CLBuilder/CoverLetterBuilder";
-import JobAnalyze from "./sections/JobAnalyze/JobAnalyze";
+import * as Sections from "./sections";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
 
 const tabs = [
     {
         name: "Resume Builder",
-        content: <ResumeBuilder/>,
+        content: <Sections.ResumeBuilder/>,
     },
-    {
-        name: "Letter",
-        content: <CLBuilder/>,
-    },
+    // {
+    //     name: "Letter",
+    //     content: <Sections.CLBuilder/>,
+    // },
     {
         name: "Job Analyze",
-        content: <JobAnalyze/>
+        content: <Sections.JobAnalyze/>
     },
 ];
 

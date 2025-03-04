@@ -1,5 +1,5 @@
 import "./cleditor.sass"
-import { useEffect, useReducer } from "react";
+import { useEffect } from "react";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { useImmer } from "use-immer";
 import { BucketTypeNames, DynamicComponent, Item } from "../../../components/dnd/types";

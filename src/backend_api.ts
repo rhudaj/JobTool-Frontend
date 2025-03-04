@@ -1,4 +1,4 @@
-import  useLogger  from "./hooks/logger";
+import { useLogger } from "./hooks/logger";
 
 const TEST = process.env.REACT_APP_TEST_MODE === "1"
 

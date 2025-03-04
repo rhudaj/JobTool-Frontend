@@ -1,7 +1,7 @@
 import React from "react";
 import "./A4-page.scss"
 
-function PrintablePage(props: {
+export function PrintablePage(props: {
     children: React.ReactElement,
     page_id: string,
 }) {
@@ -14,5 +14,3 @@ function PrintablePage(props: {
         </div>
     );
 };
-
-export default PrintablePage;

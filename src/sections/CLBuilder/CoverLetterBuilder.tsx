@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
 import BackendAPI from "../../backend_api";
-import Section from "../../components/Section/Section";
 import { DndProvider } from "react-dnd";
-import SplitView from "../../components/SplitView/splitview";
-import PrintablePage from "../../components/PagePrint/pageprint";
 import CLEditor from "./CLEditor/cleditor";
-import InfoPad from "../../components/infoPad/infoPad";
+import { Section, PrintablePage, InfoPad, SplitView } from "../../components";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import useComponent2PDF from "../../hooks/component2pdf";
+import { useComponent2PDF } from "../../hooks";
 import { usePopup } from "../../hooks/popup";
 
 const JobPopup = (props: {
