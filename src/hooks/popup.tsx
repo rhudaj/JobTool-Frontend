@@ -51,5 +51,5 @@ export const usePopup = (title?: string, content?: ReactNode) => {
         setPopup(null);
     };
 
-    return { open, close, PopupComponent: popup };
+    return { open, close, component: popup };
 };

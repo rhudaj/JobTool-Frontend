@@ -256,7 +256,7 @@ export function VersionedItemUI(props: {
 
     return (
         <div className="versioned-item-container">
-            {editNewItemPopup.PopupComponent}
+            {editNewItemPopup.component}
             {/* CONTROLS ARE FLOATING TO THE LEFT (NOT IN THE LAYOUT) */}
             <ControlsBox
                 id="version-controls"

@@ -87,7 +87,7 @@ function CLBuilder(props: {}) {
 
     return (
         <Section id="section-cl" heading="Cover Letter">
-            {jobPopup.PopupComponent}
+            {jobPopup.component}
 
             {/* CONTROLS --------------------------- */}
 

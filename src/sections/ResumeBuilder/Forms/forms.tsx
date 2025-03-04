@@ -5,6 +5,8 @@ import { useImmer } from "use-immer";
 import { NamedCV } from "job-tool-shared-types";
 import * as util from "../../../util/fileInOut";
 import { StyleManager } from "../CVEditor/styles";
+import { Field, Fieldset, Input, Label, Legend, Select, Textarea } from '@headlessui/react'
+
 import { useForm, SubmitHandler } from "react-hook-form"
 
 export const SaveForm = (props: {
@@ -123,20 +125,31 @@ export const ImportForm = (props: { onComplete: (ncv: NamedCV) => void }) => {
     );
 };
 
-export const FindReplaceForm = (props: { cb: (find: string, replace: string) => void }) => {
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const form = e.target as HTMLFormElement;
-        const find = (form.elements.namedItem("find") as HTMLInputElement).value;
-        const replace = (form.elements.namedItem("replace") as HTMLInputElement).value;
-        props.cb(find, replace);
-    };
+
+
+interface FindReplaceFormInput {
+    find: string
+    replace: string
+}
+export const FindReplaceForm = (props: { cb: (data: FindReplaceFormInput) => void }) => {
+
+    const {
+        register,
+        handleSubmit, // validates input before calling `onSubmit`
+        formState: { errors },
+    } = useForm<FindReplaceFormInput>()
+    const onSubmit: SubmitHandler<FindReplaceFormInput> = props.cb
 
     return (
-        <form className="popup-content" id="find-replace" onSubmit={handleSubmit}>
-            <p>Find and Replace</p>
-            <input type="text" name="find" placeholder="find" />
-            <input type="text" name="replace" placeholder="replace" />
+        <form className="popup-content" id="find-replace" onSubmit={handleSubmit(onSubmit)}>
+            {/* FIND TEXT */}
+            <input type="text" placeholder="find" {...register("find", { required: true })} />
+            {errors.find && <span>field required</span>}
+
+            {/* REPLACE TEXT */}
+            <input type="text" placeholder="replace" {...register("replace", { required: true })} />
+            {errors.replace && <span>field required</span>}
+
             <button type="submit">Go</button>
         </form>
     );

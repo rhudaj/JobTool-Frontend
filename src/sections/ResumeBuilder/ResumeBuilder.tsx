@@ -1,5 +1,5 @@
 import "./resumebuilder.sass";
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import Section from "../../components/Section/Section";
 import { NamedCV } from "job-tool-shared-types";
 import PrintablePage from "../../components/PagePrint/pageprint";
@@ -18,6 +18,7 @@ import { useShallow } from 'zustand/react/shallow'
 import SavedCVsUI from "./savedCVs/savedCVs";
 import { Button } from '@headlessui/react'
 import { ImportForm, SaveForm, FindReplaceForm, StylesForm } from "./Forms/forms";
+import { bind } from "lodash";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 
@@ -37,6 +38,23 @@ function ResumeBuilder() {
     }, []);
 
     const saveAsPDF = useComponent2PDF("cv-page");
+
+    // const onSaveFormSubmit = useCallback((name: string, tags: string[]) => {
+    //     // first check that the cv has actually changed!
+    //     if (!cvsState.trackMods[cvsState.curIdx]) {
+    //         alert("No changes have been made to the CV!");
+    //         return;
+    //     }
+    //     // if it has, check wether new/update
+    //     const overwrite = name === cur_cv.name;
+    //     saveCv2backend({
+    //         name: name,
+    //         tags: tags,
+    //         data: cur_cv.data,
+    //     }, overwrite)
+    //     savePopup.close();
+
+    // }, [cvsState, cur_cv]);
 
     const CONTROLS = {
         popups: {
@@ -64,6 +82,7 @@ function ResumeBuilder() {
                     data: cur_cv.data,
                 }, overwrite)
                 savePopup.close();
+
             },
 
             onImportJsonFileChange: (
@@ -90,7 +109,8 @@ function ResumeBuilder() {
                 importPopup.close();
             },
 
-            onFindAndReplace: (find: string, replace: string) => {
+            onFindAndReplace: ({find, replace}) => {
+                console.log(`find: ${find}, replace: ${replace}`)
                 try {
                     cvsState.update(
                         JSON.parse(
@@ -99,7 +119,7 @@ function ResumeBuilder() {
                         )
                     );
                 } catch(err: unknown) {
-                    alert("Invalid find/replace strings");
+                    alert(`Invalid find/replace strings: ${err}`);
                 }
                 findReplacePopup.close();
             }
@@ -107,42 +127,48 @@ function ResumeBuilder() {
     };
 
     // ref's to popups
-    const exportPopup = usePopup("Export CV",
-        <div className="popup-content export-popup">
-            <h2>Export As</h2>
-            <button onClick={CONTROLS.popups.onPDFClicked}>PDF</button>
-            <button onClick={CONTROLS.popups.onJsonClicked}>JSON</button>
-        </div>
-    )
+    const exportPopup = usePopup("Export CV")
+    const savePopup = usePopup("Save CV")
+    const importPopup = usePopup("Import")
+    const deletePopup = usePopup("Delete CV")
+    const findReplacePopup = usePopup()
+    const updateStylesPopup = usePopup("Customize CV Style")
 
-    const savePopup = usePopup("Save CV",
-        <SaveForm
-            name={cur_cv?.name}
-            tags={cur_cv?.tags}
-            onSave={CONTROLS.popups.onSaveFormSubmit}
-        />
-    )
-
-    const importPopup = usePopup("Import",
-        <div className="popup-content" id="import-popup">
-            <ImportForm
-                onComplete={CONTROLS.settings.onImportFormComplete}
+    const POPUP_CONTENT = {
+        export: (
+            <div className="popup-content export-popup">
+                <h2>Export As</h2>
+                <button onClick={CONTROLS.popups.onPDFClicked}>PDF</button>
+                <button onClick={CONTROLS.popups.onJsonClicked}>JSON</button>
+            </div>
+        ),
+        save: (
+            <SaveForm
+                name={cur_cv?.name}
+                tags={cur_cv?.tags}
+                onSave={CONTROLS.popups.onSaveFormSubmit}
             />
-        </div>
-    )
-
-    const deletePopup = usePopup("Delete CV",
-        <div className="popup-content">
-            <p>Are you sure you want to delete?</p>
-            <button onClick={CONTROLS.popups.onDeleteCV}>Yes</button>
-        </div>
-    )
-
-    const findReplacePopup = usePopup("Find/Replace",
-        <FindReplaceForm cb={CONTROLS.settings.onFindAndReplace} />
-    )
-
-    const updateStylesPopup = usePopup("Customize CV Style", <StylesForm/>)
+        ),
+        import: (
+            <div className="popup-content" id="import-popup">
+                <ImportForm
+                    onComplete={CONTROLS.settings.onImportFormComplete}
+                />
+            </div>
+        ),
+        delete: (
+            <div className="popup-content">
+                <p>Are you sure you want to delete?</p>
+                <button onClick={CONTROLS.popups.onDeleteCV}>Yes</button>
+            </div>
+        ),
+        findReplace: (
+            <FindReplaceForm cb={CONTROLS.settings.onFindAndReplace} />
+        ),
+        styles: (
+            <StylesForm/>
+        )
+    }
 
     // ---------------- VIEW ----------------
 
@@ -152,17 +178,17 @@ function ResumeBuilder() {
 
             {/* ------------ POPUPS ------------ */}
             {[
-                exportPopup.PopupComponent,
-                savePopup.PopupComponent,
-                importPopup.PopupComponent,
-                deletePopup.PopupComponent,
-                findReplacePopup.PopupComponent,
-                updateStylesPopup.PopupComponent,
+                exportPopup.component,
+                savePopup.component,
+                importPopup.component,
+                deletePopup.component,
+                findReplacePopup.component,
+                updateStylesPopup.component,
             ]}
             {/* ------------ VIEW SAVED CVs ------------ */}
             <SubSection id="ss-named-cvs" heading="My Resumes">
                 <SavedCVsUI />
-                <Button onClick={importPopup.open} style={{width: "min-content"}}>New</Button>
+                <Button onClick={()=>importPopup.open(POPUP_CONTENT.import)} style={{width: "min-content"}}>New</Button>
             </SubSection>
             {/* ------------ CUR CV INFO, SAVE/EXPORT BUTTONS ------------ */}
             <div id="display-info">
@@ -180,13 +206,13 @@ function ResumeBuilder() {
                     {cur_cv?.tags?.join(", ")}
                 </div>
                 <div className="export-container">
-                    <button onClick={exportPopup.open}>Export</button>
-                    <button onClick={deletePopup.open}>Delete</button>
-                    <button onClick={findReplacePopup.open}>Find/Replace</button>
-                    <button onClick={updateStylesPopup.open}>Styles</button>
+                    <button onClick={()=>exportPopup.open(POPUP_CONTENT.export)}>Export</button>
+                    <button onClick={()=>deletePopup.open(POPUP_CONTENT.delete)}>Delete</button>
+                    <button onClick={()=>findReplacePopup.open(POPUP_CONTENT.findReplace)}>Find/Replace</button>
+                    <button onClick={()=>updateStylesPopup.open(POPUP_CONTENT.styles)}>Styles</button>
                     {USE_BACKEND && (
                         <>
-                            <button onClick={savePopup.open}>
+                            <button onClick={()=>savePopup.open(POPUP_CONTENT.save)}>
                                 Save
                             </button>
                         </>
