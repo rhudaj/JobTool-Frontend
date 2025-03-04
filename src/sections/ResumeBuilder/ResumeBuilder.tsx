@@ -18,7 +18,6 @@ import { useShallow } from 'zustand/react/shallow'
 import SavedCVsUI from "./savedCVs/savedCVs";
 import { Button } from '@headlessui/react'
 import { ImportForm, SaveForm, FindReplaceForm, StylesForm } from "./Forms/forms";
-import { bind } from "lodash";
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 
@@ -105,6 +104,7 @@ function ResumeBuilder() {
         settings: {
 
             onImportFormComplete: (ncv: NamedCV) => {
+                console.log(`onImportFormComplete: ncv = `, ncv)
                 cvsState.add(ncv);
                 importPopup.close();
             },
@@ -151,9 +151,7 @@ function ResumeBuilder() {
         ),
         import: (
             <div className="popup-content" id="import-popup">
-                <ImportForm
-                    onComplete={CONTROLS.settings.onImportFormComplete}
-                />
+                <ImportForm cb={CONTROLS.settings.onImportFormComplete}/>
             </div>
         ),
         delete: (
@@ -187,8 +185,8 @@ function ResumeBuilder() {
             ]}
             {/* ------------ VIEW SAVED CVs ------------ */}
             <SubSection id="ss-named-cvs" heading="My Resumes">
-                <SavedCVsUI />
                 <Button onClick={()=>importPopup.open(POPUP_CONTENT.import)} style={{width: "min-content"}}>New</Button>
+                <SavedCVsUI />
             </SubSection>
             {/* ------------ CUR CV INFO, SAVE/EXPORT BUTTONS ------------ */}
             <div id="display-info">

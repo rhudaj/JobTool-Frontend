@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import TextEditDiv from "../../../components/TextEditDiv/texteditdiv";
 import TextItems from "../../../components/TextItems/TextItems";
-import { useImmer } from "use-immer";
 import { NamedCV } from "job-tool-shared-types";
-import * as util from "../../../util/fileInOut";
 import { StyleManager } from "../CVEditor/styles";
-import { Field, Fieldset, Input, Label, Legend, Select, Textarea } from '@headlessui/react'
 
 import { useForm, SubmitHandler } from "react-hook-form"
 
@@ -63,65 +60,53 @@ export const SaveForm = (props: {
     );
 };
 
-export const ImportForm = (props: { onComplete: (ncv: NamedCV) => void }) => {
-    const [ncv, setNCV] = useImmer<NamedCV>(null);
-    const [errMsg, setErrMsg] = useState("");
 
-    useEffect(() => {
-        if (!ncv) return;
-        console.log("ncv: ", ncv);
-    }, [ncv]);
+interface ImportForm {
+    name: string
+    pasted_text: string
+}
+export const ImportForm = (props: { cb: (ncv: NamedCV) => void }) => {
 
-    // only the data not a full NamedCV json
-    const onJsonFromText = (txt: string) => {
-        let parsed: any;
-        try {
-            parsed = JSON.parse(txt);
-        } catch (err: unknown) {
-            setErrMsg(String(err));
-            setNCV(null);
-            return;
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<ImportForm>()
+
+    const onSubmit: SubmitHandler<ImportForm> = (data) => {
+        console.log(`form data: `, data)
+        if(data.pasted_text) {
+            let parsed: any;
+            try {
+                parsed = JSON.parse(data.pasted_text);
+                props.cb({
+                    name: data.name,
+                    path: "/",
+                    data: parsed,
+                    tags: [],
+                })
+            } catch (err: unknown) {
+                console.log("Error with your pasted text!")
+            }
         }
-        setErrMsg("");
-        setNCV({
-            name: "untitled",
-            data: parsed,
-            tags: [],
-        });
-    };
-
-    const onImportNCVFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-        util.jsonFileImport(e, setNCV);
-    };
-
-    const onDoneClicked = () => {
-        props.onComplete(ncv);
-    };
+    }
 
     return (
-        <div className="popup-content" id="import-popup">
-            <p>Import from JSON</p>
-            <div>
-                <p>Copy and Paste</p>
-                <textarea
-                    className="json-paste-area"
-                    placeholder="paste json"
-                    onPaste={(e) =>
-                        onJsonFromText(e.clipboardData.getData("Text"))
-                    }
-                />
-                <p className="error-message">{errMsg}</p>
-            </div>
-            <div>
-                <p>Import File</p>
-                <input type="file" accept=".json" onChange={onImportNCVFile} />
-            </div>
-            <div>
-                <button disabled={ncv === null} onClick={onDoneClicked}>
-                    Done
-                </button>
-            </div>
-        </div>
+        <form className="popup-content" id="import-popup" onSubmit={handleSubmit(onSubmit)}>
+
+            <label>Copy/Paste</label>
+            <textarea
+                {...register("pasted_text", {required: true})}
+                className="json-paste-area"
+                placeholder="paste json"
+            />
+            {errors.pasted_text && <span>field required</span>}
+
+            <label>Name</label>
+            <input type="text" defaultValue="untitled" {...register("name", { required: true })}/>
+
+            <button type="submit">Done</button>
+        </form>
     );
 };
 
@@ -164,18 +149,16 @@ export const StylesForm = () => {
 
     return (
         <form className="popup-content" id="styles-form">
-            {
-                Object.entries(StyleManager.getAll()).map(([key, val]) => (
-                    <div key={key}>
-                        <p>{key}</p>
-                        <input
-                            type="number"
-                            defaultValue={StyleManager.styles[key]}
-                            onBlur={(e) => handleUpdate(key, Number(e.target.value))}
-                        />
-                    </div>
-                ))
-            }
+            {Object.entries(StyleManager.getAll()).map(([key, val]) => (
+                <>
+                    <label>{key}</label>
+                    <input
+                        type="number"
+                        defaultValue={StyleManager.styles[key]}
+                        onBlur={(e) => handleUpdate(key, Number(e.target.value))}
+                    />
+                </>
+            ))}
         </form>
     )
 };
