@@ -1,6 +1,11 @@
-html {
+:root {
     /* ALL rem UNITS IN THE APP ARE RELATIVE TO THE BELOW VALUE */
     font-size: 1px;
+}
+
+[id^="headlessui-"] {
+    /* NEEDED TO KEEP HEADLESS-UI COMPONENTS RELATIVE TO THIS SCALE AS WELL */
+    font-size: 16rem;
 }
 
 * {

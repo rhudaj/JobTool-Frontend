@@ -15,7 +15,7 @@ export function PopupExample(props: {
         <Dialog
             open={true}
             onClose={props.onClose}
-            style={{ position: 'relative', zIndex: 50, fontSize: '16rem' }}
+            style={{ position: 'relative', zIndex: 50 }}
         >
             {/* The backdrop, rendered as a fixed sibling to the panel container */}
             <DialogBackdrop style={{position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)"}} />

@@ -8,7 +8,7 @@ import CLEditor from "./CLEditor/cleditor";
 import InfoPad from "../../components/infoPad/infoPad";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import useComponent2PDF from "../../hooks/component2pdf";
-import { usePopup } from "../../hooks/Popup/popup";
+import { usePopup } from "../../hooks/popup";
 
 const JobPopup = (props: {
     onEnter: (result: string[]) => void;

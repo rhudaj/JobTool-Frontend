@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DynamicComponent, Item } from "../dnd/types";
 import { StandaloneDragItem } from '../dnd/BucketItem';
 import TextEditDiv from '../TextEditDiv/texteditdiv';
-import { usePopup } from '../../hooks/Popup/popup';
+import { usePopup } from '../../hooks/popup';
 import { useImmer } from 'use-immer';
 import { isEqual } from 'lodash';
 import { ControlsBox } from '../ControlsBox/ControlBox';

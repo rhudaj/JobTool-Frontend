@@ -13,13 +13,15 @@ import * as util from "../../util/fileInOut";
 import SubSection from "../../components/Section/SubSection";
 import TextEditDiv from "../../components/TextEditDiv/texteditdiv";
 import TextItems from "../../components/TextItems/TextItems";
-import { PopupExample, usePopup } from "../../hooks/Popup/popup";
+import { PopupExample, usePopup } from "../../hooks/popup";
 import { useImmer } from "use-immer";
 import { useCvsStore, save2backend as saveCv2backend } from "./useCVs";
 import { useCvInfoStore } from "./useCVInfo";
 import { useShallow } from 'zustand/react/shallow'
 import SavedCVsUI from "./savedCVs/savedCVs";
 import { StyleManager } from "./CVEditor/styles";
+
+import { Button } from '@headlessui/react'
 
 const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
 
@@ -350,10 +352,8 @@ function ResumeBuilder() {
             ]}
             {/* ------------ VIEW SAVED CVs ------------ */}
             <SubSection id="ss-named-cvs" heading="My Resumes">
-                <div id="named-cvs-controls">
-                    <div onClick={importPopup.open}>+</div>
-                </div>
                 <SavedCVsUI />
+                <Button onClick={importPopup.open} style={{width: "min-content"}}>New</Button>
             </SubSection>
             {/* ------------ CUR CV INFO, SAVE/EXPORT BUTTONS ------------ */}
             <div id="display-info">
