@@ -21,7 +21,7 @@ export class StyleManager {
 		page_padding_sides: 25,
 		page_padding_top: 20,
 		hr_line_width: 0.5,
-		exp_indent: 2.5,
+		exp_indent: 13,
 		link_col_gap: 3,
 		text_line_height: 7,
 		sec_row_gap: 6,

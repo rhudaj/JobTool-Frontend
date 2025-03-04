@@ -1,41 +1,53 @@
-import './popup.sass'
-import { useState, useEffect, ReactNode, useRef } from "react";
-import { createPortal } from "react-dom";
+import {
+    Dialog,
+    DialogBackdrop,
+    DialogPanel,
+    DialogTitle,
+} from "@headlessui/react";
+import { useState, ReactNode, useRef } from "react";
 
-interface PopupProps {
-    onClose: () => void;
-    children: ReactNode;
+export function PopupExample(props: {
+    onClose: () => void
+    children: ReactNode
+    title?: string
+}) {
+    return (
+        <Dialog
+            open={true}
+            onClose={props.onClose}
+            style={{ position: 'relative', zIndex: 50, fontSize: '16rem' }}
+        >
+            {/* The backdrop, rendered as a fixed sibling to the panel container */}
+            <DialogBackdrop style={{position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)"}} />
+
+            {/* Full-screen container to center the panel */}
+            <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+
+                {/* The actual dialog panel  */}
+                <DialogPanel style={{ padding: '2em', backgroundColor: 'white', border: '1rem solid' }}>
+                    <DialogTitle style={{ fontWeight: 'bold' }}>{props.title}</DialogTitle>
+                    {props.children}
+                </DialogPanel>
+            </div>
+        </Dialog>
+    );
 }
 
-const PopupUI = ({ onClose, children }: PopupProps) => {
-    return createPortal(
-        <div className="popup-overlay">
-            <div className="popup-div">
-                <button className="popup-close" onClick={onClose}>✖</button>
-                <div className="popup-content">{children}</div>
-            </div>
-        </div>,
-        document.body
-    );
-};
-
-export const usePopup = (content?: ReactNode) => {
+export const usePopup = (title?: string, content?: ReactNode) => {
     const [popup, setPopup] = useState<ReactNode>(null);
     const contentRef = useRef(content);
 
-    const open = (content?: ReactNode|any) => {
+    const open = (content?: ReactNode | any) => {
         // If they passed a valid react component, use that instead
-        if(content && !content.$$typeof) {
-            content = contentRef.current
-        }
-        console.log("opening popup...")
+        content = (content && !content.$$typeof) ? contentRef.current : content;
+        console.log("opening popup...");
         setPopup(
-            <PopupUI onClose={close}>{content}</PopupUI>
+            <PopupExample title={title} onClose={close}>{content}</PopupExample>
         );
     };
 
     const close = () => {
-        console.log("closing popup...")
+        console.log("closing popup...");
         setPopup(null);
     };
 

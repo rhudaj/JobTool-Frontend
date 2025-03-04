@@ -13,7 +13,7 @@ import * as util from "../../util/fileInOut";
 import SubSection from "../../components/Section/SubSection";
 import TextEditDiv from "../../components/TextEditDiv/texteditdiv";
 import TextItems from "../../components/TextItems/TextItems";
-import { usePopup } from "../../hooks/Popup/popup";
+import { PopupExample, usePopup } from "../../hooks/Popup/popup";
 import { useImmer } from "use-immer";
 import { useCvsStore, save2backend as saveCv2backend } from "./useCVs";
 import { useCvInfoStore } from "./useCVInfo";
@@ -175,7 +175,7 @@ const StylesForm = () => {
                 Object.entries(StyleManager.getAll()).map(([key, val]) => (
                     <div key={key}>
                         <p>{key}</p>
-                        <input 
+                        <input
                             type="number"
                             defaultValue={StyleManager.styles[key]}
                             onBlur={(e) => handleUpdate(key, Number(e.target.value))}
@@ -296,7 +296,7 @@ function ResumeBuilder() {
     };
 
     // ref's to popups
-    const exportPopup = usePopup(
+    const exportPopup = usePopup("Export CV",
         <div className="popup-content export-popup">
             <h2>Export As</h2>
             <button onClick={CONTROLS.popups.onPDFClicked}>PDF</button>
@@ -304,7 +304,7 @@ function ResumeBuilder() {
         </div>
     )
 
-    const savePopup = usePopup(
+    const savePopup = usePopup("Save CV",
         <SaveForm
             name={cur_cv?.name}
             tags={cur_cv?.tags}
@@ -312,7 +312,7 @@ function ResumeBuilder() {
         />
     )
 
-    const importPopup = usePopup(
+    const importPopup = usePopup("Import",
         <div className="popup-content" id="import-popup">
             <ImportForm
                 onComplete={CONTROLS.settings.onImportFormComplete}
@@ -320,24 +320,25 @@ function ResumeBuilder() {
         </div>
     )
 
-    const deletePopup = usePopup(
+    const deletePopup = usePopup("Delete CV",
         <div className="popup-content">
             <p>Are you sure you want to delete?</p>
             <button onClick={CONTROLS.popups.onDeleteCV}>Yes</button>
         </div>
     )
 
-    const findReplacePopup = usePopup(
+    const findReplacePopup = usePopup("Find/Replace",
         <FindReplaceForm cb={CONTROLS.settings.onFindAndReplace} />
     )
 
-    const updateStylesPopup = usePopup(<StylesForm/>)
+    const updateStylesPopup = usePopup("Customize CV Style", <StylesForm/>)
 
     // ---------------- VIEW ----------------
 
     if ( !cvsState.status || !cvInfoState.status ) return null;
     return (
         <Section id="section-cv" heading="Resume Builder">
+
             {/* ------------ POPUPS ------------ */}
             {[
                 exportPopup.PopupComponent,

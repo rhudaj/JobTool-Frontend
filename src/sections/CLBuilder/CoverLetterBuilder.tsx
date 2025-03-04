@@ -66,7 +66,7 @@ function CLBuilder(props: {}) {
     // ---------------- MODEL ----------------
 
     const [paragraphs, setParagraphs] = useState<string[]>([]);
-    const jobPopup = usePopup();
+    const jobPopup = usePopup("Generate Cover Letter",);
 
     const saveAsPDF = useComponent2PDF("cl-page");
 

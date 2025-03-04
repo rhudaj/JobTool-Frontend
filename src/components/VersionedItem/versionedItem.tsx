@@ -203,7 +203,7 @@ export function VersionedItemUI(props: {
         props.onUpdate?.({ ...props.obj, versions: state.versions });
     }, [state.versions]);
 
-    const editNewItemPopup = usePopup();
+    const editNewItemPopup = usePopup("Edit Item Version");
 
     // ----------------- CONTROLS -----------------
 
