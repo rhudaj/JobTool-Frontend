@@ -5,6 +5,8 @@ import { Item } from '../dnd/types';
 import { VersionedItemUI, VersionedItem } from "../VersionedItem/versionedItem"
 import { useImmer } from 'use-immer';
 import { isEqual } from 'lodash';
+import { useCvInfoStore } from '../../sections/ResumeBuilder/useCVInfo';
+import { useCvsStore } from '../../sections/ResumeBuilder/useCVs';
 
 // TODO: atm InfoPad does not work because it does not supply CVContext
 
@@ -16,7 +18,12 @@ export interface CVInfo {
     }
 }
 
-const Info2Sections = (info: CVInfo): {secName: string, items: VersionedItem[]}[] => (
+interface SectionOfVersionedItems {
+    secName: string;
+    items: VersionedItem[];
+}
+
+const Info2Sections = (info: CVInfo): SectionOfVersionedItems[] => (
     Object.entries(info)
     .map( ([ secName, secGroups ]) => ({
         secName: secName,
@@ -55,8 +62,35 @@ const Sections2Info = (sections: { secName: string; items: VersionedItem<any>[] 
     return info;
 };
 
+
+const useNcvsAsCVInfo = () => {
+    const ncvs = useCvsStore(s=>s.ncvs);
+    const cvInfo = React.useMemo(() => {
+        const sections: CVInfo = {}
+        ncvs.forEach(cv => {
+            const cv_name = cv.name
+            cv.data.sections.forEach(section => {
+                const section_name = section.name
+                sections[section_name] = sections[section_name] || {}
+                section.items.forEach(item => {
+                    let group_name = (section_name === "summary") ? "default" : item.title
+                    sections[section_name][group_name] = sections[section_name][group_name] || {}
+                    sections[section_name][group_name][cv_name] = item
+                })
+            })
+        })
+        return sections
+    }, [ncvs])
+
+    return cvInfo
+};
+
 // MAIN COMPONENT
 export function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void }) {
+
+    // ----------------- TEST -----------------
+
+    const test = useNcvsAsCVInfo()
 
     // ----------------- STATE -----------------
 
@@ -67,18 +101,19 @@ export function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void
 
     // Sync `sections` only when `info` changes, but don't overwrite user edits
     React.useEffect(() => {
+        console.log('test: ', test)
         setState(D=>{
-            D.sections = Info2Sections(props.info)
+            D.sections = Info2Sections(test)
             D.status = false
         })
-    }, [props.info])
+    }, [test])
 
     // Call `onUpdate` only when `sections` have been edited
-    React.useEffect(() => {
-        if (!state.status) return // not changed by user
-        console.debug('InfoPad: sections updated');
-        props.onUpdate( Sections2Info(state.sections) );
-    }, [state.sections]);
+    // React.useEffect(() => {
+    //     if (!state.status) return // not changed by user
+    //     console.debug('InfoPad: sections updated');
+    //     props.onUpdate( Sections2Info(state.sections) );
+    // }, [state.sections]);
 
 
     // ----------------- CONTROLS -----------------
@@ -92,7 +127,7 @@ export function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void
 
     // ----------------- VIEW -----------------
 
-    if (!state.sections) {
+    if (!state.sections || !test) {
         return <div id="info-pad">no CV info found</div>;
     }
     return (
