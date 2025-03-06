@@ -2,6 +2,7 @@
     "compilerOptions": {
         "target": "es2020",
         "lib": ["dom", "dom.iterable", "esnext"],
+        "types": ["vite/client"],
         "allowJs": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
@@ -15,5 +16,6 @@
         "noEmit": true,
         "jsx": "react-jsx"
     },
-    "include": ["src", "sharedTypes.ts"]
+    "include": ["src"],
+    "references": [{ "path": "./tsconfig.node.json" }]
 }

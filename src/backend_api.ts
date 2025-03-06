@@ -1,6 +1,6 @@
 import { useLogger } from "./hooks/logger";
 
-const TEST = process.env.REACT_APP_TEST_MODE === "1"
+const TEST = import.meta.env.VITE_TEST_MODE === "1"
 
 console.log("BackendAPI.tsx: TEST MODE IS", TEST ? "ON" : "OFF")
 

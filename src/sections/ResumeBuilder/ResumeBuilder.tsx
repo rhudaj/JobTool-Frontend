@@ -22,7 +22,7 @@ import SavedCVsUI from "./savedCVs/savedCVs";
 import { Button } from '@headlessui/react'
 import { ImportForm, SaveForm, FindReplaceForm, StylesForm } from "./Forms/forms";
 
-const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
+const USE_BACKEND = import.meta.env.VITE_USE_BACKEND === "1";
 
 function ResumeBuilder() {
 
