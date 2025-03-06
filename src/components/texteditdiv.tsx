@@ -1,6 +1,16 @@
 import React from "react";
-import "./texteditdiv.scss";
-import { joinClassNames } from "../../util/joinClassNames";
+import { joinClassNames } from "../util/joinClassNames";
+
+/*
+.text-edit-div {
+    min-width: 10rem;
+    &:hover:not(.editing) {
+        &:hover:not(.editing) {
+            outline: 1rem dashed blue;  // outline (not border) => prevent jitter
+        }
+    }
+}
+*/
 
 /**
  * @param tv standard text || html string
@@ -47,10 +57,14 @@ function TextEditDiv(props: {
 
     // ----------------- RENDER -----------------
 
-    const classNames = joinClassNames("text-edit-div", props.className, isEditing ? "editing" : "");
+    const classNames = joinClassNames(
+        props.className,
+        isEditing ? "outline-none" : "hover:outline-dashed hover:outline-blue"
+    );
 
     return (
         <div
+            title="text-edit-div"
             className={classNames}
             id={props.id}
             contentEditable={isEditing}

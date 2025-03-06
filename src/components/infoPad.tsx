@@ -1,14 +1,12 @@
-import './infoPad.sass';
 import React, { useCallback } from "react";
-import { InfoPadMap } from '../dnd/types';
-import { Item } from '../dnd/types';
-import { VersionedItemUI, VersionedItem } from "../VersionedItem/versionedItem"
+import { InfoPadMap } from './dnd/types';
+import { Item } from './dnd/types';
+import { VersionedItemUI, VersionedItem } from "./versionedItem"
 import { useImmer } from 'use-immer';
 import { isEqual } from 'lodash';
-import { useCvInfoStore } from '../../sections/ResumeBuilder/useCVInfo';
-import { useCvsStore } from '../../sections/ResumeBuilder/useCVs';
+import { useCvInfoStore } from '../sections/ResumeBuilder/useCVInfo';
+import { useCvsStore } from '../sections/ResumeBuilder/useCVs';
 
-// TODO: atm InfoPad does not work because it does not supply CVContext
 
 export interface CVInfo {
     [ secName: string ]: {                  // section name
@@ -115,7 +113,6 @@ export function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void
     //     props.onUpdate( Sections2Info(state.sections) );
     // }, [state.sections]);
 
-
     // ----------------- CONTROLS -----------------
 
     const onVersionedItemUpdate = (newVI: VersionedItem, sec_idx, item_idx) => {
@@ -131,13 +128,14 @@ export function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void
         return <div id="info-pad">no CV info found</div>;
     }
     return (
-        <div id="info-pad">
+        <div id="info-pad" className="flex flex-col gap-5 p-5 bg-white">
             {state.sections.map((sec, sec_idx: number) => (
-                <div key={sec_idx} className="info-pad-section">
-                    <h2>{sec.secName.toUpperCase()}</h2>
-                    <div className='section-items'>
+                <div key={sec_idx} title="info-pad-section" >
+                    <h2 className="mb-5 font-bold">{sec.secName.toUpperCase()}</h2>
+                    <div title='section-items' className="flex flex-col gap-5">
                         {sec.items.map((vi: VersionedItem, i: number) =>
                             <VersionedItemUI
+                                className="border-2 p-3 rounded-md"
                                 key={i}
                                 obj={vi}
                                 onUpdate={(newVI)=>onVersionedItemUpdate(newVI, sec_idx, i)}

@@ -1,14 +1,14 @@
-import "./Bucket.scss";
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import React, { useContext, useEffect, useReducer } from "react";
+import React, { useEffect, useReducer, JSX } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
-import { Item, DEFAULT_ITEM_TYPE, BucketTypes, Bucket } from "./types";
+import { Item, DEFAULT_ITEM_TYPE, BucketTypes } from "./types";
 import BucketItem from "./BucketItem";
-import { BucketAction, BucketContext, BucketActions, bucketReducer } from "./useBucket";
+import { BucketAction, BucketActions, bucketReducer } from "./useBucket";
 
 // Shows a gap between items when dragging over the bucket.
 function DropGap(props: { isActive: boolean }) {
-    return <div className="drop-gap" hidden={!props.isActive} />;
+    return <div className="border-2 border-solid border-red"
+    hidden={!props.isActive} />;
 }
 
 // Helpers to get the get the gap index from the item index
@@ -168,12 +168,10 @@ function ItemBucket(props: {
     if (!bucket?.items || props.children.length !== bucket.items.length)
         return null;
 
-    const classes = joinClassNames("bucket-wrapper", isHovered ? "hover" : "");
-
     return (
         <div
-            ref={dropRef}
-            className={classes}
+            ref={dropRef as any}
+            className={isHovered ? "border-dashed border-black" : ""}
             onMouseLeave={() => setHoveredGap(undefined)}
         >
             <div className={BucketTypes[props.type ?? bucket.id].layoutClass}>

@@ -1,5 +1,11 @@
 import { ReactElement, useRef, useState } from "react";
-import "./splitview.sass"
+
+/*
+.split-view
+    & .view
+        max-height: 100cqh
+        overflow-y: scroll
+*/
 
 export function SplitView(props: {
     children: [ReactElement, ReactElement]
@@ -47,14 +53,25 @@ export function SplitView(props: {
 
     // -------------- RENDER --------------
 
+    const view_style = "mh-[100cqh] overflow-y-scroll";
     const L_STYLE = { width: `${WRatio}%` };
     const R_STYLE = { width: `${100 - WRatio}%` };
 
     return (
-        <div className="split-view" ref={bounds_ref}>
-            {!hidden[0] && <div className="view left" style={L_STYLE}>{props.children[0]}</div>}
-            <div className="width-drag" onMouseDown={onMouseDown}>||</div>
-            {!hidden[1] && <div className="view right" style={R_STYLE}>{props.children[1]}</div>}
+        <div id="split-view" ref={bounds_ref} className="flex flex-row">
+            {!hidden[0] &&
+                <div id="lhs-view" className={view_style} style={L_STYLE}>
+                    {props.children[0]}
+                </div>
+            }
+            <div id="width-drag" onMouseDown={onMouseDown} className="w-3.5 text-center bg-gray-600 cursor-col-resize">
+                ||
+            </div>
+            {!hidden[1] &&
+                <div id="rhs-view" className={view_style} style={R_STYLE}>
+                    {props.children[1]}
+                </div>
+            }
         </div>
     );
 };

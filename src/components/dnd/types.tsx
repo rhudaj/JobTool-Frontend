@@ -1,6 +1,6 @@
 import { ExperienceUI, SectionUI, SummaryUI, ProjectUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
-import { VersionedItemUI } from "../VersionedItem/versionedItem";
-import TextEditDiv from "../TextEditDiv/texteditdiv";
+import { VersionedItemUI } from "../versionedItem";
+import TextEditDiv from "../texteditdiv";
 import "./types.scss";
 
 const DEFAULT_ITEM_TYPE = "DRAG-ITEM";

@@ -1,16 +1,10 @@
-import "./resumebuilder.sass";
 import { useEffect } from "react";
-// import Section from "../../components/Section/Section";
 import { NamedCV } from "job-tool-shared-types";
-// import PrintablePage from "../../components/PrintablePage/PrintablePage";
 import { useComponent2PDF } from "../../hooks";
-// import InfoPad from "../../components/infoPad/infoPad";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-// import SplitView from "../../components/SplitView/splitview";
 import CVEditor from "./CVEditor/cveditor";
 import * as util from "../../util/fileInOut";
-// import SubSection from "../../components/Section/SubSection";
 
 import { Section, SubSection, SplitView, InfoPad, PrintablePage } from "../../components"
 
@@ -21,6 +15,7 @@ import { useShallow } from 'zustand/react/shallow'
 import SavedCVsUI from "./savedCVs/savedCVs";
 import { Button } from '@headlessui/react'
 import { ImportForm, SaveForm, FindReplaceForm, StylesForm } from "./Forms/forms";
+import { CustomStyles } from "../../styles";
 
 const USE_BACKEND = import.meta.env.VITE_USE_BACKEND === "1";
 
@@ -40,23 +35,6 @@ function ResumeBuilder() {
     }, []);
 
     const saveAsPDF = useComponent2PDF("cv-page");
-
-    // const onSaveFormSubmit = useCallback((name: string, tags: string[]) => {
-    //     // first check that the cv has actually changed!
-    //     if (!cvsState.trackMods[cvsState.curIdx]) {
-    //         alert("No changes have been made to the CV!");
-    //         return;
-    //     }
-    //     // if it has, check wether new/update
-    //     const overwrite = name === cur_cv.name;
-    //     saveCv2backend({
-    //         name: name,
-    //         tags: tags,
-    //         data: cur_cv.data,
-    //     }, overwrite)
-    //     savePopup.close();
-
-    // }, [cvsState, cur_cv]);
 
     const CONTROLS = {
         popups: {
@@ -139,7 +117,7 @@ function ResumeBuilder() {
 
     const POPUP_CONTENT = {
         export: (
-            <div className="popup-content export-popup">
+            <div id="export-popup" className={CustomStyles.popup_content}>
                 <h2>Export As</h2>
                 <button onClick={CONTROLS.popups.onPDFClicked}>PDF</button>
                 <button onClick={CONTROLS.popups.onJsonClicked}>JSON</button>
@@ -153,12 +131,12 @@ function ResumeBuilder() {
             />
         ),
         import: (
-            <div className="popup-content" id="import-popup">
+            <div id="import-popup" className={CustomStyles.popup_content}>
                 <ImportForm cb={CONTROLS.settings.onImportFormComplete}/>
             </div>
         ),
         delete: (
-            <div className="popup-content">
+            <div className={CustomStyles.popup_content}>
                 <p>Are you sure you want to delete?</p>
                 <button onClick={CONTROLS.popups.onDeleteCV}>Yes</button>
             </div>
@@ -187,19 +165,17 @@ function ResumeBuilder() {
                 updateStylesPopup.component,
             ]}
             {/* ------------ VIEW SAVED CVs ------------ */}
-            <SubSection id="ss-named-cvs" heading="My Resumes">
+            <SubSection id="named-cvs" heading="Resumes">
                 <Button onClick={()=>importPopup.open(POPUP_CONTENT.import)} style={{width: "min-content"}}>New</Button>
                 <SavedCVsUI />
             </SubSection>
             {/* ------------ CUR CV INFO, SAVE/EXPORT BUTTONS ------------ */}
-            <div id="display-info">
+            <div id="display-info" className="flex justify-between p-4 border-3 ">
                 <div>
-                    <span className="descr">Name:</span>{" "}
+                    <span className="text-white">Name:</span>{" "}
                     {cur_cv?.name}
                     {cvsState.trackMods[cvsState.curIdx] && (
-                        <span className="is-modified-status">
-                            {"(modified)"}
-                        </span>
+                        <span className="text-darkgrey ml-2">{"(modified)"}</span>
                     )}
                 </div>
                 <div>

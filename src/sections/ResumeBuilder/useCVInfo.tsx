@@ -1,5 +1,5 @@
 import BackendAPI from "../../backend_api";
-import { CVInfo } from "../../components/infoPad/infoPad";
+import { CVInfo } from "../../components/infoPad";
 import { create } from "zustand";
 
 const USE_BACKEND = import.meta.env.VITE_USE_BACKEND === "1";

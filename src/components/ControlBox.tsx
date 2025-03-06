@@ -1,16 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { joinClassNames } from "../../util/joinClassNames";
-import "./ControlBox.sass"
-import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
-
+import "@fortawesome/fontawesome-free/css/all.min.css"; // icons
 
 interface IconControl {
     id?: string;
     icon_class?: string;
     title?: string;
-    disabled?: boolean
+    disabled?: boolean;
     [key: string]: any; // Allows any additional props (handlers, styles, etc.)
-};
+}
 
 export function ControlsBox(props: {
     id?: string;
@@ -18,23 +15,32 @@ export function ControlsBox(props: {
     controls: IconControl[];
     isVertical?: boolean;
 }) {
-
     const Orientation: React.CSSProperties = {
-        flexDirection: props.isVertical ? "column" : "row"
+        flexDirection: props.isVertical ? "column" : "row",
     };
 
     return (
-        <div className={joinClassNames(props.className, "controls-box")} id={props.id} style={Orientation}>
-            {props.controls.map(({ id, icon_class, title, disabled, ...handlers }) => (
-                disabled ? null :
-                    <i
-                        key={id} // static list
-                        id={id}
-                        className={joinClassNames("control-button", icon_class)}
-                        title={title}
-                        {...handlers}
-                    />
-            ))}
+        <div
+            title="controls-box"
+            id={props.id}
+            className={props.className + " absolute top-0 right-full flex"}
+            style={Orientation}
+        >
+            {props.controls.map(
+                ({ id, icon_class, title, disabled, ...handlers }) =>
+                    disabled ? null : (
+                        <i
+                            title={`control-button-${title}`}
+                            key={id}
+                            id={id}
+                            className={
+                                icon_class +
+                                " text-gray-500 p-2 cursor-pointer hover:text-black transform hover:scale-110 transition-all duration-300"
+                            }
+                            {...handlers}
+                        />
+                    )
+            )}
         </div>
     );
 }
@@ -63,21 +69,21 @@ export function useHoverBuffer(buffer: number) {
             event.clientY >= rect.top - buffer &&
             event.clientY <= rect.bottom + buffer;
         setIsHovered(insideParent || nearParent);
-    }
+    };
 
     const handleMouseEnter = () => {
         if (!ref.current) return;
         setNestedHovered(false); // reset
         ref.current.dispatchEvent(
-            new CustomEvent("nested-hover", { bubbles: true,  })
+            new CustomEvent("nested-hover", { bubbles: true })
         ); // Dispatch nested-hover when mouse enters
-    }
+    };
 
     const handleNestedHover = (event: Event) => {
         // Don't show controls when nested-hover event reaches this component
-        if (!ref.current || event.target === ref.current) return
+        if (!ref.current || event.target === ref.current) return;
         setNestedHovered(true);
-    }
+    };
 
     useEffect(() => {
         document.addEventListener("mousemove", handleMouseMove);

@@ -1,16 +1,16 @@
-import "./BucketItem.sass"
+// import "./BucketItem.sass"
 import { useDrag, useDrop } from "react-dnd";
 import React, { useContext } from "react";
 import { joinClassNames } from "../../util/joinClassNames";
 import { Item } from "./types";
 import { BucketItemContext } from "./Bucket";
-import { ControlsBox, useHoverBuffer } from "../ControlsBox/ControlBox";
+import { ControlsBox, useHoverBuffer } from "../ControlBox";
 
 /**
  * This item should only ever be rendered inside a Bucket component.
  * Because it requires the BucketContext to be present.
 */
-export default function BucketItem(props: { item: Item, children: JSX.Element }) {
+export default function BucketItem(props: { item: Item, children: React.ReactNode }) {
 
     // -------------------- STATE ---------------------
 
@@ -135,7 +135,7 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
 export function StandaloneDragItem(props: {
     item: Item,
     item_type: string,
-    children: JSX.Element,
+    children: React.ReactNode,
 }) {
 
     // -------------------- STATE ---------------------

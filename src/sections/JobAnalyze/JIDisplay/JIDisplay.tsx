@@ -2,7 +2,7 @@ import './JIDisplay.sass'
 import { useEffect, forwardRef, useImperativeHandle } from "react";
 import { SubSection } from "../../../components";
 import { useImmer } from 'use-immer';
-import TextEditDiv from '../../../components/TextEditDiv/texteditdiv';
+import TextEditDiv from '../../../components/texteditdiv';
 
 // TODO: fix the JobInfo interface in /shared.
 interface JobInfo2 {

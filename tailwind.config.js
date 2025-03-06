@@ -6,6 +6,9 @@ export default {
     ],
     theme: {
       extend: {},
+      colors: {
+        bggrey: 'rgb(123, 131, 138)'
+      }
     },
     plugins: [],
   }

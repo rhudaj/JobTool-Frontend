@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import TextEditDiv from "../../../components/TextEditDiv/texteditdiv";
+import TextEditDiv from "../../../components/texteditdiv";
 import TextItems from "../../../components/TextItems/TextItems";
 import { NamedCV } from "job-tool-shared-types";
 import { StyleManager } from "../CVEditor/styles";
 
 import { useForm, SubmitHandler } from "react-hook-form"
+import { CustomStyles } from "../../../styles";
 
 export const SaveForm = (props: {
     name: string;
@@ -92,7 +93,7 @@ export const ImportForm = (props: { cb: (ncv: NamedCV) => void }) => {
     }
 
     return (
-        <form className="popup-content" id="import-popup" onSubmit={handleSubmit(onSubmit)}>
+        <form className={CustomStyles.popup_content} id="import-form" onSubmit={handleSubmit(onSubmit)}>
 
             <label>Copy/Paste</label>
             <textarea
@@ -126,7 +127,7 @@ export const FindReplaceForm = (props: { cb: (data: FindReplaceFormInput) => voi
     const onSubmit: SubmitHandler<FindReplaceFormInput> = props.cb
 
     return (
-        <form className="popup-content" id="find-replace" onSubmit={handleSubmit(onSubmit)}>
+        <form className={CustomStyles.popup_content} id="find-replace" onSubmit={handleSubmit(onSubmit)}>
             {/* FIND TEXT */}
             <input type="text" placeholder="find" {...register("find", { required: true })} />
             {errors.find && <span>field required</span>}
@@ -148,7 +149,7 @@ export const StylesForm = () => {
     };
 
     return (
-        <form className="popup-content" id="styles-form">
+        <form id="styles-form" className={"flex flex-col w-100 mh-500 overflow-y-scroll"}>
             {Object.entries(StyleManager.getAll()).map(([key, val]) => (
                 <>
                     <label>{key}</label>
@@ -168,7 +169,7 @@ export const SaveTrainingExampleForm = (props: { onSave: (job: string) => void }
 
     const [job, setJob] = useState<string>(null);
     return (
-        <div className="popup-content">
+        <div className={CustomStyles.popup_content}>
             <p>Save Training Example</p>
             <textarea
                 className="job-paste-area"

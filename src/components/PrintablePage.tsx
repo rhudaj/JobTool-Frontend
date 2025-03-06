@@ -1,5 +1,4 @@
 import React from "react";
-import "./A4-page.scss"
 
 export function PrintablePage(props: {
     children: React.ReactElement,
@@ -7,8 +6,12 @@ export function PrintablePage(props: {
 }) {
     if (!props.children) return null;
     return (
-        <div className="page-container">
-            <div className="A4-page" id={props.page_id}>
+        <div id="page-container" className="flex justify-center">
+            <div
+                title="A4-page"
+                id={props.page_id}
+                className="[container-type:size] bg-white w-full h-auto aspect-[21/29.7]"
+            >
                 { props.children }
             </div>
         </div>

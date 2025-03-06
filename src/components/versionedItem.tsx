@@ -1,15 +1,13 @@
-import './versionedItem.sass'
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DynamicComponent, Item } from "../dnd/types";
-import { StandaloneDragItem } from '../dnd/BucketItem';
-import TextEditDiv from '../TextEditDiv/texteditdiv';
-import { usePopup } from '../../hooks/popup';
+import { DynamicComponent, Item } from "./dnd/types";
+import { StandaloneDragItem } from './dnd/BucketItem';
+import TextEditDiv from './texteditdiv';
+import { usePopup } from '../hooks/popup';
 import { useImmer } from 'use-immer';
 import { isEqual } from 'lodash';
-import { ControlsBox } from '../ControlsBox/ControlBox';
+import { ControlsBox } from './ControlBox';
 import { create } from "zustand";
 import { produce } from 'immer';
-import { is } from 'immer/dist/internal';
 
 export interface VersionedItem<T=any> {
     id: string,
@@ -39,7 +37,7 @@ function EditNewItem(props: {
 
     if(!value) return;
     return (
-        <div className='item-edit'>
+        <div className="flex flex-col gap-4 p-4">
             <div className='name-edit'>
                 <h3>Name:</h3>
                 <TextEditDiv tv={id} onUpdate={setId}/>
@@ -183,7 +181,8 @@ const useVersionStore = () =>
  */
 export function VersionedItemUI(props: {
     obj: VersionedItem,
-    onUpdate?: (newObj: VersionedItem<any>) => void;
+    onUpdate?: (newObj: VersionedItem<any>) => void,
+    className?: string,
 }) {
 
     // ----------------- STATE -----------------
@@ -242,9 +241,6 @@ export function VersionedItemUI(props: {
     // ----------------- RENDER -----------------
 
     if (!state.versions?.length) return <div>No versions</div>
-
-    // const _cur = state.versions[state.cur];
-
     if (!_cur) return <div>No current version</div>;
 
     const version_str = `${props.obj?.id}/${_cur?.id}`
@@ -255,7 +251,7 @@ export function VersionedItemUI(props: {
     }
 
     return (
-        <div className="versioned-item-container">
+        <div className={"relative " + props.className}>
             {editNewItemPopup.component}
             {/* CONTROLS ARE FLOATING TO THE LEFT (NOT IN THE LAYOUT) */}
             <ControlsBox
@@ -268,7 +264,7 @@ export function VersionedItemUI(props: {
                 ]}
             />
             {/* this text is also floating */}
-            <div className='version-id-container'>
+            <div title="id-container" className="absolute flex justify-end bottom-full w-full overflow-hidden">
                 <p>{version_str}</p>
             </div>
             <StandaloneDragItem item={dnd_item} item_type={props.obj.item_type} >
