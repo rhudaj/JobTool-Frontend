@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css"; // icons
+import { joinClassNames } from "../util/joinClassNames";
 
 interface IconControl {
     id?: string;
@@ -11,20 +12,24 @@ interface IconControl {
 
 export function ControlsBox(props: {
     id?: string;
-    className?: string;
+    placement: "top" | "bottom" | "left" | "right";
+    buttonClass?: string;
     controls: IconControl[];
     isVertical?: boolean;
 }) {
-    const Orientation: React.CSSProperties = {
+    const styles: React.CSSProperties = {
         flexDirection: props.isVertical ? "column" : "row",
-    };
+    }
+
+    if(props.placement === "left") styles.right = "100%"
+    else if (props.placement === "top") styles.left = 0
 
     return (
         <div
             title="controls-box"
             id={props.id}
-            className={props.className + " absolute top-0 right-full flex"}
-            style={Orientation}
+            className="absolute top-0 flex"
+            style={styles}
         >
             {props.controls.map(
                 ({ id, icon_class, title, disabled, ...handlers }) =>
@@ -34,8 +39,11 @@ export function ControlsBox(props: {
                             key={id}
                             id={id}
                             className={
-                                icon_class +
-                                " text-gray-500 p-2 cursor-pointer hover:text-black transform hover:scale-110 transition-all duration-300"
+                                joinClassNames(
+                                    icon_class,
+                                    props.buttonClass,
+                                    "text-gray-500 p-0.3 cursor-pointer hover:text-black transform hover:scale-110 transition-all duration-300"
+                                )
                             }
                             {...handlers}
                         />

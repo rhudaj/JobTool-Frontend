@@ -256,6 +256,7 @@ export function VersionedItemUI(props: {
             {/* CONTROLS ARE FLOATING TO THE LEFT (NOT IN THE LAYOUT) */}
             <ControlsBox
                 id="version-controls"
+                placement="left"
                 isVertical={true}
                 controls={[
                     { id: "edit", icon_class: "fa-solid fa-pen", onClick: openEditExistingPopup },

@@ -4,6 +4,8 @@ const BASE_SIZE = 0.26;
 type StyleKeys =
 	| "page_padding_sides"
 	| "page_padding_top"
+	| "experiences_gap"
+	| "bullet_point_gap"
 	| "hr_line_width"
 	| "exp_indent"
 	| "link_col_gap"
@@ -20,6 +22,8 @@ export class StyleManager {
 	static styles = {
 		page_padding_sides: 25,
 		page_padding_top: 20,
+		bullet_point_gap: 3,
+		experiences_gap: 5,
 		hr_line_width: 0.5,
 		exp_indent: 13,
 		link_col_gap: 3,

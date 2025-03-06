@@ -1,7 +1,7 @@
 import { ExperienceUI, SectionUI, SummaryUI, ProjectUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
 import { VersionedItemUI } from "../versionedItem";
 import TextEditDiv from "../texteditdiv";
-import "./types.scss";
+import { StyleManager } from "../../sections/ResumeBuilder/CVEditor/styles";
 
 const DEFAULT_ITEM_TYPE = "DRAG-ITEM";
 
@@ -17,7 +17,7 @@ interface Bucket<T=any> {
 
 interface BucketType {
     layoutClass?: string,
-    DisplayItem?: (props: { obj: any, onUpdate?: any }) => JSX.Element,
+    DisplayItem?: (props: { obj: any, onUpdate?: any }) => React.ReactNode,
 };
 
 /**
@@ -47,34 +47,34 @@ const BucketTypeNames = {
     CL_PARAGRAPHS: "cl_paragraphs",
     VERSIONED_ITEMS: "versioned_items",
 };
+
 const BucketTypes: { [key: string]: BucketType } = {
     "summary": {
         DisplayItem: SummaryUI,
     },
     "experiences": {
-        layoutClass:"experiences",
+        layoutClass: `grid gap-${StyleManager.get("experiences_gap")}`,
         DisplayItem: ExperienceUI
     },
     "projects": {
-        layoutClass:"experiences",
+        layoutClass: `grid gap-${StyleManager.get("experiences_gap")}`,
         DisplayItem: ProjectUI
     },
     "exp_points": {
-        layoutClass: "exp-points",
+        layoutClass: `flex flex-col gap-${StyleManager.get("bullet_point_gap")}`,
         DisplayItem: (props: {obj: string, onUpdate: any}) => (
             <li><TextEditDiv tv={props.obj} onUpdate={props.onUpdate} /></li>
         )
     },
     "cl_info_pad": {
-        layoutClass: "text-item-list",
+        layoutClass: `flex flex-row flex-wrap gap-2`,
         DisplayItem: (props: {obj: string}) => <div className="text-item">{props.obj}</div>
     },
     "sections": {
-        layoutClass: "sections",
+        layoutClass: `grid gap-${StyleManager.get("sec_row_gap")}`,
         DisplayItem: SectionUI
     },
     "cl_paragraphs": {
-        layoutClass: "cl-editor",
         DisplayItem: (props: { obj: string, onUpdate: any })=> <TextEditDiv tv={props.obj} onUpdate={props.onUpdate}/>
     }
 };
