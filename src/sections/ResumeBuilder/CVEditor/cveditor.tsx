@@ -10,7 +10,6 @@ function CVEditor(props: {
 	onUpdate?: (cv: CV) => void
 }) {
 
-	// const S = useStyleStore().getComputedStyles();
 	const S = StyleManager.getAll();
 
 	const onSectionUpdate = (idx: number, section: CVSection) => {
@@ -57,7 +56,6 @@ function CVEditor(props: {
 				onUpdate={onBucketUpdate}
 				addItemDisabled
 			>
-				{/* SECTIONS -------------------------------------- */}
 				{cv.sections.map((S: CVSection, i: number) =>
 					<UI.SectionUI
 						key={i}

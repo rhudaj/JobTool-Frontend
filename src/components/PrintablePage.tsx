@@ -6,7 +6,7 @@ export function PrintablePage(props: {
 }) {
     if (!props.children) return null;
     return (
-        <div id="page-container" className="flex justify-center">
+        <div title="page-container">
             <div
                 title="A4-page"
                 id={props.page_id}

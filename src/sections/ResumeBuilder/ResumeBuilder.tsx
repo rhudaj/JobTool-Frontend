@@ -12,7 +12,7 @@ import { usePopup } from "../../hooks/popup";
 import { useCvsStore, save2backend as saveCv2backend } from "./useCVs";
 import { useCvInfoStore } from "./useCVInfo";
 import { useShallow } from 'zustand/react/shallow'
-import SavedCVsUI from "./savedCVs/savedCVs";
+import SavedCVsUI from "./savedCVs";
 import { Button } from '@headlessui/react'
 import { ImportForm, SaveForm, FindReplaceForm, StylesForm } from "./Forms/forms";
 import { CustomStyles } from "../../styles";

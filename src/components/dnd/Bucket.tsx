@@ -1,6 +1,5 @@
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import React, { useEffect, useReducer, JSX } from "react";
-import { joinClassNames } from "../../util/joinClassNames";
 import { Item, DEFAULT_ITEM_TYPE, BucketTypes } from "./types";
 import BucketItem from "./BucketItem";
 import { BucketAction, BucketActions, bucketReducer } from "./useBucket";
@@ -170,11 +169,15 @@ function ItemBucket(props: {
 
     return (
         <div
+            title="bucket-dnd-wrapper"
             ref={dropRef as any}
             className={isHovered ? "border-dashed border-black" : ""}
             onMouseLeave={() => setHoveredGap(undefined)}
         >
-            <div className={BucketTypes[props.type ?? bucket.id].layoutClass}>
+            <div
+                title="bucket-items"
+                className={BucketTypes[props.type ?? bucket.id].layoutClass}
+            >
                 {bucket.items.map((I: Item, i: number) => {
                     return (
                         <div key={`bucket-${bucket.id}-item-${i}`}>

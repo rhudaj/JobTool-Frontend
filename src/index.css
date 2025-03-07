@@ -1,14 +1,18 @@
 @import "tailwindcss";
 
-* {
-    /* margin: 0;
-    padding: 0; */
-    box-sizing:border-box;
-    user-select: none;
+@layer base {
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        user-select: none;
+    }
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+        "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+        "Helvetica Neue", sans-serif;
 }
 
 @media print {
@@ -17,11 +21,15 @@ body {
         size: A4;
         margin: 0 0 0 0;
     }
-    #header, #footer, #nav {
-        display: none !important
+    #header,
+    #footer,
+    #nav {
+        display: none !important;
     }
 
-    *, :after, :before {
-        color: #000!important
+    *,
+    :after,
+    :before {
+        color: #000 !important;
     }
 }

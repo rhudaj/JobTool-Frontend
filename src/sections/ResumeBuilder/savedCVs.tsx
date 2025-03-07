@@ -1,13 +1,12 @@
-import "./savedCVs.sass";
 import {
     Popover,
     PopoverButton,
     PopoverPanel,
 } from "@headlessui/react";
 import { useShallow } from "zustand/react/shallow";
-import { useCvsStore } from "../useCVs";
+import { useCvsStore } from "./useCVs";
 import { useMemo } from "react";
-import { joinClassNames } from "../../../util/joinClassNames";
+import { joinClassNames } from "../../util/joinClassNames";
 
 const DEFAULT_GROUP = "other";
 
@@ -19,9 +18,9 @@ function CVItem(props: {
 	onClick: (idx: number) => void,
 }) {
 	const classes = joinClassNames(
-		"cv-thumbnail",
-		props.isActive ? "active" : "",
-		props.isModified ? "is-modified" : ""
+		"w-max whitespace-nowrap p-2 hover:scale-105",
+		props.isActive ? "c-white bg-darkgray" : "c-gray",
+		props.isModified ? "bg-red" : ""
 	)
 	return (
 		<div key={props.name} className={classes}
@@ -87,11 +86,11 @@ export default function SavedCVsUI() {
     return (
 		<Popover className="select-group">
 			<PopoverButton>Select</PopoverButton>
-			<PopoverPanel style={{paddingLeft: '15rem'}}>
+			<PopoverPanel className="pl-4">
 				{groups.map(([group, item_list]: [string, any[]]) => (
 					<Popover className="cv-group" style={{ position: "relative" }}>
 						<PopoverButton as="div">{group}</PopoverButton>
-						<PopoverPanel style={{ paddingLeft: '20rem' }}>
+						<PopoverPanel className="pl-4">
 							{item_list.map(({name, cv_idx})=>
 								<CVItem
 									name={name}
