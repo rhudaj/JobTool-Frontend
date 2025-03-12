@@ -170,7 +170,8 @@ function ResumeBuilder() {
                 <SavedCVsUI />
             </SubSection>
             {/* ------------ CUR CV INFO, SAVE/EXPORT BUTTONS ------------ */}
-            <div id="display-info" className="flex justify-between p-4 border-3 ">
+            <div title="display-info" className="flex justify-between p-4 border-3 ">
+                {/* FILE NAME */}
                 <div>
                     <span className="text-white">Name:</span>{" "}
                     {cur_cv?.name}
@@ -178,21 +179,21 @@ function ResumeBuilder() {
                         <span className="text-darkgrey ml-2">{"(modified)"}</span>
                     )}
                 </div>
+                {/* TAGS */}
                 <div>
                     <span className="descr">Tags:</span>
                     {cur_cv?.tags?.join(", ")}
                 </div>
-                <div className="export-container">
-                    <button onClick={()=>exportPopup.open(POPUP_CONTENT.export)}>Export</button>
-                    <button onClick={()=>deletePopup.open(POPUP_CONTENT.delete)}>Delete</button>
-                    <button onClick={()=>findReplacePopup.open(POPUP_CONTENT.findReplace)}>Find/Replace</button>
-                    <button onClick={()=>updateStylesPopup.open(POPUP_CONTENT.styles)}>Styles</button>
-                    {USE_BACKEND && (
-                        <>
-                            <button onClick={()=>savePopup.open(POPUP_CONTENT.save)}>
-                                Save
-                            </button>
-                        </>
+                {/* BUTTONS */}
+                <div title="cv-buttons" className="max-w-33% flex gap-1 flex-wrap">
+                    {[
+                        [ 'Export', ()=>exportPopup.open(POPUP_CONTENT.export) ],
+                        [ 'Delete', ()=>deletePopup.open(POPUP_CONTENT.delete) ],
+                        [ 'Find/Replace', ()=>findReplacePopup.open(POPUP_CONTENT.findReplace) ],
+                        [ 'Styles', ()=>updateStylesPopup.open(POPUP_CONTENT.styles) ],
+                        [ 'Save', ()=>savePopup.open(POPUP_CONTENT.save) ]
+                    ].map(([label, onClick]: [string, ()=>void])=>
+                        <button onClick={onClick} className="border-1 p-1 hover:bg-white">{label}</button>
                     )}
                 </div>
             </div>
