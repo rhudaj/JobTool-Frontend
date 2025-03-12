@@ -42,7 +42,7 @@ export class StyleManager {
 		page_padding_top: 20,
 		bullet_point_gap: 3,
 		experiences_gap: 5,
-		hr_line_width: 0.5,
+		hr_line_width: 1,
 		exp_indent: 13,
 		link_col_gap: 3,
 		text_line_height: 7,

@@ -1,47 +1,15 @@
-// delimited-list ----------------------------
-
-.delimited-list
+.experience
     display: flex
-    flex-wrap: wrap
-    & > *
-        flex: 0 1 auto                     // Prevent children from expanding and ensure they fit their content
-        white-space: wrap                  // Prevent wrapping
-        white-space-collapse: preserve
-
-
-// CV-EDITOR ----------------------------
-
-#cv-editor
-    height: 100% // take up the whole page
-    color: black
-    font-family: 'Arial Narrow Bold', sans-serif
-    overflow: hidden
-
-    display: grid
-    grid-auto-rows: min-content // same as repeat(N, min-content), where N = # rows
-    row-gap: 1%
-
-    .section
+    flex-direction: column
+    gap: 0.5rem
+    // first child
+    .header-info
         display: flex
         flex-direction: column
-        .sec-head
+        gap: 0.25rem
+        .hi-row-1, .hi-row-2
             display: flex
-            & > :first-child
-                width: min-content
-            & > :last-child
-                width: 100%
-        .experience
-            display: flex
-            flex-direction: column
-            gap: 0.5rem
-            // first child
-            .header-info
-                display: flex
-                flex-direction: column
-                gap: 0.25rem
-                .hi-row-1, .hi-row-2
-                    display: flex
-                    justify-content: space-between
+            justify-content: space-between
 
 
 .divider
@@ -56,17 +24,6 @@
 .item-list
     width: max-content
     white-space: nowrap
-
-// STYLES ------------------
-
-.sec-head
-    font-weight: bold
-
-hr // HORIZONTAL LINE ACROSS CENTER OF DIV
-    border: none
-    border-bottom: solid black
-    align-self: center
-
 
 // SUB SECTION ------------------
 
@@ -95,20 +52,3 @@ hr // HORIZONTAL LINE ACROSS CENTER OF DIV
     color: black
 
 // HEADER INFO ------------------------------------------------
-
-#full-name
-    text-align: center
-    white-space: nowrap
-    font-weight: bolder
-
-#link-list
-    display: flex
-    justify-content: center
-    gap: 1em
-
-// sections[summary] ------------------------------------------------
-
-.sec-summary
-    display: flex
-    flex-direction: column
-    gap: 0.5em

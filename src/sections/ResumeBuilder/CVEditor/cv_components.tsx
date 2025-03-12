@@ -1,13 +1,16 @@
 import "./cveditor.sass";
 import { Experience, Link, MonthYear, DateRange, CVSection } from "job-tool-shared-types";
 import TextEditDiv from "../../../components/texteditdiv";
-import { joinClassNames } from "../../../util/joinClassNames";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
 import { BucketTypeNames, DynamicComponent } from "../../../components/dnd/types";
 import { StyleManager } from "./styles";
+
+const secStyleMap = {
+	"summary": "flex flex-col gap-[.5cqh]"
+}
 
 function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
 
@@ -41,12 +44,19 @@ function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
 	}
 
 	return (
-		<div className="section" style={sectionStyle}>
-			<div className="sec-head">
+		<div title="section" className="flex flex-col" style={sectionStyle}>
+			<div title="sec-head" className="grid grid-cols-[min-content_1fr] gap-[1cqw] font-bold">
 				<p>{data.name.toUpperCase()}</p>
-				<hr style={{height: Styles.sec_head_line_height, borderBottomWidth: Styles.hr_line_width}}/>
+				<hr
+					className="border-0 border-b border-black self-center"
+					style={{height: Styles.sec_head_line_height, borderBottomWidth: Styles.hr_line_width}}
+				/>
 			</div>
-			<div id={`sec-${data.name}`} className="sec-content" style={{gap: Styles.sec_head_line_gap}}>
+			<div
+				title={`sec-${data.name}-content`}
+				className={secStyleMap[data.name] ?? ""}
+				style={{gap: Styles.sec_head_line_gap}}
+			>
 				<ItemBucket
 					id={data.name}
 					items={data.items?.map((item: any, i: number)=>({
@@ -344,10 +354,8 @@ function DelimitedList(props: {
 		}
 	};
 
-	const classNames = joinClassNames("delimited-list", props.className);
-
 	return (
-		<div className={classNames}>
+		<div title="delimited-list" className={props.className}>
 			<TextEditDiv tv={props.items.join(props.delimiter)} onUpdate={onUpdate} />
 		</div>
 	);
