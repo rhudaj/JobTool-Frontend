@@ -1,13 +1,12 @@
-import "./cveditor.sass";
 import { Experience, Link, MonthYear, DateRange, CVSection } from "job-tool-shared-types";
-import TextEditDiv from "../../../components/TextEditDiv/texteditdiv";
-import { joinClassNames } from "../../../util/joinClassNames";
+import TextEditDiv from "../../../components/texteditdiv";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
 import { BucketTypeNames, DynamicComponent } from "../../../components/dnd/types";
 import { StyleManager } from "./styles";
+import { capitlize } from "../../../util/text";
 
 function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
 
@@ -41,12 +40,18 @@ function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
 	}
 
 	return (
-		<div className="section" style={sectionStyle}>
-			<div className="sec-head">
+		<div title="section" className="flex flex-col" style={sectionStyle}>
+			<div title="sec-head" className="grid grid-cols-[min-content_1fr] gap-[1cqw] font-bold">
 				<p>{data.name.toUpperCase()}</p>
-				<hr style={{height: Styles.sec_head_line_height, borderBottomWidth: Styles.hr_line_width}}/>
+				<hr
+					className="border-0 border-b border-black self-center"
+					style={{height: Styles.sec_head_line_height, borderBottomWidth: Styles.hr_line_width}}
+				/>
 			</div>
-			<div id={`sec-${data.name}`} className="sec-content" style={{gap: Styles.sec_head_line_gap}}>
+			<div
+				title={`sec-${data.name}-content`}
+				style={{gap: Styles.sec_head_line_gap}}
+			>
 				<ItemBucket
 					id={data.name}
 					items={data.items?.map((item: any, i: number)=>({
@@ -79,30 +84,47 @@ function SummaryUI(props: { obj: any, onUpdate?: (newObj: any)=>void }) {
 	};
 
 	return (
-		<div className="sec-summary">
-			<TextEditDiv tv={props.obj["summary"]} id="summary" onUpdate={val => handleUpdate("summary", val)}/>
-			<div className="sub-sec">
-				<div className="sub-sec-head">Languages:</div>
-				<UI.DelimitedList items={props.obj["languages"]} delimiter=", " onUpdate={val => handleUpdate("languages", val)}/>
-			</div>
-			<div className="sub-sec">
-				<div className="sub-sec-head">Technology:</div>
-				<UI.DelimitedList items={props.obj["technologies"]} delimiter=", " onUpdate={val => handleUpdate("technologies", val)}/>
-			</div>
+		<div
+			title="summary"
+			className="flex flex-col gap-[.5cqh]"
+		>
+			<TextEditDiv tv={props.obj["summary"]} onUpdate={val => handleUpdate("summary", val)}/>
+			{['languages', 'technologies'].map(subSec =>
+				<div title="sub-sec" className="flex gap-[.5cqw]">
+					<span className="font-bold">{capitlize(subSec)}:</span>
+					<UI.DelimitedList
+						items={props.obj[subSec]}
+						delimiter=", "
+						onUpdate={val => handleUpdate("languages", val)}
+					/>
+				</div>
+			)}
 		</div>
 	)
 }
 
+/** Helper for ExperienceUI */
+const Divided = ({children}) => {
+	return (
+		<div className="flex gap-[1cqw]">
+			{children[0]}
+			{children[1] && <span className="italic">|</span>}
+			{children[1]}
+		</div>
+	)
+};
+
 // Note: we can make changes to this and it be local.
 function ExperienceUI(props: {
 	obj: Experience
+	type: 'experience' | 'project'
 	onUpdate?: (newObj: any)=>void
 	disableBucketFeatures?: boolean
 }) {
 
-	// const Styles = useStyleStore().getComputedStyles();
-	const Styles = StyleManager.getAll();
+	console.log('type = ', props.type);
 
+	const Styles = StyleManager.getAll();
 
 	const handleUpdate = (field: keyof Experience, val: any) => {
 		props.onUpdate?.({
@@ -123,55 +145,74 @@ function ExperienceUI(props: {
 
 	const data = props.obj;
 
-	if (!data) {
-		console.log("ExperienceUI, data = ", data);
-		return null;
-	}
+	if (!data) return <div>No data!</div>
 
-	const bulletPoints = data.description.map((item: string, i: number)=>(
-		<li key={i}>
-			<TextEditDiv
-				tv={item}
-				onUpdate={newVal=>handleItemChange(i, newVal)}
-			/>
-		</li>
-	));
+	const UI_elements = {
+		title:  (
+			<TextEditDiv className="font-bold" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
+		),
+		role:  (
+			<TextEditDiv className="italic" tv={data.role} onUpdate={val => handleUpdate('title', val)} />
+		),
+		item_list: (
+			data.item_list.length < 2 ? null :
+			<DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} />
+		),
+		date: (
+			<DateUI obj={data.date} onUpdate={val => handleUpdate('date', val)} />
+		),
+		location: (
+			<TextEditDiv className="italic" tv={data.location} onUpdate={val => handleUpdate('location', val)}/>
+		),
+		link: (
+			<LinkUI {...data.link}/>
+		),
+		bulletPoints: data.description.map((item: string, i: number)=>(
+			<li key={i}>
+				<TextEditDiv
+					tv={item}
+					onUpdate={newVal=>handleItemChange(i, newVal)}
+				/>
+			</li>
+		))
+	};
+
+	// -------------------------------------------------------
+	// HOW WE DISPLAY DEPENDS ON PROPS.TYPE
+	// -------------------------------------------------------
+
+	const head_rows = [
+		(
+			props.type === "project" ?
+				[ <Divided>{UI_elements.title}{UI_elements.item_list}</Divided>, UI_elements.link ] :
+				[ UI_elements.title, UI_elements.date ]
+		),
+		(
+			props.type === "project" ? null :
+				[ <Divided>{UI_elements.role}{UI_elements.item_list}</Divided>, UI_elements.location ]
+		)
+	]
+
+	const headRow = "flex justify-between";
 
 	return (
-		<div className="experience">
-			{/* ROW 1 */}
-			<div className="header-info">
-				{/* ROW 1 */}
-				<div className="hi-row-1">
-					<div className="hi-col-1">
-						<TextEditDiv className="title" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
+		<div
+			title="experience"
+			className="flex flex-col gap-[0.5cqh]"
+			style={{rowGap: StyleManager.get("exp_row_gap")}}
+		>
+			{/* HEADER ROWS */}
+			{
+				head_rows.map(row =>
+					<div title="header-row" className={headRow}>
+						{row}
 					</div>
-					<div className="hi-col-2">
-						<DateUI obj={data.date} onUpdate={val => handleUpdate('date', val)} />
-					</div>
-				</div>
-				{/* ROW 2 */}
-				<div className="hi-row-2">
-					<div className="hi-col-1 role-item-list">
-						{ data.role &&
-						<TextEditDiv className="role" tv={data.role} onUpdate={val => handleUpdate('role', val)} />}
-						{  (data.item_list && data.item_list.length>1) &&
-						<>
-						<span className="divider">|</span>
-						<DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} />
-						</>
-						}
-					</div>
-					<div className="hi-col-2">
-						{ data.location &&
-						<TextEditDiv className="location" tv={data.location} onUpdate={val => handleUpdate('location', val)}/>}
-					</div>
-				</div>
-			</div>
-			{/* ROW 2 */}
+				)
+			}
+			{/* BULLET POINTS */}
 			<div className="exp-content" style={{paddingLeft: Styles.exp_indent}}>
 				<ul>
-					{props.disableBucketFeatures ? bulletPoints : (
+					{props.disableBucketFeatures ? UI_elements.bulletPoints : (
 						<ItemBucket
 							id="experience"
 							items={data?.description?.map((item: string, i: number)=>({
@@ -183,91 +224,7 @@ function ExperienceUI(props: {
 							replaceDisabled deleteOnMoveDisabled
 							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
 						>
-							{bulletPoints}
-						</ItemBucket>
-					)}
-				</ul>
-			</div>
-		</div>
-	);
-}
-
-// TODO: this is a temp solution
-// dont show date.
-function ProjectUI(props: {
-	obj: Experience;
-	onUpdate?: (newObj: any)=>void
-	disableBucketFeatures?: boolean;
-}) {
-
-	// const Styles = useStyleStore().getComputedStyles();
-	const Styles = StyleManager.getAll();
-
-	const handleUpdate = (field: keyof Experience, val: any) => {
-		props.onUpdate?.({
-			...props.obj,
-			[field]: val
-		})
-	};
-
-	const handleItemChange = (i: number, newVal: any) => {
-		const new_description = [...props.obj.description]
-		new_description[i] = newVal
-		handleUpdate('description', new_description)
-	};
-
-	const onBucketUpdate = (newVals: any[]) => {
-		handleUpdate("description", newVals)
-	}
-
-	const data = props.obj;
-
-	if (!data) return <div>No project data</div>
-
-	const bucket_items = data.description.map((item: string, i: number)=>(
-		<li key={i}>
-			<TextEditDiv
-				tv={item}
-				onUpdate={newVal=>handleItemChange(i, newVal)}
-			/>
-		</li>
-	));
-
-	return (
-		<div className="experience">
-			{/* ROW 1 */}
-			<div className="header-info">
-				{/* ROW 1 */}
-				<div className="hi-row-1">
-					<div className="hi-col-1 role-item-list">
-						<TextEditDiv className="title" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
-						{ (data.item_list && data.item_list.length>1) &&
-						<>
-						<span className="divider">|</span>
-						<DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} />
-						</>}
-					</div>
-					<div className="hi-col-2">
-						{ data.link && <LinkUI {...data.link} /> }
-					</div>
-				</div>
-			</div>
-			{/* ROW 2 */}
-			<div className="exp-content" style={{paddingLeft: Styles.exp_indent}}>
-				<ul>
-					{props.disableBucketFeatures ? bucket_items : (
-						<ItemBucket
-							id="experience"
-							items={data?.description?.map((item: string, i: number)=>({
-								id: `${data.title}-bp${i}`,
-								value: item
-							}))}
-							type={BucketTypeNames.EXP_POINTS}
-							onUpdate={onBucketUpdate}
-							replaceDisabled deleteOnMoveDisabled
-							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
-						>
-							{bucket_items}
+							{UI_elements.bulletPoints}
 						</ItemBucket>
 					)}
 				</ul>
@@ -322,7 +279,12 @@ function LinkUI(props: Link) {
 	// const Styles = useStyleStore().getComputedStyles();
 	const Styles = StyleManager.getAll();
 	return (
-		<a className="link" style={{gap: Styles.link_col_gap}} href={props.url}>
+		<a
+			title="link"
+			className="flex items-center"
+			style={{gap: Styles.link_col_gap}}
+			href={props.url}
+		>
 			<i className={props.icon} />
 			{ props.text && <TextEditDiv tv={props.text} id="link-text" /> }
 		</a>
@@ -344,13 +306,11 @@ function DelimitedList(props: {
 		}
 	};
 
-	const classNames = joinClassNames("delimited-list", props.className);
-
 	return (
-		<div className={classNames}>
+		<div title="delimited-list" className={props.className}>
 			<TextEditDiv tv={props.items.join(props.delimiter)} onUpdate={onUpdate} />
 		</div>
 	);
 }
 
-export { SectionUI, SummaryUI, ExperienceUI, ProjectUI, DateUI, LinkUI, DelimitedList }
+export { SectionUI, SummaryUI, ExperienceUI, DateUI, LinkUI, DelimitedList }

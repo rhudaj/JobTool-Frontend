@@ -1,9 +1,35 @@
-import "./jobanalyze.sass"
 import { NamedCV } from "job-tool-shared-types";
-import JIDisplay from "./JIDisplay/JIDisplay";
+import JIDisplay from "./JIDisplay";
 import { Section, SplitView }  from "../../components";
 import BackendAPI from "../../backend_api";
 import { useEffect, useRef, useState } from "react";
+
+/* sass file
+
+#job-info-input
+    height: 100%
+    width: 100%
+    padding: 5rem
+    font-size: 16em
+    font-family: Arial, Helvetica, sans-serif
+    resize: none
+    outline: none
+
+.toggle-mode
+    align-self: center
+    font-size: 14rem
+    display: flex
+    gap: 20rem
+    border: 2px solid black
+    border-radius: 10rem
+    padding: 10rem
+    width: max-content
+
+    &.mode-0
+        background: linear-gradient(to right, black 50%, transparent 50%) // Default background
+    &.mode-1
+        background: linear-gradient(to left, black 50%, transparent 50%) // Default background
+*/
 
 function JobAnalyze() {
 

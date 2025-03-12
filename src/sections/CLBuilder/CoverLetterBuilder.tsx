@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import BackendAPI from "../../backend_api";
 import { DndProvider } from "react-dnd";
-import CLEditor from "./CLEditor/cleditor";
+import CLEditor from "./cleditor";
 import { Section, PrintablePage, InfoPad, SplitView } from "../../components";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useComponent2PDF } from "../../hooks";

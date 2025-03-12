@@ -1,9 +1,9 @@
 import BackendAPI from "../../backend_api";
-import { CVInfo } from "../../components/infoPad/infoPad";
+import { CVInfo } from "../../components/infoPad";
 import { create } from "zustand";
 
-const USE_BACKEND = process.env.REACT_APP_USE_BACKEND === "1";
-const SAMPLES_PATH = process.env.PUBLIC_URL + "/samples/";
+const USE_BACKEND = import.meta.env.VITE_USE_BACKEND === "1";
+const SAMPLES_PATH = import.meta.env.BASE_URL + "/samples/";
 
 // ------------------------------------------------------
 //                          STATE

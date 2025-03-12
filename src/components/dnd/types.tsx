@@ -1,7 +1,7 @@
-import { ExperienceUI, SectionUI, SummaryUI, ProjectUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
-import { VersionedItemUI } from "../VersionedItem/versionedItem";
-import TextEditDiv from "../TextEditDiv/texteditdiv";
-import "./types.scss";
+import { ExperienceUI, SectionUI, SummaryUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
+import { VersionedItemUI } from "../versionedItem";
+import TextEditDiv from "../texteditdiv";
+import { StyleManager } from "../../sections/ResumeBuilder/CVEditor/styles";
 
 const DEFAULT_ITEM_TYPE = "DRAG-ITEM";
 
@@ -17,7 +17,8 @@ interface Bucket<T=any> {
 
 interface BucketType {
     layoutClass?: string,
-    DisplayItem?: (props: { obj: any, onUpdate?: any }) => JSX.Element,
+    style?: React.CSSProperties,    // for dynamic css properties (if any)
+    DisplayItem?: (props: { obj: any, onUpdate?: any }) => React.ReactNode,
 };
 
 /**
@@ -47,34 +48,38 @@ const BucketTypeNames = {
     CL_PARAGRAPHS: "cl_paragraphs",
     VERSIONED_ITEMS: "versioned_items",
 };
+
 const BucketTypes: { [key: string]: BucketType } = {
     "summary": {
         DisplayItem: SummaryUI,
     },
     "experiences": {
-        layoutClass:"experiences",
-        DisplayItem: ExperienceUI
+        layoutClass: "grid",
+        style: { rowGap: StyleManager.get("experiences_gap") },
+        DisplayItem: props => <ExperienceUI type="experience" {...props}/>
     },
     "projects": {
-        layoutClass:"experiences",
-        DisplayItem: ProjectUI
+        layoutClass:  "grid",
+        style: { rowGap: StyleManager.get("experiences_gap") },
+        DisplayItem: props => <ExperienceUI type="project" {...props}/>
     },
     "exp_points": {
-        layoutClass: "exp-points",
+        layoutClass: "flex flex-col",
+        style: { rowGap: StyleManager.get("bullet_point_gap") },
         DisplayItem: (props: {obj: string, onUpdate: any}) => (
             <li><TextEditDiv tv={props.obj} onUpdate={props.onUpdate} /></li>
         )
     },
     "cl_info_pad": {
-        layoutClass: "text-item-list",
+        layoutClass: "flex flex-row flex-wrap gap-2",
         DisplayItem: (props: {obj: string}) => <div className="text-item">{props.obj}</div>
     },
     "sections": {
-        layoutClass: "sections",
+        layoutClass: "grid",
+        style: { rowGap: StyleManager.get("sec_row_gap") },
         DisplayItem: SectionUI
     },
     "cl_paragraphs": {
-        layoutClass: "cl-editor",
         DisplayItem: (props: { obj: string, onUpdate: any })=> <TextEditDiv tv={props.obj} onUpdate={props.onUpdate}/>
     }
 };

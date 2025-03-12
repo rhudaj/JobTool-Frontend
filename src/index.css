@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@layer base {
+    * {
+        margin: 0;
+        padding: 0;
+        user-select: none;
+    }
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+        "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+        "Helvetica Neue", sans-serif;
+}
+
+@media print {
+    @page {
+        /* SETTINGS PART OF PRINT */
+        size: A4;
+        margin: 0 0 0 0;
+    }
+    #header,
+    #footer,
+    #nav {
+        display: none !important;
+    }
+
+    *,
+    :after,
+    :before {
+        color: #000 !important;
+    }
+}

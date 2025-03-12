@@ -1,16 +1,21 @@
-import "./BucketItem.sass"
+// import "./BucketItem.sass"
 import { useDrag, useDrop } from "react-dnd";
 import React, { useContext } from "react";
-import { joinClassNames } from "../../util/joinClassNames";
 import { Item } from "./types";
 import { BucketItemContext } from "./Bucket";
-import { ControlsBox, useHoverBuffer } from "../ControlsBox/ControlBox";
+import { ControlsBox, useHoverBuffer } from "../ControlBox";
+
+
+const getItemWrapperStyle = (isDragging: boolean, isDroppable: boolean) =>
+    "relative " + (isDragging ? "opacity-10" : "") + (isDroppable ? "bg-lightcyan" : "");
+
+const control_button_style = "border-1 border-black opacity-50 hover:opacity-100";
 
 /**
  * This item should only ever be rendered inside a Bucket component.
  * Because it requires the BucketContext to be present.
 */
-export default function BucketItem(props: { item: Item, children: JSX.Element }) {
+export default function BucketItem(props: { item: Item, children: React.ReactNode }) {
 
     // -------------------- STATE ---------------------
 
@@ -87,17 +92,13 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
         throw new Error("BucketItem must be rendered inside a Bucket component.");
     }
 
-    const classNames = joinClassNames(
-        "dnd-item-wrapper",
-        isDragging ? "dragging" : "", isDropTarget ? "droppable": "",
-        "can-drag" // props.disableDrag === true ? "no-drag" : "can-drag"
-    );
+    const styles = getItemWrapperStyle(isDragging, isDropTarget);
 
     return (
-        <div ref={ref} className={classNames}>
+        <div title="dnd-item-wrapper" ref={ref} className={styles}>
             {props.children}
             { isHovered &&
-            <ControlsBox className="dnd-item-controls" controls={[
+            <ControlsBox buttonClass={control_button_style} placement="top" controls={[
                 {
                     id: "move",
                     icon_class: "fa-solid fa-grip",
@@ -135,7 +136,7 @@ export default function BucketItem(props: { item: Item, children: JSX.Element })
 export function StandaloneDragItem(props: {
     item: Item,
     item_type: string,
-    children: JSX.Element,
+    children: React.ReactNode,
 }) {
 
     // -------------------- STATE ---------------------
@@ -164,15 +165,12 @@ export function StandaloneDragItem(props: {
 
     // -----------------RENDER-----------------
 
-    const classNames = joinClassNames(
-        "standalone-drag-item-wrapper",
-        isDragging ? "dragging" : "",
-    );
+    const styles = getItemWrapperStyle(isDragging, false);
 
     return (
-        <div ref={ref} className={classNames}>
+        <div ref={ref} className={styles}>
             { isHovered &&
-            <ControlsBox className="dnd-item-controls" controls={[{
+            <ControlsBox placement="top" controls={[{
                 id: "move",
                 icon_class: "fa-solid fa-grip",
                 ref: drag,
