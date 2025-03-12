@@ -73,7 +73,12 @@ const useNcvsAsCVInfo = () => {
                 const section_name = section.name
                 sections[section_name] = sections[section_name] || {}
                 section.items.forEach(item => {
-                    let group_name = (section_name === "summary") ? "default" : item.title
+                    let group_name
+                    try {
+                        group_name = (section_name === "summary") ? "default" : item.title
+                    } catch (e) {
+                        alert("Error with item: " + item)
+                    }
                     sections[section_name][group_name] = sections[section_name][group_name] || {}
                     sections[section_name][group_name][cv_name] = item
                 })

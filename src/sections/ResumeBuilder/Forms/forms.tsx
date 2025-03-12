@@ -5,31 +5,45 @@ import { NamedCV } from "job-tool-shared-types";
 import { StyleManager } from "../CVEditor/styles";
 
 import { useForm, SubmitHandler } from "react-hook-form"
+import { useImmer } from "use-immer";
 
+interface SaveForm {
+    name: string
+    path: string
+    tags: string[]
+}
 export const SaveForm = (props: {
     name: string;
+    path: string;
     tags: string[];
-    onSave: (name: string, tags: string[]) => void;
+    onSave: (formData: SaveForm) => void;
     disabled?: boolean;
 }) => {
-    const [name, setName] = useState(null);
-    const [tags, setTags] = useState(null);
+    const [formData, setFormData] = useImmer<SaveForm>({
+        name: "",
+        path: "",
+        tags: [],
+    });
+
     const tags_ref = useRef(null);
     const [isNameValid, setIsNameValid] = useState(true);
     const [reason, setReason] = useState("File exists. Will overwrite!");
 
-    useEffect(() => setName(props.name), [props.name]);
-    useEffect(() => setTags(props.tags), [props.tags]);
+    useEffect(() => setFormData({
+        name: props.name,
+        path: props.path,
+        tags: props.tags,
+    }), [props.name, props.path, props.tags]);
 
     // Handle name input
     const handleNameChange = (newName: string) => {
-        setName(newName);
+        setFormData(D => { D.name = newName })
         const isValid = newName && newName != "";
         setIsNameValid(isValid);
         setReason(
             !isValid
                 ? "Invalid file name!"
-                : newName === name
+                : newName === formData.name
                 ? "File exists. Will overwrite!"
                 : ""
         );
@@ -38,7 +52,11 @@ export const SaveForm = (props: {
     // Handle form submission
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        props.onSave(name, tags_ref.current.get());
+        props.onSave({
+            name: formData.name,
+            path: formData.path,
+            tags: tags_ref.current.get(),
+        });
     };
 
     return (
@@ -47,11 +65,11 @@ export const SaveForm = (props: {
             style={{ display: "flex", flexDirection: "column", gap: "5rem" }}
         >
             <p>File Name:</p>
-            <TextEditDiv tv={name} onUpdate={handleNameChange} />
+            <TextEditDiv tv={formData.name} onUpdate={handleNameChange} />
             <p style={{ color: isNameValid ? "grey" : "black" }}>{reason}</p>
 
             <p>Tags (optional):</p>
-            <TextItems initItems={tags} ref={tags_ref} />
+            <TextItems initItems={formData.tags} ref={tags_ref} />
 
             <button type="submit" disabled={!isNameValid}>
                 Save

@@ -41,23 +41,6 @@ function ResumeBuilder() {
 
     const saveAsPDF = useComponent2PDF("cv-page");
 
-    // const onSaveFormSubmit = useCallback((name: string, tags: string[]) => {
-    //     // first check that the cv has actually changed!
-    //     if (!cvsState.trackMods[cvsState.curIdx]) {
-    //         alert("No changes have been made to the CV!");
-    //         return;
-    //     }
-    //     // if it has, check wether new/update
-    //     const overwrite = name === cur_cv.name;
-    //     saveCv2backend({
-    //         name: name,
-    //         tags: tags,
-    //         data: cur_cv.data,
-    //     }, overwrite)
-    //     savePopup.close();
-
-    // }, [cvsState, cur_cv]);
-
     const CONTROLS = {
         popups: {
             onPDFClicked: () => {
@@ -70,17 +53,16 @@ function ResumeBuilder() {
                 exportPopup.close();
             },
 
-            onSaveFormSubmit: (name: string, tags: string[]) => {
+            onSaveFormSubmit: (formData: any) => {
                 // first check that the cv has actually changed!
                 if (!cvsState.trackMods[cvsState.curIdx]) {
                     alert("No changes have been made to the CV!");
                     return;
                 }
                 // if it has, check wether new/update
-                const overwrite = name === cur_cv.name;
+                const overwrite = formData.name === cur_cv.name;
                 saveCv2backend({
-                    name: name,
-                    tags: tags,
+                    ...formData,
                     data: cur_cv.data,
                 }, overwrite)
                 savePopup.close();
@@ -148,6 +130,7 @@ function ResumeBuilder() {
         save: (
             <SaveForm
                 name={cur_cv?.name}
+                path={cur_cv?.path}
                 tags={cur_cv?.tags}
                 onSave={CONTROLS.popups.onSaveFormSubmit}
             />
