@@ -7,10 +7,7 @@ import * as UI from "./cv_components"
 import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
 import { BucketTypeNames, DynamicComponent } from "../../../components/dnd/types";
 import { StyleManager } from "./styles";
-
-const secStyleMap = {
-	"summary": "flex flex-col gap-[.5cqh]"
-}
+import { capitlize } from "../../../util/text";
 
 function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
 
@@ -54,7 +51,6 @@ function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
 			</div>
 			<div
 				title={`sec-${data.name}-content`}
-				className={secStyleMap[data.name] ?? ""}
 				style={{gap: Styles.sec_head_line_gap}}
 			>
 				<ItemBucket
@@ -89,16 +85,17 @@ function SummaryUI(props: { obj: any, onUpdate?: (newObj: any)=>void }) {
 	};
 
 	return (
-		<div className="sec-summary">
-			<TextEditDiv tv={props.obj["summary"]} id="summary" onUpdate={val => handleUpdate("summary", val)}/>
-			<div className="sub-sec">
-				<div className="sub-sec-head">Languages:</div>
-				<UI.DelimitedList items={props.obj["languages"]} delimiter=", " onUpdate={val => handleUpdate("languages", val)}/>
-			</div>
-			<div className="sub-sec">
-				<div className="sub-sec-head">Technology:</div>
-				<UI.DelimitedList items={props.obj["technologies"]} delimiter=", " onUpdate={val => handleUpdate("technologies", val)}/>
-			</div>
+		<div
+			title="summary"
+			className="flex flex-col gap-[.5cqh]"
+		>
+			<TextEditDiv tv={props.obj["summary"]} onUpdate={val => handleUpdate("summary", val)}/>
+			{['languages', 'technologies'].map(subSec =>
+				<div title="sub-sec" className="flex gap-[.5cqw]">
+					<div className="sub-sec-head">{capitlize(subSec)}:</div>
+					<UI.DelimitedList items={props.obj[subSec]} delimiter=", " onUpdate={val => handleUpdate("languages", val)}/>
+				</div>
+			)}
 		</div>
 	)
 }
