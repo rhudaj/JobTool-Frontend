@@ -32,15 +32,15 @@ const TextItems = forwardRef((props: {
 
     if (!items) return null;
     return (
-        <div title="text-items" className="text-left ltr w-full h-max flex flex-col gap-20">
+        <div title="text-items" className="text-left ltr w-full h-max flex flex-col gap-2">
             <div
                 title="text-input"
-                className="p-20 w-full bg-white"
+                className="p-2 w-full bg-white"
                 ref={text_ref}
                 contentEditable="true"
                 onKeyDown={handleKeyDown}
             />
-            <div title="items-container" className="w-full min-h-[50rem] border-1 border-dashed border-black p-20">
+            <div title="items-container" className="max-w-[30rem] flex flex-wrap gap-4  border-1 border-dashed border-black p-4">
                 { items.map((txt: string, idx: number) => (
                     <span
                         title="item"
