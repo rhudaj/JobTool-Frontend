@@ -21,8 +21,8 @@ const tabs = [
 
 function App() {
     return (
-        <div className="grid grid-rows-[min-content_1fr] bg-[#282c34] c-white">
-            <div id="app-header" className="text-3xl border-b-2 border-black p-4 pl-8">
+        <div className="grid grid-rows-[min-content_1fr] bg-[#282c34]">
+            <div id="app-header" className="text-3xl border-b-2 border-black p-4 pl-8 text-white">
                 <h1 className="">Job Tool</h1>
             </div>
             {/* SIDE-MENU : SECTION CONTAINER */}
