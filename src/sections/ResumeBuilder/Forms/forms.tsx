@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import TextEditDiv from "../../../components/texteditdiv";
-import TextItems from "../../../components/TextItems/TextItems";
+import TextItems from "../../../components/TextItems";
 import { NamedCV } from "job-tool-shared-types";
 import { StyleManager } from "../CVEditor/styles";
 

@@ -6,5 +6,5 @@ export * from './PrintablePage';
 export * from './Section';
 export * from './splitview';
 export * from './texteditdiv';
-export * from './TextItems/TextItems';
+export * from './TextItems';
 export * from './versionedItem';

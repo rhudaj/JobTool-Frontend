@@ -1,4 +1,3 @@
-import "./textitems.sass"
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { useImmer } from "use-immer";
 
@@ -33,15 +32,21 @@ const TextItems = forwardRef((props: {
 
     if (!items) return null;
     return (
-        <div className="text-items">
-            <div className="text-input"
+        <div title="text-items" className="text-left ltr w-full h-max flex flex-col gap-20">
+            <div
+                title="text-input"
+                className="p-20 w-full bg-white"
                 ref={text_ref}
                 contentEditable="true"
                 onKeyDown={handleKeyDown}
             />
-            <div className="items-container">
+            <div title="items-container" className="w-full min-h-[50rem] border-1 border-dashed border-black p-20">
                 { items.map((txt: string, idx: number) => (
-                    <span className="item" onDoubleClick={()=>onDeleteItem(idx)}>
+                    <span
+                        title="item"
+                        className="p-3 border-1 border-dashed border-blue"
+                        onDoubleClick={()=>onDeleteItem(idx)}
+                    >
                         {txt}
                     </span>
                 ))}
