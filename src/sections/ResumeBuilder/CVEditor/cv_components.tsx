@@ -1,4 +1,3 @@
-import "./cveditor.sass";
 import { Experience, Link, MonthYear, DateRange, CVSection } from "job-tool-shared-types";
 import TextEditDiv from "../../../components/texteditdiv";
 import ItemBucket from "../../../components/dnd/Bucket";
