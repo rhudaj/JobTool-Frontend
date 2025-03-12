@@ -92,13 +92,20 @@ function SummaryUI(props: { obj: any, onUpdate?: (newObj: any)=>void }) {
 			<TextEditDiv tv={props.obj["summary"]} onUpdate={val => handleUpdate("summary", val)}/>
 			{['languages', 'technologies'].map(subSec =>
 				<div title="sub-sec" className="flex gap-[.5cqw]">
-					<div className="sub-sec-head">{capitlize(subSec)}:</div>
-					<UI.DelimitedList items={props.obj[subSec]} delimiter=", " onUpdate={val => handleUpdate("languages", val)}/>
+					<span className="font-bold">{capitlize(subSec)}:</span>
+					<UI.DelimitedList
+						items={props.obj[subSec]}
+						delimiter=", "
+						onUpdate={val => handleUpdate("languages", val)}
+					/>
 				</div>
 			)}
 		</div>
 	)
 }
+
+const experience = "flex flex-col gap-[0.5cqh]";
+const headRow = "flex justify-between";
 
 // Note: we can make changes to this and it be local.
 function ExperienceUI(props: {
@@ -145,37 +152,37 @@ function ExperienceUI(props: {
 	));
 
 	return (
-		<div className="experience">
-			{/* ROW 1 */}
-			<div className="header-info">
-				{/* ROW 1 */}
-				<div className="hi-row-1">
-					<div className="hi-col-1">
-						<TextEditDiv className="title" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
-					</div>
-					<div className="hi-col-2">
-						<DateUI obj={data.date} onUpdate={val => handleUpdate('date', val)} />
-					</div>
-				</div>
-				{/* ROW 2 */}
-				<div className="hi-row-2">
-					<div className="hi-col-1 role-item-list">
-						{ data.role &&
-						<TextEditDiv className="role" tv={data.role} onUpdate={val => handleUpdate('role', val)} />}
-						{  (data.item_list && data.item_list.length>1) &&
-						<>
-						<span className="divider">|</span>
-						<DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} />
-						</>
-						}
-					</div>
-					<div className="hi-col-2">
-						{ data.location &&
-						<TextEditDiv className="location" tv={data.location} onUpdate={val => handleUpdate('location', val)}/>}
-					</div>
-				</div>
+		<div
+			title="experience"
+			className={experience}
+			style={{rowGap: StyleManager.get("exp_row_gap")}}
+		>
+			{/* ROW 1, [title] [date] */}
+			<div title="head-row-1" className={headRow}>
+				<TextEditDiv className="font-bold" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
+				<DateUI obj={data.date} onUpdate={val => handleUpdate('date', val)} />
 			</div>
-			{/* ROW 2 */}
+			{/* ROW 2, [ [role] [item-list] ] [location(optional)] */}
+			<div title="head-row-2" className={headRow}>
+				<div title="role-item-list" className="flex gap-[1cqw]">
+
+					{/* ROLE */}
+					{ data.role &&
+					<TextEditDiv className="italic" tv={data.role} onUpdate={val => handleUpdate('role', val)} />}
+
+					{/* ITEM LIST */}
+					{  (data.item_list && data.item_list.length>1) &&
+					<>
+					<span title="divider" className="italic">|</span>
+					<DelimitedList className="italic" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} />
+					</>}
+
+				</div>
+				{/* LOCATION */}
+				{ data.location &&
+				<TextEditDiv className="italic" tv={data.location} onUpdate={val => handleUpdate('location', val)}/>}
+			</div>
+			{/* ROW 3 */}
 			<div className="exp-content" style={{paddingLeft: Styles.exp_indent}}>
 				<ul>
 					{props.disableBucketFeatures ? bulletPoints : (
@@ -200,14 +207,12 @@ function ExperienceUI(props: {
 }
 
 // TODO: this is a temp solution
-// dont show date.
 function ProjectUI(props: {
 	obj: Experience;
 	onUpdate?: (newObj: any)=>void
 	disableBucketFeatures?: boolean;
 }) {
 
-	// const Styles = useStyleStore().getComputedStyles();
 	const Styles = StyleManager.getAll();
 
 	const handleUpdate = (field: keyof Experience, val: any) => {
@@ -241,22 +246,20 @@ function ProjectUI(props: {
 	));
 
 	return (
-		<div className="experience">
+		<div title="project" className={experience}>
 			{/* ROW 1 */}
 			<div className="header-info">
 				{/* ROW 1 */}
-				<div className="hi-row-1">
-					<div className="hi-col-1 role-item-list">
-						<TextEditDiv className="title" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
+				<div className={headRow}>
+					<div className="role-item-list">
+						<TextEditDiv className="font-bold" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
 						{ (data.item_list && data.item_list.length>1) &&
 						<>
 						<span className="divider">|</span>
 						<DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} />
 						</>}
 					</div>
-					<div className="hi-col-2">
-						{ data.link && <LinkUI {...data.link} /> }
-					</div>
+					{ data.link && <LinkUI {...data.link} /> }
 				</div>
 			</div>
 			{/* ROW 2 */}
@@ -329,7 +332,12 @@ function LinkUI(props: Link) {
 	// const Styles = useStyleStore().getComputedStyles();
 	const Styles = StyleManager.getAll();
 	return (
-		<a className="link" style={{gap: Styles.link_col_gap}} href={props.url}>
+		<a
+			title="link"
+			className="flex items-center"
+			style={{gap: Styles.link_col_gap}}
+			href={props.url}
+		>
 			<i className={props.icon} />
 			{ props.text && <TextEditDiv tv={props.text} id="link-text" /> }
 		</a>

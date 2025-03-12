@@ -14,7 +14,8 @@ type StyleKeys =
 	| "sec_head_line_gap"
 	| "sec_head_line_height"
 	| "p_font"
-	| "name_font";
+	| "name_font"
+	| "exp_row_gap";
 
 // TODO: should all units be 'cqw'? Shouldnt some be 'cqh' (e.g. sec_row_gap)
 const get_style = (val: number) => `${val * BASE_SIZE}cqw`;
@@ -42,13 +43,14 @@ export class StyleManager {
 		page_padding_top: 20,
 		bullet_point_gap: 3,
 		experiences_gap: 5,
-		hr_line_width: 1,
+		exp_row_gap: 2,
+		hr_line_width: .5,
 		exp_indent: 13,
 		link_col_gap: 3,
 		text_line_height: 7,
 		sec_row_gap: 6,
 		sec_head_line_gap: 3,
-		sec_head_line_height: 0.5,
+		sec_head_line_height: .5,
 		p_font: 6,
 		name_font: 12,
 	};
