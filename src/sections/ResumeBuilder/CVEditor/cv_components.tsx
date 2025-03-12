@@ -103,19 +103,28 @@ function SummaryUI(props: { obj: any, onUpdate?: (newObj: any)=>void }) {
 	)
 }
 
-const experience = "flex flex-col gap-[0.5cqh]";
-const headRow = "flex justify-between";
+/** Helper for ExperienceUI */
+const Divided = ({children}) => {
+	return (
+		<div className="flex gap-[1cqw]">
+			{children[0]}
+			{children[1] && <span className="italic">|</span>}
+			{children[1]}
+		</div>
+	)
+};
 
 // Note: we can make changes to this and it be local.
 function ExperienceUI(props: {
 	obj: Experience
+	type: 'experience' | 'project'
 	onUpdate?: (newObj: any)=>void
 	disableBucketFeatures?: boolean
 }) {
 
-	// const Styles = useStyleStore().getComputedStyles();
-	const Styles = StyleManager.getAll();
+	console.log('type = ', props.type);
 
+	const Styles = StyleManager.getAll();
 
 	const handleUpdate = (field: keyof Experience, val: any) => {
 		props.onUpdate?.({
@@ -136,135 +145,74 @@ function ExperienceUI(props: {
 
 	const data = props.obj;
 
-	if (!data) {
-		console.log("ExperienceUI, data = ", data);
-		return null;
-	}
+	if (!data) return <div>No data!</div>
 
-	const bulletPoints = data.description.map((item: string, i: number)=>(
-		<li key={i}>
-			<TextEditDiv
-				tv={item}
-				onUpdate={newVal=>handleItemChange(i, newVal)}
-			/>
-		</li>
-	));
+	const UI_elements = {
+		title:  (
+			<TextEditDiv className="font-bold" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
+		),
+		role:  (
+			<TextEditDiv className="italic" tv={data.role} onUpdate={val => handleUpdate('title', val)} />
+		),
+		item_list: (
+			data.item_list.length < 2 ? null :
+			<DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} />
+		),
+		date: (
+			<DateUI obj={data.date} onUpdate={val => handleUpdate('date', val)} />
+		),
+		location: (
+			<TextEditDiv className="italic" tv={data.location} onUpdate={val => handleUpdate('location', val)}/>
+		),
+		link: (
+			<LinkUI {...data.link}/>
+		),
+		bulletPoints: data.description.map((item: string, i: number)=>(
+			<li key={i}>
+				<TextEditDiv
+					tv={item}
+					onUpdate={newVal=>handleItemChange(i, newVal)}
+				/>
+			</li>
+		))
+	};
+
+	// -------------------------------------------------------
+	// HOW WE DISPLAY DEPENDS ON PROPS.TYPE
+	// -------------------------------------------------------
+
+	const head_rows = [
+		(
+			props.type === "project" ?
+				[ <Divided>{UI_elements.title}{UI_elements.item_list}</Divided>, UI_elements.link ] :
+				[ UI_elements.title, UI_elements.date ]
+		),
+		(
+			props.type === "project" ? null :
+				[ <Divided>{UI_elements.role}{UI_elements.item_list}</Divided>, UI_elements.location ]
+		)
+	]
+
+	const headRow = "flex justify-between";
 
 	return (
 		<div
 			title="experience"
-			className={experience}
+			className="flex flex-col gap-[0.5cqh]"
 			style={{rowGap: StyleManager.get("exp_row_gap")}}
 		>
-			{/* ROW 1, [title] [date] */}
-			<div title="head-row-1" className={headRow}>
-				<TextEditDiv className="font-bold" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
-				<DateUI obj={data.date} onUpdate={val => handleUpdate('date', val)} />
-			</div>
-			{/* ROW 2, [ [role] [item-list] ] [location(optional)] */}
-			<div title="head-row-2" className={headRow}>
-				<div title="role-item-list" className="flex gap-[1cqw]">
-
-					{/* ROLE */}
-					{ data.role &&
-					<TextEditDiv className="italic" tv={data.role} onUpdate={val => handleUpdate('role', val)} />}
-
-					{/* ITEM LIST */}
-					{  (data.item_list && data.item_list.length>1) &&
-					<>
-					<span title="divider" className="italic">|</span>
-					<DelimitedList className="italic" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} />
-					</>}
-
-				</div>
-				{/* LOCATION */}
-				{ data.location &&
-				<TextEditDiv className="italic" tv={data.location} onUpdate={val => handleUpdate('location', val)}/>}
-			</div>
-			{/* ROW 3 */}
-			<div className="exp-content" style={{paddingLeft: Styles.exp_indent}}>
-				<ul>
-					{props.disableBucketFeatures ? bulletPoints : (
-						<ItemBucket
-							id="experience"
-							items={data?.description?.map((item: string, i: number)=>({
-								id: `${data.title}-bp${i}`,
-								value: item
-							}))}
-							type={BucketTypeNames.EXP_POINTS}
-							onUpdate={onBucketUpdate}
-							replaceDisabled deleteOnMoveDisabled
-							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
-						>
-							{bulletPoints}
-						</ItemBucket>
-					)}
-				</ul>
-			</div>
-		</div>
-	);
-}
-
-// TODO: this is a temp solution
-function ProjectUI(props: {
-	obj: Experience;
-	onUpdate?: (newObj: any)=>void
-	disableBucketFeatures?: boolean;
-}) {
-
-	const Styles = StyleManager.getAll();
-
-	const handleUpdate = (field: keyof Experience, val: any) => {
-		props.onUpdate?.({
-			...props.obj,
-			[field]: val
-		})
-	};
-
-	const handleItemChange = (i: number, newVal: any) => {
-		const new_description = [...props.obj.description]
-		new_description[i] = newVal
-		handleUpdate('description', new_description)
-	};
-
-	const onBucketUpdate = (newVals: any[]) => {
-		handleUpdate("description", newVals)
-	}
-
-	const data = props.obj;
-
-	if (!data) return <div>No project data</div>
-
-	const bucket_items = data.description.map((item: string, i: number)=>(
-		<li key={i}>
-			<TextEditDiv
-				tv={item}
-				onUpdate={newVal=>handleItemChange(i, newVal)}
-			/>
-		</li>
-	));
-
-	return (
-		<div title="project" className={experience}>
-			{/* ROW 1 */}
-			<div className="header-info">
-				{/* ROW 1 */}
-				<div className={headRow}>
-					<div className="role-item-list">
-						<TextEditDiv className="font-bold" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
-						{ (data.item_list && data.item_list.length>1) &&
-						<>
-						<span className="divider">|</span>
-						<DelimitedList className="item-list" items={data.item_list} delimiter=", " onUpdate={val => handleUpdate('item_list', val)} />
-						</>}
+			{/* HEADER ROWS */}
+			{
+				head_rows.map(row =>
+					<div title="header-row" className={headRow}>
+						{row}
 					</div>
-					{ data.link && <LinkUI {...data.link} /> }
-				</div>
-			</div>
-			{/* ROW 2 */}
+				)
+			}
+			{/* BULLET POINTS */}
 			<div className="exp-content" style={{paddingLeft: Styles.exp_indent}}>
 				<ul>
-					{props.disableBucketFeatures ? bucket_items : (
+					{props.disableBucketFeatures ? UI_elements.bulletPoints : (
 						<ItemBucket
 							id="experience"
 							items={data?.description?.map((item: string, i: number)=>({
@@ -276,7 +224,7 @@ function ProjectUI(props: {
 							replaceDisabled deleteOnMoveDisabled
 							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
 						>
-							{bucket_items}
+							{UI_elements.bulletPoints}
 						</ItemBucket>
 					)}
 				</ul>
@@ -365,4 +313,4 @@ function DelimitedList(props: {
 	);
 }
 
-export { SectionUI, SummaryUI, ExperienceUI, ProjectUI, DateUI, LinkUI, DelimitedList }
+export { SectionUI, SummaryUI, ExperienceUI, DateUI, LinkUI, DelimitedList }

@@ -1,4 +1,4 @@
-import { ExperienceUI, SectionUI, SummaryUI, ProjectUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
+import { ExperienceUI, SectionUI, SummaryUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
 import { VersionedItemUI } from "../versionedItem";
 import TextEditDiv from "../texteditdiv";
 import { StyleManager } from "../../sections/ResumeBuilder/CVEditor/styles";
@@ -56,12 +56,12 @@ const BucketTypes: { [key: string]: BucketType } = {
     "experiences": {
         layoutClass: "grid",
         style: { rowGap: StyleManager.get("experiences_gap") },
-        DisplayItem: ExperienceUI
+        DisplayItem: props => <ExperienceUI type="experience" {...props}/>
     },
     "projects": {
         layoutClass:  "grid",
         style: { rowGap: StyleManager.get("experiences_gap") },
-        DisplayItem: ProjectUI
+        DisplayItem: props => <ExperienceUI type="project" {...props}/>
     },
     "exp_points": {
         layoutClass: "flex flex-col",
