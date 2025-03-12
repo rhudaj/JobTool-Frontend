@@ -173,7 +173,7 @@ function ResumeBuilder() {
             <div title="display-info" className="flex justify-between p-4 border-3 ">
                 {/* FILE NAME */}
                 <div>
-                    <span className="text-white">Name:</span>{" "}
+                    <span>Name:</span>
                     {cur_cv?.name}
                     {cvsState.trackMods[cvsState.curIdx] && (
                         <span className="text-darkgrey ml-2">{"(modified)"}</span>

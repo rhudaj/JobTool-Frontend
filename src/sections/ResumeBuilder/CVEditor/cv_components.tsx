@@ -168,7 +168,7 @@ function ExperienceUI(props: {
 			<LinkUI {...data.link}/>
 		),
 		bulletPoints: data.description.map((item: string, i: number)=>(
-			<li key={i}>
+			<li key={i} className="list-disc">
 				<TextEditDiv
 					tv={item}
 					onUpdate={newVal=>handleItemChange(i, newVal)}

@@ -70,7 +70,7 @@ const useNcvsAsCVInfo = () => {
             cv.data.sections.forEach(section => {
                 const section_name = section.name
                 sections[section_name] = sections[section_name] || {}
-                section.items.forEach(item => {
+                section.items.forEach((item: any) => {
                     let group_name
                     try {
                         group_name = (section_name === "summary") ? "default" : item.title
@@ -133,11 +133,11 @@ export function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void
         return <div id="info-pad">no CV info found</div>;
     }
     return (
-        <div id="info-pad" className="flex flex-col gap-5 p-5 bg-white">
+        <div id="info-pad" className="flex flex-col gap-5 p-10 bg-white">
             {state.sections.map((sec, sec_idx: number) => (
                 <div key={sec_idx} title="info-pad-section" >
                     <h2 className="mb-5 font-bold">{sec.secName.toUpperCase()}</h2>
-                    <div title='section-items' className="flex flex-col gap-5">
+                    <div title='section-items' className="flex flex-col gap-15">
                         {sec.items.map((vi: VersionedItem, i: number) =>
                             <VersionedItemUI
                                 className="border-2 p-3 rounded-md"
