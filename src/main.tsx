@@ -18,82 +18,10 @@ const tabs = [
     },
 ];
 
-/*
-
-/* .app-root-container {
-    width: 100vw;
-    height: 100vh;
-
-    overflow-x: hidden;
-    overflow-y: hidden;
-
-    display: flex;
-    flex-direction: column;
-} */
-
-/* #app-content {
-    display: flex;
-} */
-
-/* #side-menu {
-    display: grid;
-    grid-template-columns: max-content;  ensures they all have the same width
-    grid-auto-rows: min-content;
-    row-gap: 40rem;
-} */
-
-/* #section-container {
-    width: 300%;
-    height: 100cqh;          SOMEHOW THIS WORKS!
-    overflow-y: scroll;      ONLY THIS IS ALLOWED TO SCROLL!
-} */
-
-/* ------------------- STYLES ------------------- */
-
-/* .app-root-container {
-    background-color: #282c34;
-    color: white;
-} */
-
-/* #section-container {
-    background-color: rgb(123, 131, 138);
-} */
-/*
-#app-header {
-    font-size: 15rem;
-    border-bottom: 3px solid black;
-    padding: 10rem;
-    padding-left: 20rem;
-} */
-
-
-/* #side-menu {
-    font-size: 10rem;
-    padding-right: 20rem;
-} */
-
-/* .menu-item {
-    padding: 2em;
-    border-bottom: 1px solid grey;
-    color: rgb(210, 209, 209);
-}
-
-.menu-item:hover {
-    transform: scale(1.1);
-    color: rgb(255, 255, 255);
-}
-
-.menu-item.active {
-    color: white;
-    font-weight: bold;
-}
-
-*/
 
 function App() {
     return (
-        // ROOT CONTAINER: flex-col w-screen h-screen overflow-hidden
-        <div className="flex flex-col w-screen h-screen overflow-hidden bg-[#282c34] c-white">
+        <div className="grid grid-rows-[min-content_1fr] bg-[#282c34] c-white">
             <div id="app-header" className="text-3xl border-b-2 border-black p-4 pl-8">
                 <h1 className="">Job Tool</h1>
             </div>
@@ -113,7 +41,7 @@ function App() {
                 </TabList>
                 <TabPanels
                     id="section-container"
-                    className="h-[100cqh] overflow-y-scroll bg-[#868686]"
+                    className="h-full overflow-y-scroll bg-[#868686]"
                 >
                     {tabs.map((tab) => (
                         <TabPanel>{tab.content}</TabPanel>

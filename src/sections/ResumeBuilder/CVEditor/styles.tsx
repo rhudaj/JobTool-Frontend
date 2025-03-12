@@ -16,9 +16,27 @@ type StyleKeys =
 	| "p_font"
 	| "name_font";
 
+// TODO: should all units be 'cqw'? Shouldnt some be 'cqh' (e.g. sec_row_gap)
 const get_style = (val: number) => `${val * BASE_SIZE}cqw`;
 
+/*
+Note: in tailwind
+
+	CAN DO this:
+
+	className={`flex gap-[${getSomeNumber()}cqh]`}
+
+		- the dynamic value is a number
+
+	NOT this:
+
+	className={`flex gap-[${getSomeString()}]`}
+
+		- the dynamic values is a "<number><unit>"
+*/
+
 export class StyleManager {
+	static BASE_SIZE = 0.26;
 	static styles = {
 		page_padding_sides: 25,
 		page_padding_top: 20,
@@ -34,6 +52,10 @@ export class StyleManager {
 		p_font: 6,
 		name_font: 12,
 	};
+
+	static getVal(key: StyleKeys): number {
+		return StyleManager.styles[key] * this.BASE_SIZE;
+	}
 
 	// Getter: Returns the computed style as a string
 	static get(key: StyleKeys): string {

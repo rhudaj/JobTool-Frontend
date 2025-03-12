@@ -1,12 +1,5 @@
 import { ReactElement, useRef, useState } from "react";
 
-/*
-.split-view
-    & .view
-        max-height: 100cqh
-        overflow-y: scroll
-*/
-
 export function SplitView(props: {
     children: [ReactElement, ReactElement]
 }) {
@@ -53,7 +46,7 @@ export function SplitView(props: {
 
     // -------------- RENDER --------------
 
-    const view_style = "mh-[100cqh] overflow-y-scroll";
+    const view_style = "max-h-[100vh] overflow-y-scroll";
     const L_STYLE = { width: `${WRatio}%` };
     const R_STYLE = { width: `${100 - WRatio}%` };
 

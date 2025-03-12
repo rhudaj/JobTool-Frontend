@@ -17,6 +17,7 @@ interface Bucket<T=any> {
 
 interface BucketType {
     layoutClass?: string,
+    style?: React.CSSProperties,    // for dynamic css properties (if any)
     DisplayItem?: (props: { obj: any, onUpdate?: any }) => React.ReactNode,
 };
 
@@ -53,25 +54,29 @@ const BucketTypes: { [key: string]: BucketType } = {
         DisplayItem: SummaryUI,
     },
     "experiences": {
-        layoutClass: `grid gap-${StyleManager.get("experiences_gap")}`,
+        layoutClass: "grid",
+        style: { rowGap: StyleManager.get("experiences_gap") },
         DisplayItem: ExperienceUI
     },
     "projects": {
-        layoutClass: `grid gap-${StyleManager.get("experiences_gap")}`,
+        layoutClass:  "grid",
+        style: { rowGap: StyleManager.get("experiences_gap") },
         DisplayItem: ProjectUI
     },
     "exp_points": {
-        layoutClass: `flex flex-col gap-${StyleManager.get("bullet_point_gap")}`,
+        layoutClass: "flex flex-col",
+        style: { rowGap: StyleManager.get("bullet_point_gap") },
         DisplayItem: (props: {obj: string, onUpdate: any}) => (
             <li><TextEditDiv tv={props.obj} onUpdate={props.onUpdate} /></li>
         )
     },
     "cl_info_pad": {
-        layoutClass: `flex flex-row flex-wrap gap-2`,
+        layoutClass: "flex flex-row flex-wrap gap-2",
         DisplayItem: (props: {obj: string}) => <div className="text-item">{props.obj}</div>
     },
     "sections": {
-        layoutClass: `grid gap-${StyleManager.get("sec_row_gap")}`,
+        layoutClass: "grid",
+        style: { rowGap: StyleManager.get("sec_row_gap") },
         DisplayItem: SectionUI
     },
     "cl_paragraphs": {

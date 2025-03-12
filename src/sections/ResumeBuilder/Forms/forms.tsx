@@ -149,7 +149,7 @@ export const StylesForm = () => {
     };
 
     return (
-        <form id="styles-form" className={"flex flex-col w-100 mh-500 overflow-y-scroll"}>
+        <form id="styles-form" className={"flex flex-col w-100 max-h-500 overflow-y-scroll"}>
             {Object.entries(StyleManager.getAll()).map(([key, val]) => (
                 <>
                     <label>{key}</label>

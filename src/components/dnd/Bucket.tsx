@@ -167,6 +167,8 @@ function ItemBucket(props: {
     if (!bucket?.items || props.children.length !== bucket.items.length)
         return null;
 
+    const bt = BucketTypes[props.type ?? bucket.id]
+
     return (
         <div
             title="bucket-dnd-wrapper"
@@ -176,7 +178,8 @@ function ItemBucket(props: {
         >
             <div
                 title="bucket-items"
-                className={BucketTypes[props.type ?? bucket.id].layoutClass}
+                className={bt.layoutClass}
+                style={bt.style}
             >
                 {bucket.items.map((I: Item, i: number) => {
                     return (

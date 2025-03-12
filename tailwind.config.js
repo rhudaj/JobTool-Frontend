@@ -5,10 +5,11 @@ export default {
       "./src/**/*.{js,ts,jsx,tsx}",
     ],
     theme: {
-      extend: {},
-      colors: {
-        bggrey: 'rgb(123, 131, 138)'
-      }
+      extend: {
+        colors: {
+          bggrey: 'rgb(123, 131, 138)',
+        },
+      },
     },
     plugins: [],
   }
