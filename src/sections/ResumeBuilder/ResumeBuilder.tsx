@@ -13,6 +13,7 @@ import { useShallow } from 'zustand/react/shallow'
 import SavedCVsUI from "./savedCVs";
 import { ImportForm, SaveForm, FindReplaceForm, StylesForm, SaveFormData, ExportForm, AnnotationForm } from "./forms";
 import { CustomStyles } from "../../styles";
+import BackendAPI from "../../backend_api";
 
 const USE_BACKEND = import.meta.env.VITE_USE_BACKEND === "1";
 const saveAnnotation2Backend = (annotation: {
@@ -23,9 +24,16 @@ const saveAnnotation2Backend = (annotation: {
         console.log('Not saving annotation (backend disabled)')
         return;
     }
+    if(! annotation || !annotation.job || !annotation.ncv) {
+        console.log("Invalid annotation: ", annotation);
+        return;
+    }
     console.log("Saving annotation to backend!")
-
-
+    BackendAPI.request({
+        method: "POST",
+        endpoint: "annotations",
+        body: annotation
+    })
 };
 
 
