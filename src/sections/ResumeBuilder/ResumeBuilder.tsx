@@ -113,14 +113,25 @@ function ResumeBuilder() {
     //                                      POPUPS
     // --------------------------------------------------------------------------------
 
-    const exportPopup = usePopup("Export CV")
-    const savePopup = usePopup("Save CV")
+    const exportPopup = usePopup("Export")
+    const savePopup = usePopup("Save")
     const importPopup = usePopup("Import")
-    const deletePopup = usePopup("Delete CV")
-    const findReplacePopup = usePopup()
-    const updateStylesPopup = usePopup("Customize CV Style")
+    const deletePopup = usePopup("Delete")
+    const findReplacePopup = usePopup('Find/Replace')
+    const updateStylesPopup = usePopup("Style")
 
-    const popups = {
+    const popups: { [key: string]: {hook, content, disabled?} } = {
+        save: {
+            hook: savePopup,
+            content: (
+                <SaveForm
+                    cvInfo={cur_cv}
+                    onSave={CONTROLS.popups.onSaveFormSubmit}
+                />
+            ),
+            // Disable save button when no changes have been made
+            disabled: !curIsModified
+        },
         export: {
             hook: exportPopup,
             content: (
@@ -129,15 +140,6 @@ function ResumeBuilder() {
                     <button onClick={CONTROLS.popups.onPDFClicked}>PDF</button>
                     <button onClick={CONTROLS.popups.onJsonClicked}>JSON</button>
                 </div>
-            )
-        },
-        save: {
-            hook: savePopup,
-            content: (
-                <SaveForm
-                    cvInfo={cur_cv}
-                    onSave={CONTROLS.popups.onSaveFormSubmit}
-                />
             )
         },
         import: {
@@ -202,7 +204,13 @@ function ResumeBuilder() {
                 {/* BUTTONS */}
                 <div title="cv-buttons" className="max-w-33% flex gap-1 flex-wrap">
                     {Object.values(popups).map(popup =>
-                        popup.hook.getTriggerButton({ content: popup.content }, { className:"border-1 p-1 hover:bg-white"})
+                        popup.hook.getTriggerButton(
+                            { content: popup.content },
+                            {
+                                className:"border-1 p-1 hover:bg-white",
+                                disabled: popup.disabled
+                            }
+                        )
                     )}
                 </div>
             </div>
