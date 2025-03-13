@@ -122,8 +122,6 @@ function ExperienceUI(props: {
 	disableBucketFeatures?: boolean
 }) {
 
-	console.log('type = ', props.type);
-
 	const Styles = StyleManager.getAll();
 
 	const handleUpdate = (field: keyof Experience, val: any) => {

@@ -124,9 +124,7 @@ function ResumeBuilder() {
         ),
         save: (
             <SaveForm
-                name={cur_cv?.name}
-                path={cur_cv?.path}
-                tags={cur_cv?.tags}
+                cvInfo={cur_cv}
                 onSave={CONTROLS.popups.onSaveFormSubmit}
             />
         ),

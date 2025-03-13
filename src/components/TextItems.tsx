@@ -1,18 +1,18 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useImmer } from "use-immer";
 
-const TextItems = forwardRef((props: {
-    initItems?: string[]
-}, ref: React.ForwardedRef<any>) => {
+const TextItems = (props: {
+    initItems?: string[],
+    onUpdate: (newItems: string[]) => void,
+}) => {
 
-    const [items, setItems] = useImmer<string[]>([]);
+    const [items, setItems] = useImmer<string[]>(props.initItems || []);
     const text_ref = useRef<HTMLDivElement>(null);
 
-    useEffect(()=>setItems(props.initItems), [props.initItems]);
-
-    useImperativeHandle(ref, () => ({
-        get() { return items; }
-    }));
+    useEffect(()=>{
+        console.log('TextItems calling props.onUpdate')
+        props.onUpdate(items);
+    }, [items]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.key !== 'Enter') return; // only care ab
@@ -43,6 +43,7 @@ const TextItems = forwardRef((props: {
             <div title="items-container" className="max-w-[30rem] flex flex-wrap gap-4  border-1 border-dashed border-black p-4">
                 { items.map((txt: string, idx: number) => (
                     <span
+                        key={`text-item-#${idx}`}
                         title="item"
                         className="p-3 border-1 border-dashed border-blue"
                         onDoubleClick={()=>onDeleteItem(idx)}
@@ -53,6 +54,6 @@ const TextItems = forwardRef((props: {
             </div>
         </div>
     )
-});
+};
 
 export default TextItems;

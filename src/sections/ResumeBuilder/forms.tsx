@@ -1,84 +1,88 @@
-import { useEffect, useRef, useState } from "react";
-import TextEditDiv from "../../components/texteditdiv";
+import { useEffect, useState } from "react";
 import TextItems from "../../components/TextItems";
-import { NamedCV } from "job-tool-shared-types";
+import { CVMetaInfo, NamedCV } from "job-tool-shared-types";
 import { StyleManager } from "./CVEditor/styles";
-
-import { useForm, SubmitHandler } from "react-hook-form"
+import { useForm, SubmitHandler, Controller } from "react-hook-form"
 import { CustomStyles } from "../../styles";
-import { useImmer } from "use-immer";
 
-interface SaveForm {
-    name: string
-    path: string
-    tags: string[]
-}
+/**
+ * Notes on "react-hook-form"
+ * --------------------------
+ * `register`
+ *
+ *      SOURCE: https://react-hook-form.com/docs/useform/register
+ *      WHAT? method to register an input|select element & apply validation rules to React Hook Form.
+ *      EXAMPLE: register('name', { required: true })
+ *      RETURNS: { ref, name, onChange, onBlur }
+ *
+*/
 
-// save form
+interface SaveFormInput extends CVMetaInfo {}
 export const SaveForm = (props: {
-    name: string;
-    path: string;
-    tags: string[];
-    onSave: (formData: SaveForm) => void;
-    disabled?: boolean;
+    cvInfo: CVMetaInfo
+    onSave: (formData: SaveFormInput) => void;
+    disabled?: boolean
+    saveAnnotation?: boolean
 }) => {
-    const [formData, setFormData] = useImmer<SaveForm>({
-        name: "",
-        path: "",
-        tags: [],
+
+    const {
+        register,
+        control,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<SaveFormInput>({
+        defaultValues: {
+            name: "untitled",
+            path: "/",
+            tags: []
+        },
+        values: props.cvInfo,
+        resolver: async (data) => {
+            // Custom validation
+            const errors: Record<string, { message: string }> = {};
+            if (!data.name) errors.name = { message: "File name required!" };
+            if (!data.path) errors.path = { message: "Path required!" };
+            return { values: data, errors };
+        }
     });
-
-    const tags_ref = useRef(null);
-    const [isNameValid, setIsNameValid] = useState(true);
-    const [reason, setReason] = useState("File exists. Will overwrite!");
-
-    useEffect(() => setFormData({
-        name: props.name,
-        path: props.path,
-        tags: props.tags,
-    }), [props.name, props.path, props.tags]);
-
-    // Handle name input
-    const handleNameChange = (newName: string) => {
-        setFormData(D => { D.name = newName })
-        const isValid = newName && newName != "";
-        setIsNameValid(isValid);
-        setReason(
-            !isValid
-                ? "Invalid file name!"
-                : newName === formData.name
-                ? "File exists. Will overwrite!"
-                : ""
-        );
-    };
-
-    // Handle form submission
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        props.onSave({
-            name: formData.name,
-            path: formData.path,
-            tags: tags_ref.current.get(),
-        });
-    };
 
     return (
         <form
-            onSubmit={handleSubmit}
-            style={{ display: "flex", flexDirection: "column", gap: "5rem" }}
+            className="grid grid-cols-[max-content_1fr] gap-x-10"
+            onSubmit={handleSubmit(props.onSave)}
+            onChange={(e)=>console.log('SAVE FORM CHANGED: ', (e.target as any).value)}
         >
-            <p>File Name:</p>
-            <TextEditDiv tv={formData.name} onUpdate={handleNameChange} />
-            <p style={{ color: isNameValid ? "grey" : "black" }}>{reason}</p>
 
-            <p>Tags (optional):</p>
-            <TextItems initItems={formData.tags} ref={tags_ref} />
+            {/* FIELD #1 -- NAME */}
+            <label>File Name:</label>
+            <div>
+                <input name="file-name" type="text" {...register('name')} />
+                <p>{errors.name?.message}</p>
+            </div>
 
-            <button type="submit" disabled={!isNameValid}>
-                Save
-            </button>
+            {/* FIELD #2 -- PATH */}
+            <label>Path:</label>
+            <div>
+                <input name="path" type="text" {...register('path')} />
+                <p>{errors.path?.message}</p>
+            </div>
+
+            {/* FIELD #3 -- TAGS */}
+            <label>Tags:</label>
+            <Controller
+                name="tags"
+                control={control}
+                render={({ field }) => (
+                    <TextItems
+                        initItems={field.value}
+                        // NOTE: the native <form> element wont react to changes. Only the react-hook-form.
+                        onUpdate={(newTags: string[]) => field.onChange(newTags)}
+                    />
+                )}
+            />
+            <button type="submit">Save</button>
         </form>
-    );
+    )
 };
 
 
@@ -185,7 +189,7 @@ export const StylesForm = () => {
 };
 
 // If TEST_MODE is enabled
-export const SaveTrainingExampleForm = (props: { onSave: (job: string) => void }) => {
+const SaveTrainingExampleForm = (props: { onSave: (job: string) => void }) => {
 
     const [job, setJob] = useState<string>(null);
     return (
