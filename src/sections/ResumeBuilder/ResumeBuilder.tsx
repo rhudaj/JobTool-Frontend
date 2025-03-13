@@ -14,7 +14,7 @@ import { useCvInfoStore } from "./useCVInfo";
 import { useShallow } from 'zustand/react/shallow'
 import SavedCVsUI from "./savedCVs";
 import { Button } from '@headlessui/react'
-import { ImportForm, SaveForm, FindReplaceForm, StylesForm } from "./forms";
+import { ImportForm, SaveForm, FindReplaceForm, StylesForm, SaveFormData } from "./forms";
 import { CustomStyles } from "../../styles";
 
 const USE_BACKEND = import.meta.env.VITE_USE_BACKEND === "1";
@@ -25,6 +25,7 @@ function ResumeBuilder() {
 
     const cvsState = useCvsStore();
     const cur_cv = useCvsStore(useShallow(s => s.ncvs[s.curIdx]));
+    const curIsModified = useCvsStore(s => s.trackMods[s.curIdx])
 
     const cvInfoState = useCvInfoStore();
 
@@ -48,9 +49,11 @@ function ResumeBuilder() {
                 exportPopup.close();
             },
 
-            onSaveFormSubmit: (formData: any) => {
+            onSaveFormSubmit: (formData: SaveFormData) => {
+                console.log("onSaveFormSubmit: ", formData);
+
                 // first check that the cv has actually changed!
-                if (!cvsState.trackMods[cvsState.curIdx]) {
+                if (!curIsModified) {
                     alert("No changes have been made to the CV!");
                     return;
                 }
@@ -106,7 +109,10 @@ function ResumeBuilder() {
         }
     };
 
-    // ref's to popups
+    // --------------------------------------------------------------------------------
+    //                                      POPUPS
+    // --------------------------------------------------------------------------------
+
     const exportPopup = usePopup("Export CV")
     const savePopup = usePopup("Save CV")
     const importPopup = usePopup("Import")
@@ -114,57 +120,68 @@ function ResumeBuilder() {
     const findReplacePopup = usePopup()
     const updateStylesPopup = usePopup("Customize CV Style")
 
-    const POPUP_CONTENT = {
-        export: (
-            <div id="export-popup" className={CustomStyles.popup_content}>
-                <h2>Export As</h2>
-                <button onClick={CONTROLS.popups.onPDFClicked}>PDF</button>
-                <button onClick={CONTROLS.popups.onJsonClicked}>JSON</button>
-            </div>
-        ),
-        save: (
-            <SaveForm
-                cvInfo={cur_cv}
-                onSave={CONTROLS.popups.onSaveFormSubmit}
-            />
-        ),
-        import: (
-            <div id="import-popup" className={CustomStyles.popup_content}>
-                <ImportForm cb={CONTROLS.settings.onImportFormComplete}/>
-            </div>
-        ),
-        delete: (
-            <div className={CustomStyles.popup_content}>
-                <p>Are you sure you want to delete?</p>
-                <button onClick={CONTROLS.popups.onDeleteCV}>Yes</button>
-            </div>
-        ),
-        findReplace: (
-            <FindReplaceForm cb={CONTROLS.settings.onFindAndReplace} />
-        ),
-        styles: (
-            <StylesForm/>
-        )
-    }
+    const popups = {
+        export: {
+            hook: exportPopup,
+            content: (
+                <div id="export-popup" className={CustomStyles.popup_content}>
+                    <h2>Export As</h2>
+                    <button onClick={CONTROLS.popups.onPDFClicked}>PDF</button>
+                    <button onClick={CONTROLS.popups.onJsonClicked}>JSON</button>
+                </div>
+            )
+        },
+        save: {
+            hook: savePopup,
+            content: (
+                <SaveForm
+                    cvInfo={cur_cv}
+                    onSave={CONTROLS.popups.onSaveFormSubmit}
+                />
+            )
+        },
+        import: {
+            hook: importPopup,
+            content: (
+                <div id="import-popup" className={CustomStyles.popup_content}>
+                    <ImportForm cb={CONTROLS.settings.onImportFormComplete}/>
+                </div>
+            )
+        },
+        delete: {
+            hook: deletePopup,
+            content: (
+                <div className={CustomStyles.popup_content}>
+                    <p>Are you sure you want to delete?</p>
+                    <button onClick={CONTROLS.popups.onDeleteCV}>Yes</button>
+                </div>
+            )
+        },
+        findReplace: {
+            hook: findReplacePopup,
+            content: (
+                <FindReplaceForm cb={CONTROLS.settings.onFindAndReplace} />
+            )
+        },
+        styles: {
+            hook: updateStylesPopup,
+            content: (
+                <StylesForm/>
+            )
+        }
+    };
 
-    // ---------------- VIEW ----------------
+    // --------------------------------------------------------------------------------
+    //                                      VIEW
+    // --------------------------------------------------------------------------------
 
     if ( !cvsState.status || !cvInfoState.status ) return null;
     return (
         <Section id="section-cv" heading="Resume Builder">
 
-            {/* ------------ POPUPS ------------ */}
-            {[
-                exportPopup.component,
-                savePopup.component,
-                importPopup.component,
-                deletePopup.component,
-                findReplacePopup.component,
-                updateStylesPopup.component,
-            ]}
             {/* ------------ VIEW SAVED CVs ------------ */}
             <SubSection id="named-cvs" heading="Resumes">
-                <Button onClick={()=>importPopup.open(POPUP_CONTENT.import)} style={{width: "min-content"}}>New</Button>
+                { popups.import.hook.getTriggerButton({content: popups.import.content}) }
                 <SavedCVsUI />
             </SubSection>
             {/* ------------ CUR CV INFO, SAVE/EXPORT BUTTONS ------------ */}
@@ -184,14 +201,8 @@ function ResumeBuilder() {
                 </div>
                 {/* BUTTONS */}
                 <div title="cv-buttons" className="max-w-33% flex gap-1 flex-wrap">
-                    {[
-                        [ 'Export', ()=>exportPopup.open(POPUP_CONTENT.export) ],
-                        [ 'Delete', ()=>deletePopup.open(POPUP_CONTENT.delete) ],
-                        [ 'Find/Replace', ()=>findReplacePopup.open(POPUP_CONTENT.findReplace) ],
-                        [ 'Styles', ()=>updateStylesPopup.open(POPUP_CONTENT.styles) ],
-                        [ 'Save', ()=>savePopup.open(POPUP_CONTENT.save) ]
-                    ].map(([label, onClick]: [string, ()=>void])=>
-                        <button onClick={onClick} className="border-1 p-1 hover:bg-white">{label}</button>
+                    {Object.values(popups).map(popup =>
+                        popup.hook.getTriggerButton({ content: popup.content }, { className:"border-1 p-1 hover:bg-white"})
                     )}
                 </div>
             </div>

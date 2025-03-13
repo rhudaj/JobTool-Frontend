@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import TextItems from "../../components/TextItems";
 import { CVMetaInfo, NamedCV } from "job-tool-shared-types";
 import { StyleManager } from "./CVEditor/styles";
@@ -17,10 +17,13 @@ import { CustomStyles } from "../../styles";
  *
 */
 
-interface SaveFormInput extends CVMetaInfo {}
+export interface SaveFormData extends CVMetaInfo {
+    // For annotations
+    jobText?: string
+}
 export const SaveForm = (props: {
     cvInfo: CVMetaInfo
-    onSave: (formData: SaveFormInput) => void;
+    onSave: (formData: SaveFormData) => void;
     disabled?: boolean
     saveAnnotation?: boolean
 }) => {
@@ -30,11 +33,12 @@ export const SaveForm = (props: {
         control,
         handleSubmit,
         formState: { errors },
-    } = useForm<SaveFormInput>({
+    } = useForm<SaveFormData>({
         defaultValues: {
             name: "untitled",
             path: "/",
-            tags: []
+            tags: [],
+            jobText: "",
         },
         values: props.cvInfo,
         resolver: async (data) => {
@@ -48,38 +52,47 @@ export const SaveForm = (props: {
 
     return (
         <form
-            className="grid grid-cols-[max-content_1fr] gap-x-10"
+            className="flex flex-col gap-10"
             onSubmit={handleSubmit(props.onSave)}
             onChange={(e)=>console.log('SAVE FORM CHANGED: ', (e.target as any).value)}
         >
+            <div title="cv-metadata" className="grid grid-cols-[max-content_1fr] gap-x-10   border-1 border-b p-4">
+                {/* FIELD #1 -- NAME */}
+                <label>File Name:</label>
+                <div>
+                    <input name="file-name" type="text" {...register('name')} />
+                    <p>{errors.name?.message}</p>
+                </div>
 
-            {/* FIELD #1 -- NAME */}
-            <label>File Name:</label>
-            <div>
-                <input name="file-name" type="text" {...register('name')} />
-                <p>{errors.name?.message}</p>
+                {/* FIELD #2 -- PATH */}
+                <label>Path:</label>
+                <div>
+                    <input name="path" type="text" {...register('path')} />
+                    <p>{errors.path?.message}</p>
+                </div>
+
+                {/* FIELD #3 -- TAGS */}
+                <label>Tags:</label>
+                <Controller
+                    name="tags"
+                    control={control}
+                    render={({ field }) => (
+                        <TextItems
+                            initItems={field.value}
+                            // NOTE: the native <form> element wont react to changes. Only the react-hook-form.
+                            onUpdate={(newTags: string[]) => field.onChange(newTags)}
+                        />
+                    )}
+                />
             </div>
-
-            {/* FIELD #2 -- PATH */}
-            <label>Path:</label>
-            <div>
-                <input name="path" type="text" {...register('path')} />
-                <p>{errors.path?.message}</p>
+            <div title="job-text" className="flex flex-col  border-1 border-b p-4">
+                <label>Job Text</label>
+                <textarea
+                    {...register('jobText')}
+                    placeholder="Paste a job description"
+                    className="min-h-30 align-top"
+                />
             </div>
-
-            {/* FIELD #3 -- TAGS */}
-            <label>Tags:</label>
-            <Controller
-                name="tags"
-                control={control}
-                render={({ field }) => (
-                    <TextItems
-                        initItems={field.value}
-                        // NOTE: the native <form> element wont react to changes. Only the react-hook-form.
-                        onUpdate={(newTags: string[]) => field.onChange(newTags)}
-                    />
-                )}
-            />
             <button type="submit">Save</button>
         </form>
     )
@@ -186,23 +199,4 @@ export const StylesForm = () => {
             ))}
         </form>
     )
-};
-
-// If TEST_MODE is enabled
-const SaveTrainingExampleForm = (props: { onSave: (job: string) => void }) => {
-
-    const [job, setJob] = useState<string>(null);
-    return (
-        <div className={CustomStyles.popup_content}>
-            <p>Save Training Example</p>
-            <textarea
-                className="job-paste-area"
-                placeholder="paste job description"
-                onBlur={(e) => setJob(e.target.value)}
-            />
-            <button disabled={job === null} onClick={() => props.onSave(job)}>
-                Save
-            </button>
-        </div>
-    );
 };

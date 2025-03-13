@@ -4,9 +4,9 @@ import {
     DialogPanel,
     DialogTitle,
 } from "@headlessui/react";
-import { useState, ReactNode, useRef } from "react";
+import { useState, ReactNode, useRef, useMemo, Ref } from "react";
 
-export function PopupExample(props: {
+export function PopupUI(props: {
     onClose: () => void
     children: ReactNode
     title?: string
@@ -33,23 +33,37 @@ export function PopupExample(props: {
     );
 }
 
+interface PopupParams {
+    title?: string
+    content?: ReactNode
+};
 export const usePopup = (title?: string, content?: ReactNode) => {
-    const [popup, setPopup] = useState<ReactNode>(null);
+
+    const [component, setComponent] = useState<ReactNode>(null);
     const contentRef = useRef(content);
 
     const open = (content?: ReactNode | any) => {
         // If they passed a valid react component, use that instead
         content = (content && !content.$$typeof) ? contentRef.current : content;
-        console.log("opening popup...");
-        setPopup(
-            <PopupExample title={title} onClose={close}>{content}</PopupExample>
+        console.log(`opening '${title}' popup`);
+        setComponent(
+            <PopupUI title={title} onClose={close}>{content}</PopupUI>
         );
     };
 
     const close = () => {
-        console.log("closing popup...");
-        setPopup(null);
+        console.log(`closing '${title}' popup`);
+        setComponent(null);
     };
 
-    return { open, close, component: popup };
+    const getTriggerButton = (p?: PopupParams, otherParams?: any) => (
+        <>
+            {component}
+            <button {...otherParams} onClick={()=>open(p.content)}>{p.title || title}</button>
+        </>
+    )
+
+
+
+    return { open, close, component, getTriggerButton };
 };
