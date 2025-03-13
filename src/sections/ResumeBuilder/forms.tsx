@@ -52,51 +52,67 @@ export const SaveForm = (props: {
 
     return (
         <form
-            className="flex flex-col gap-10"
+            className="grid grid-cols-[min-content_1fr] gap-4"
             onSubmit={handleSubmit(props.onSave)}
-            onChange={(e)=>console.log('SAVE FORM CHANGED: ', (e.target as any).value)}
         >
-            <div title="cv-metadata" className="grid grid-cols-[max-content_1fr] gap-x-10   border-1 border-b p-4">
-                {/* FIELD #1 -- NAME */}
-                <label>File Name:</label>
-                <div>
-                    <input name="file-name" type="text" {...register('name')} />
-                    <p>{errors.name?.message}</p>
-                </div>
-
-                {/* FIELD #2 -- PATH */}
-                <label>Path:</label>
-                <div>
-                    <input name="path" type="text" {...register('path')} />
-                    <p>{errors.path?.message}</p>
-                </div>
-
-                {/* FIELD #3 -- TAGS */}
-                <label>Tags:</label>
-                <Controller
-                    name="tags"
-                    control={control}
-                    render={({ field }) => (
-                        <TextItems
-                            initItems={field.value}
-                            // NOTE: the native <form> element wont react to changes. Only the react-hook-form.
-                            onUpdate={(newTags: string[]) => field.onChange(newTags)}
-                        />
-                    )}
-                />
+            {/* FIELD #1 -- NAME */}
+            <label>File Name:</label>
+            <div>
+                <input name="file-name" type="text" {...register('name')} />
+                <p>{errors.name?.message}</p>
             </div>
-            <div title="job-text" className="flex flex-col  border-1 border-b p-4">
-                <label>Job Text</label>
-                <textarea
-                    {...register('jobText')}
-                    placeholder="Paste a job description"
-                    className="min-h-30 align-top"
-                />
+
+            {/* FIELD #2 -- PATH */}
+            <label>Path:</label>
+            <div>
+                <input name="path" type="text" {...register('path')} />
+                <p>{errors.path?.message}</p>
             </div>
+
+            {/* FIELD #3 -- TAGS */}
+            <label>Tags:</label>
+            <Controller
+                name="tags"
+                control={control}
+                render={({ field }) => (
+                    <TextItems
+                        initItems={field.value}
+                        // NOTE: the native <form> element wont react to changes. Only the react-hook-form.
+                        onUpdate={(newTags: string[]) => field.onChange(newTags)}
+                    />
+                )}
+            />
             <button type="submit">Save</button>
         </form>
     )
 };
+
+
+export interface ExportForm {
+    job?: string
+}
+export const AnnotationForm = (props: {
+    onSubmit: (formData: ExportForm) => void
+}) => {
+    const { register, handleSubmit, formState } = useForm<ExportForm>({
+        defaultValues: { job: "" }
+    });
+
+    return (
+        <form
+            className="flex flex-col gap-10"
+            onSubmit={handleSubmit(props.onSubmit)}
+        >
+            <label>Job Text</label>
+            <textarea
+                {...register('job', {required: true})}
+                placeholder="Paste a job description"
+                className="min-h-30 align-top"
+            />
+            <button type="submit" disabled={!formState.isValid}>Submit</button>
+        </form>
+    )
+}
 
 
 interface ImportForm {

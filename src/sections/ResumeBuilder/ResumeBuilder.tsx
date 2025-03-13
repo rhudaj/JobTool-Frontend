@@ -5,19 +5,28 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import CVEditor from "./CVEditor/cveditor";
 import * as util from "../../util/fileInOut";
-
 import { Section, SubSection, SplitView, InfoPad, PrintablePage } from "../../components"
-
 import { usePopup } from "../../hooks/popup";
 import { useCvsStore, save2backend as saveCv2backend } from "./useCVs";
 import { useCvInfoStore } from "./useCVInfo";
 import { useShallow } from 'zustand/react/shallow'
 import SavedCVsUI from "./savedCVs";
-import { Button } from '@headlessui/react'
-import { ImportForm, SaveForm, FindReplaceForm, StylesForm, SaveFormData } from "./forms";
+import { ImportForm, SaveForm, FindReplaceForm, StylesForm, SaveFormData, ExportForm, AnnotationForm } from "./forms";
 import { CustomStyles } from "../../styles";
 
 const USE_BACKEND = import.meta.env.VITE_USE_BACKEND === "1";
+const saveAnnotation2Backend = (annotation: {
+    job: string,
+    ncv: NamedCV,
+}) => {
+    if(!USE_BACKEND) {
+        console.log('Not saving annotation (backend disabled)')
+        return;
+    }
+
+
+};
+
 
 function ResumeBuilder() {
 
@@ -49,22 +58,24 @@ function ResumeBuilder() {
                 exportPopup.close();
             },
 
+            /** ASSUMPTION: for this form to be open, cur_cv was modified */
             onSaveFormSubmit: (formData: SaveFormData) => {
+                // 1. Save NCV to backend
                 console.log("onSaveFormSubmit: ", formData);
-
-                // first check that the cv has actually changed!
-                if (!curIsModified) {
-                    alert("No changes have been made to the CV!");
-                    return;
-                }
-                // if it has, check wether new/update
                 const overwrite = formData.name === cur_cv.name;
                 saveCv2backend({
                     ...formData,
                     data: cur_cv.data,
                 }, overwrite)
                 savePopup.close();
+            },
 
+            /** ASSUMPTION: for this form to be called, `job` was not empty */
+            onSaveAnnotationFormSubmit: (formData: ExportForm) => {
+                saveAnnotation2Backend({
+                    job: formData.job,
+                    ncv: cur_cv,
+                })
             },
 
             onImportJsonFileChange: (
@@ -136,6 +147,7 @@ function ResumeBuilder() {
             hook: exportPopup,
             content: (
                 <div id="export-popup" className={CustomStyles.popup_content}>
+                    <AnnotationForm onSubmit={CONTROLS.popups.onSaveAnnotationFormSubmit}/>
                     <h2>Export As</h2>
                     <button onClick={CONTROLS.popups.onPDFClicked}>PDF</button>
                     <button onClick={CONTROLS.popups.onJsonClicked}>JSON</button>
