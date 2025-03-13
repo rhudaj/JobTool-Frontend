@@ -1,4 +1,3 @@
-import { useState } from "react";
 import TextItems from "../../components/TextItems";
 import { CVMetaInfo, NamedCV } from "job-tool-shared-types";
 import { StyleManager } from "./CVEditor/styles";

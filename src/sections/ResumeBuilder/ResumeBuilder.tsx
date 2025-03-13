@@ -23,6 +23,7 @@ const saveAnnotation2Backend = (annotation: {
         console.log('Not saving annotation (backend disabled)')
         return;
     }
+    console.log("Saving annotation to backend!")
 
 
 };
@@ -72,6 +73,7 @@ function ResumeBuilder() {
 
             /** ASSUMPTION: for this form to be called, `job` was not empty */
             onSaveAnnotationFormSubmit: (formData: ExportForm) => {
+                console.log('onSaveAnnotationFormSubmit ')
                 saveAnnotation2Backend({
                     job: formData.job,
                     ncv: cur_cv,
@@ -218,10 +220,7 @@ function ResumeBuilder() {
                     {Object.values(popups).map(popup =>
                         popup.hook.getTriggerButton(
                             { content: popup.content },
-                            {
-                                className:"border-1 p-1 hover:bg-white",
-                                disabled: popup.disabled
-                            }
+                            { disabled: popup.disabled }
                         )
                     )}
                 </div>
