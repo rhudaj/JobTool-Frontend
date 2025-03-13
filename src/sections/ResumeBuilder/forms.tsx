@@ -3,6 +3,7 @@ import { CVMetaInfo, NamedCV } from "job-tool-shared-types";
 import { StyleManager } from "./CVEditor/styles";
 import { useForm, SubmitHandler, Controller } from "react-hook-form"
 import { CustomStyles } from "../../styles";
+import { useRef, useState } from "react";
 
 /**
  * Notes on "react-hook-form"
@@ -97,10 +98,17 @@ export const AnnotationForm = (props: {
         defaultValues: { job: "" }
     });
 
+    const [submitDone, setSubmitDone] = useState(false);
+
+    const onSubmit = (data) => {
+        props.onSubmit(data);
+        setSubmitDone(true);
+    }
+
     return (
         <form
             className="flex flex-col gap-10"
-            onSubmit={handleSubmit(props.onSubmit)}
+            onSubmit={handleSubmit(onSubmit)}
         >
             <label>Job Text</label>
             <textarea
@@ -108,7 +116,7 @@ export const AnnotationForm = (props: {
                 placeholder="Paste a job description"
                 className="min-h-30 align-top"
             />
-            <button type="submit" disabled={!formState.isValid}>Submit</button>
+            <button type="submit" disabled={!formState.isValid || submitDone}>Submit</button>
         </form>
     )
 }
