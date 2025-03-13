@@ -5,17 +5,16 @@ import { Item } from "./types";
 import { BucketItemContext } from "./Bucket";
 import { ControlsBox, useHoverBuffer } from "../ControlBox";
 
-
-const getItemWrapperStyle = (isDragging: boolean, isDroppable: boolean) =>
-    "relative " + (isDragging ? "opacity-10" : "") + (isDroppable ? "bg-lightcyan" : "");
-
 const control_button_style = "border-1 border-black opacity-50 hover:opacity-100";
 
 /**
  * This item should only ever be rendered inside a Bucket component.
  * Because it requires the BucketContext to be present.
 */
-export default function BucketItem(props: { item: Item, children: React.ReactNode }) {
+export default function BucketItem(props: {
+    item: Item,
+    children: React.ReactNode
+}) {
 
     // -------------------- STATE ---------------------
 
@@ -92,10 +91,16 @@ export default function BucketItem(props: { item: Item, children: React.ReactNod
         throw new Error("BucketItem must be rendered inside a Bucket component.");
     }
 
-    const styles = getItemWrapperStyle(isDragging, isDropTarget);
-
     return (
-        <div title="dnd-item-wrapper" ref={ref} className={styles}>
+        <div
+            ref={ref}
+            title="dnd-item-wrapper"
+            className={"relative"}
+            style={{
+                opacity: isDragging ? 10 : 1,
+                backgroundColor: isDropTarget ? "lightcyan" : null
+            }}
+        >
             {props.children}
             { isHovered &&
             <ControlsBox buttonClass={control_button_style} placement="top" controls={[
@@ -129,6 +134,8 @@ export default function BucketItem(props: { item: Item, children: React.ReactNod
     );
 };
 
+// TODO: combine BucketItem & StandaloneDragItem (somehow)
+// OR: somehow a bucket can inject features/controls into a StandaloneDragItem.
 /**
  * A standalone drag item that can be used outside of a bucket.
  * It has no drop functionality, only drag.
@@ -165,10 +172,12 @@ export function StandaloneDragItem(props: {
 
     // -----------------RENDER-----------------
 
-    const styles = getItemWrapperStyle(isDragging, false);
-
     return (
-        <div ref={ref} className={styles}>
+        <div
+            ref={ref}
+            className={"relative"}
+            style={{ opacity: isDragging ? 10 : 1 }}
+        >
             { isHovered &&
             <ControlsBox placement="top" controls={[{
                 id: "move",

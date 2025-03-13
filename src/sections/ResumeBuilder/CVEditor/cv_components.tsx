@@ -95,7 +95,7 @@ function SummaryUI(props: { obj: any, onUpdate?: (newObj: any)=>void }) {
 					<UI.DelimitedList
 						items={props.obj[subSec]}
 						delimiter=", "
-						onUpdate={val => handleUpdate("languages", val)}
+						onUpdate={val => handleUpdate(subSec, val)}
 					/>
 				</div>
 			)}
@@ -152,7 +152,7 @@ function ExperienceUI(props: {
 			<TextEditDiv className="font-bold" tv={data.title} onUpdate={val => handleUpdate('title', val)} />
 		),
 		role:  (
-			<TextEditDiv className="italic" tv={data.role} onUpdate={val => handleUpdate('title', val)} />
+			<TextEditDiv className="italic" tv={data.role} onUpdate={val => handleUpdate('role', val)} />
 		),
 		item_list: (
 			data.item_list.length < 2 ? null :

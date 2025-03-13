@@ -6,7 +6,7 @@ import { BucketAction, BucketActions, bucketReducer } from "./useBucket";
 
 // Shows a gap between items when dragging over the bucket.
 function DropGap(props: { isActive: boolean }) {
-    return <div className="border-2 border-solid border-red"
+    return <div className="border-2 border-solid border-red-500"
     hidden={!props.isActive} />;
 }
 
@@ -185,7 +185,7 @@ function ItemBucket(props: {
                     return (
                         <div key={`bucket-${bucket.id}-item-${i}`}>
                             {i === 0 && (
-                                <DropGap isActive={hoveredGap === prevGap(i)} />
+                                <DropGap isActive={i === 0 && hoveredGap === prevGap(i)} />
                             )}
                             <BucketItemContext.Provider
                                 value={{
