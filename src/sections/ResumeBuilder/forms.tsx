@@ -15,6 +15,10 @@ import { useState } from "react";
  *      EXAMPLE: register('name', { required: true })
  *      RETURNS: { ref, name, onChange, onBlur }
  *
+ * `watch
+ *      WHY? e.g. useForm() doesn't automatically update the state when onBlur triggers onChange(). The form loses control over its state.
+ *           Instead of onBlur, use watch() to monitor field values and call onChange only when they actually change.
+
 */
 
 export interface SaveFormData extends CVMetaInfo {
