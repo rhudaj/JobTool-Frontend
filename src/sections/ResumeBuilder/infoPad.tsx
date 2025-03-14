@@ -1,11 +1,11 @@
 import React, { useCallback } from "react";
-import { InfoPadMap } from './dnd/types';
-import { Item } from './dnd/types';
-import { VersionedItemUI, VersionedItem } from "./versionedItem"
+import { InfoPadMap } from '../../components/dnd/types';
+import { Item } from '../../components/dnd/types';
+import { VersionedItemUI, VersionedItem } from "../../components/versionedItem"
 import { useImmer } from 'use-immer';
 import { isEqual } from 'lodash';
-import { useCvInfoStore } from '../sections/ResumeBuilder/useCVInfo';
-import { useCvsStore } from '../sections/ResumeBuilder/useCVs';
+import { useCvInfoStore } from './useCVInfo';
+import { useCvsStore } from './useCVs';
 
 
 export interface CVInfo {
