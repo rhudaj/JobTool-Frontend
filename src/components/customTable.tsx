@@ -1,5 +1,6 @@
 import { useImmer } from "use-immer";
 import { useEffect, useState } from "react";
+import * as Util from "../util"
 
 /* sass file
 
@@ -120,7 +121,7 @@ function CustomTable(props: {
             />
         );
 
-        if (!data || data.length === 0) {
+        if (Util.arrNullOrEmpty(data)) {
             return <p>n/a</p>;
         }
         else return (
@@ -141,7 +142,7 @@ function CustomTable(props: {
         </tr>
     );
 
-    if (!data || data.length === 0) return <p>n/a</p>;
+    if (Util.arrNullOrEmpty(data)) return <p>n/a</p>;
     else return (
         <table className="custom-table">
             <tbody>

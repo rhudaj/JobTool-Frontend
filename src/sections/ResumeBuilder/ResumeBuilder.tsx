@@ -4,7 +4,7 @@ import { useComponent2PDF } from "../../hooks";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import CVEditor from "./CVEditor/cveditor";
-import * as util from "../../util/fileInOut";
+import * as Util from "../../util";
 import { Section, SubSection, SplitView, InfoPad, PrintablePage } from "../../components"
 import { usePopup } from "../../hooks/popup";
 import { useCvsStore, save2backend as saveCv2backend } from "./useCVs";
@@ -24,7 +24,7 @@ const saveAnnotation2Backend = (annotation: {
         console.log('Not saving annotation (backend disabled)')
         return;
     }
-    if(! annotation || !annotation.job || !annotation.ncv) {
+    if(annotation || !annotation.job || !annotation.ncv) {
         console.log("Invalid annotation: ", annotation);
         return;
     }
@@ -35,7 +35,6 @@ const saveAnnotation2Backend = (annotation: {
         body: annotation
     })
 };
-
 
 function ResumeBuilder() {
 
@@ -63,7 +62,7 @@ function ResumeBuilder() {
             },
 
             onJsonClicked: () => {
-                if (cur_cv) util.downloadAsJson(cur_cv);
+                if (cur_cv) Util.downloadAsJson(cur_cv);
                 exportPopup.close();
             },
 
@@ -91,7 +90,7 @@ function ResumeBuilder() {
             onImportJsonFileChange: (
                 e: React.ChangeEvent<HTMLInputElement>
             ) => {
-                util.jsonFileImport(e, cvsState.add);
+                Util.jsonFileImport(e, cvsState.add);
                 importPopup.close();
             },
 
@@ -226,9 +225,13 @@ function ResumeBuilder() {
                 {/* BUTTONS */}
                 <div title="cv-buttons" className="max-w-33% flex gap-1 flex-wrap">
                     {Object.values(popups).map(popup =>
+                        // Render a button that will open the popup
                         popup.hook.getTriggerButton(
                             { content: popup.content },
-                            { disabled: popup.disabled }
+                            {
+                                disabled: popup.disabled,
+                                key: `popup-${popup.hook.title}`
+                            }
                         )
                     )}
                 </div>
@@ -239,7 +242,7 @@ function ResumeBuilder() {
                     <PrintablePage page_id="cv-page">
                         <CVEditor cv={cur_cv.data} onUpdate={cvsState.update} />
                     </PrintablePage>
-                    <InfoPad info={cvInfoState.cv_info} onUpdate={cvInfoState.set} />
+                    <InfoPad mode="ALL-CVS" info={cvInfoState.cv_info} onUpdate={cvInfoState.set} />
                 </SplitView>
             </DndProvider>
         </Section>

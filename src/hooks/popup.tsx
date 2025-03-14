@@ -33,6 +33,7 @@ export function PopupUI(props: {
     );
 }
 
+let i = 0;
 interface PopupParams {
     title?: string
     content?: ReactNode
@@ -47,7 +48,7 @@ export const usePopup = (title?: string, content?: ReactNode) => {
         content = (content && !content.$$typeof) ? contentRef.current : content;
         console.log(`opening '${title}' popup`);
         setComponent(
-            <PopupUI title={title} onClose={close}>{content}</PopupUI>
+            <PopupUI key={++i} title={title} onClose={close}>{content}</PopupUI>
         );
     };
 
@@ -56,14 +57,21 @@ export const usePopup = (title?: string, content?: ReactNode) => {
         setComponent(null);
     };
 
-    const getTriggerButton = (p?: PopupParams, otherParams?: any) => (
+    const getTriggerButton = (
+        p?: PopupParams,
+        ...otherParams: any
+    ) => (
         <>
             {component}
-            <button {...otherParams} onClick={()=>open(p.content)}>{p.title || title}</button>
+            <button key={++i}{...otherParams} onClick={()=>open(p.content)}>{p.title || title}</button>
         </>
     )
 
-
-
-    return { open, close, component, getTriggerButton };
+    return {
+        title,
+        open,
+        close,
+        component,
+        getTriggerButton
+    };
 };

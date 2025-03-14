@@ -3,6 +3,7 @@ import React, { useEffect, useReducer, JSX } from "react";
 import { Item, DEFAULT_ITEM_TYPE, BucketTypes } from "./types";
 import BucketItem from "./BucketItem";
 import { BucketAction, BucketActions, bucketReducer } from "./useBucket";
+import { arrNullOrEmpty } from "../../util";
 
 // Shows a gap between items when dragging over the bucket.
 function DropGap(props: { isActive: boolean }) {
@@ -90,7 +91,7 @@ function ItemBucket(props: {
                 // An item was dropped on the bucket (or a nested drop target).
 
                 // If the bucket is empty, just add the item.
-                if (bucket.items.length === 0) {
+                if (arrNullOrEmpty(bucket.items)) {
                     bucketDispatch({ type: BucketActions.ADD, payload: { atIndex: 0, item: dropItem } });
                     return;
                 }
@@ -113,10 +114,7 @@ function ItemBucket(props: {
                 } else if (!props.moveItemDisabled) {
                     // Its in the bucket already. Re-order.
                     // CLAMP index between 0 and props.items.length-1
-                    let newIndex = Math.max(
-                        Math.min(hoveredGap, bucket.items.length - 1),
-                        0
-                    );
+                    let newIndex = Math.max( 0, Math.min( hoveredGap, bucket.items.length - 1 ) );
                     bucketDispatch({ type: BucketActions.MOVE, payload: { indexBefore: itemIndex, indexAfter: newIndex } });
                 }
                 // after drop, no need to display the gap
@@ -164,8 +162,9 @@ function ItemBucket(props: {
 
     // -----------------RENDER-----------------
 
-    if (!bucket?.items || props.children.length !== bucket.items.length)
-        return null;
+    if (!bucket?.items || props.children.length !== bucket.items.length) {
+        return <div>No Items to Display!</div>
+    }
 
     const bt = BucketTypes[props.type ?? bucket.id]
 

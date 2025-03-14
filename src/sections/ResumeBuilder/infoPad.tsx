@@ -6,6 +6,7 @@ import { useImmer } from 'use-immer';
 import { isEqual } from 'lodash';
 import { useCvInfoStore } from './useCVInfo';
 import { useCvsStore } from './useCVs';
+import { arrNullOrEmpty } from "../../util";
 
 
 export interface CVInfo {
@@ -20,6 +21,10 @@ interface SectionOfVersionedItems {
     secName: string;
     items: VersionedItem[];
 }
+
+// -----------------------------------------------------------------------
+//                  FORMAT/CONVERT IN/OUT DATA
+// -----------------------------------------------------------------------
 
 const Info2Sections = (info: CVInfo): SectionOfVersionedItems[] => (
     Object.entries(info)
@@ -60,8 +65,7 @@ const Sections2Info = (sections: { secName: string; items: VersionedItem<any>[] 
     return info;
 };
 
-
-const useNcvsAsCVInfo = () => {
+const useCVInfoFromAllCvs = () => {
     const ncvs = useCvsStore(s=>s.ncvs);
     const cvInfo = React.useMemo(() => {
         const sections: CVInfo = {}
@@ -84,16 +88,20 @@ const useNcvsAsCVInfo = () => {
         })
         return sections
     }, [ncvs])
-
     return cvInfo
 };
 
-// MAIN COMPONENT
-export function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void }) {
+// -----------------------------------------------------------------------
+//                  MAIN COMPONENT
+// -----------------------------------------------------------------------
 
-    // ----------------- TEST -----------------
+export function InfoPad(props: {
+    mode: 'ALL-CVS' | 'CV-INFO'
+    // ONLY FOR WHEN mode == CV-INFO:
+    info: CVInfo,
+    onUpdate: (newInfo: CVInfo)=>void
+}) {
 
-    const test = useNcvsAsCVInfo()
 
     // ----------------- STATE -----------------
 
@@ -102,24 +110,38 @@ export function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void
         status: false // only true if the user made changes
     });
 
+    // ----------------- CONTROLS ------------------
+
+
+    // if mode == 'ALL-CVS' you have to build the CVInfo yourself
+    // and dont need props.info
+    const extracted = useCVInfoFromAllCvs(); // hooks must be used at root level
+    const info = React.useMemo(()=>{
+        if(props.mode == "CV-INFO") {
+            return props.info
+        } else if (props.mode == "ALL-CVS") {
+            return extracted;
+        }
+    }, [props.mode, props.info]);
+
     // Sync `sections` only when `info` changes, but don't overwrite user edits
     React.useEffect(() => {
-        console.log('test: ', test)
         setState(D=>{
-            D.sections = Info2Sections(test)
+            D.sections = Info2Sections(info)
             D.status = false
         })
-    }, [test])
+    }, [info])
 
-    // Call `onUpdate` only when `sections` have been edited
-    // React.useEffect(() => {
-    //     if (!state.status) return // not changed by user
-    //     console.debug('InfoPad: sections updated');
-    //     props.onUpdate( Sections2Info(state.sections) );
-    // }, [state.sections]);
+    React.useEffect(() => {
+        //* Only applies when: mode == CV-INFO
+        if (props.mode !== 'CV-INFO' || !state.status) return;
+        // <- sections have have been updated
+        props.onUpdate( Sections2Info(state.sections) );
+    }, [state.sections]);
 
     // ----------------- CONTROLS -----------------
 
+    // this <-- children
     const onVersionedItemUpdate = (newVI: VersionedItem, sec_idx, item_idx) => {
         setState(D=>{
             D.sections[sec_idx].items[item_idx] = newVI
@@ -129,7 +151,7 @@ export function InfoPad(props: { info: CVInfo, onUpdate: (newInfo: CVInfo)=>void
 
     // ----------------- VIEW -----------------
 
-    if (!state.sections || !test) {
+    if (arrNullOrEmpty(state.sections)) {
         return <div id="info-pad">no CV info found</div>;
     }
     return (

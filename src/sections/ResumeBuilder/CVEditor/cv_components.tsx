@@ -39,6 +39,11 @@ function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
 		lineHeight: Styles.text_line_height // NOTE: before it was on .section > *
 	}
 
+	const bucketItems = data.items?.map((item: any, i: number)=>({
+		id:    `${data.name}-${i}`,
+		value: item
+	}))
+
 	return (
 		<div title="section" className="flex flex-col" style={sectionStyle}>
 			<div title="sec-head" className="grid grid-cols-[min-content_1fr] gap-[1cqw] font-bold">
@@ -54,10 +59,7 @@ function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
 			>
 				<ItemBucket
 					id={data.name}
-					items={data.items?.map((item: any, i: number)=>({
-						id:    `${data.name}-${i}`,
-						value: item
-					}))}
+					items={bucketItems}
 					type={data.bucket_type}
 					onUpdate={onBucketUpdate}
 				>
@@ -90,7 +92,11 @@ function SummaryUI(props: { obj: any, onUpdate?: (newObj: any)=>void }) {
 		>
 			<TextEditDiv tv={props.obj["summary"]} onUpdate={val => handleUpdate("summary", val)}/>
 			{['languages', 'technologies'].map(subSec =>
-				<div title="sub-sec" className="flex gap-[.5cqw]">
+				<div
+					title="sub-section"
+					key={subSec}
+					className="flex gap-[.5cqw]"
+				>
 					<span className="font-bold">{capitlize(subSec)}:</span>
 					<UI.DelimitedList
 						items={props.obj[subSec]}
@@ -193,6 +199,11 @@ function ExperienceUI(props: {
 
 	const headRow = "flex justify-between";
 
+	const bucketItems = data?.description?.map((item: string, i: number)=>({
+		id: `${data.title}-bp${i}`,
+		value: item
+	}));
+
 	return (
 		<div
 			title="experience"
@@ -200,23 +211,22 @@ function ExperienceUI(props: {
 			style={{rowGap: StyleManager.get("exp_row_gap")}}
 		>
 			{/* HEADER ROWS */}
-			{
-				head_rows.map(row =>
-					<div title="header-row" className={headRow}>
-						{row}
-					</div>
-				)
-			}
+			{head_rows.map((row, i) =>
+				<div
+					// title="header-row"
+					key={`head-row-${i}`}
+					className={headRow}
+				>
+					{row}
+				</div>
+			)}
 			{/* BULLET POINTS */}
 			<div className="exp-content" style={{paddingLeft: Styles.exp_indent}}>
 				<ul>
 					{props.disableBucketFeatures ? UI_elements.bulletPoints : (
 						<ItemBucket
 							id="experience"
-							items={data?.description?.map((item: string, i: number)=>({
-								id: `${data.title}-bp${i}`,
-								value: item
-							}))}
+							items={bucketItems}
 							type={BucketTypeNames.EXP_POINTS}
 							onUpdate={onBucketUpdate}
 							replaceDisabled deleteOnMoveDisabled

@@ -3,7 +3,7 @@ import { CVMetaInfo, NamedCV } from "job-tool-shared-types";
 import { StyleManager } from "./CVEditor/styles";
 import { useForm, SubmitHandler, Controller } from "react-hook-form"
 import { CustomStyles } from "../../styles";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 /**
  * Notes on "react-hook-form"

@@ -8,6 +8,7 @@ import { isEqual } from 'lodash';
 import { ControlsBox } from './ControlBox';
 import { create } from "zustand";
 import { produce } from 'immer';
+import { arrNullOrEmpty } from "../util";
 
 export interface VersionedItem<T=any> {
     id: string,
@@ -240,7 +241,7 @@ export function VersionedItemUI(props: {
 
     // ----------------- RENDER -----------------
 
-    if (!state.versions?.length) return <div>No versions</div>
+    if (arrNullOrEmpty(state.versions)) return <div>No versions</div>
     if (!_cur) return <div>No current version</div>;
 
     const version_str = `${props.obj?.id}/${_cur?.id}`
