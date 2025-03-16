@@ -117,7 +117,7 @@ function FileUI(props: {
 interface FilterCVParams {
     name?: string
     tags?: string[],
-    pattern?: RegExp,
+    pattern?: string,
 };
 
 function FilterFilesForm(props: {
@@ -125,50 +125,68 @@ function FilterFilesForm(props: {
     onChange: (newValues: FilterCVParams) => void
 }) {
 
-    const { register, watch, reset } = useForm<FilterCVParams>({
-        defaultValues: props.values
+    const { register, formState, getValues } = useForm<FilterCVParams>({
+        values: props.values,
+        mode: "onChange",           // Validation mode
+        reValidateMode: "onChange" // Re-validates on change
     });
-
-    // Sync external state when the form is re-mounted
-    // useEffect(() => {
-    //     console.log("props.values = ", props.values)
-    //     reset(props.values);
-    // }, [props.values, reset]);
 
     // Watch fields and update the parent only when values change
     useEffect(() => {
-        const subscription = watch((data: FilterCVParams) => {
-            props.onChange(data);
-        });
-        return () => subscription.unsubscribe(); // Cleanup on unmount
-    }, [watch, props.onChange]);
+        // Only update parent when form is dirty (something changed) AND valid
+        if (formState.isDirty && !formState.errors.pattern) {
+            const currentValues = getValues();
+            props.onChange(currentValues);
+        }
+    }, [formState, getValues, props.onChange]);
+
 
     const fieldStyle = "flex gap-4 p-4"
     const inputStyle = "bg-white text-black"
-
-    console.log("props.values = ", props.values)
+    const errMsg = "text-red"
 
     return (
         <Fieldset className="flex flex-col">
+
             <Field className={fieldStyle}>
                 <Label className="block">Name</Label>
                 <Input className={inputStyle} {...register("name")}/>
+                <p className={errMsg}>{formState.errors?.name?.message}</p>
             </Field>
+
             <Field className={fieldStyle}>
                 <Label className="block">Tags</Label>
                 <Input className={inputStyle} {...register("tags", {
-                    setValueAs: (value: string) => value
-                        .split(",")
-                        .map(s=>s.trim())
-                        .filter(s=>s)
+                    setValueAs: (val: string[]|string) =>
+                        typeof val === 'object' ? val :
+                            !val ? [] : val
+                                .split(",")
+                                .map(s=>s.trim())
+                                .filter(s=>s)
                 })} />
+                <p className={errMsg}>{formState.errors?.tags?.message}</p>
             </Field>
+
             <Field className={fieldStyle}>
                 <Label className="block">Pattern</Label>
                 <Input className={inputStyle} {...register("pattern", {
-                    setValueAs: (value: string) => RegExp(value)
+                    setValueAs: (val: string) => val ?? null,
+                    validate: {
+                        checkValidRegex: (val: string) => {
+                            if (!val) return true; // Empty is valid
+                            console.log("Validating pattern:", val);
+                            try {
+                                new RegExp(val);
+                                return true;
+                            } catch(e) {
+                                return "Invalid regular expression";
+                            }
+                        }
+                    }
                 })} />
+                <p className={errMsg}>{formState.errors?.pattern?.message}</p>
             </Field>
+
         </Fieldset>
     )
 };
@@ -184,7 +202,11 @@ export default function SavedCVsUI() {
     const cvsState = useCvsStore();
     const [allFiles, setAllFiles] = useImmer<File[]>([]);
     const [filteredFiles, setFilteredFiles] = useImmer<File[]>([]);
-    const [filter, setFilter] = useImmer<FilterCVParams>(null);
+    const [filter, setFilter] = useImmer<FilterCVParams>({
+        name: "",
+        tags: [],
+        pattern: "",
+    });
 
     // at the start, its all files
     useEffect(()=>{
@@ -219,7 +241,7 @@ export default function SavedCVsUI() {
                 ) &&
                 (
                     !filter.tags ||
-                    filter.tags.every(tag => ncv.tags.includes(tag))
+                    filter.tags.every(tag => ncv.tags?.includes(tag))
                 )
             })
         )
