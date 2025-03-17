@@ -34,7 +34,8 @@ export default function BucketItem(props: {
             // Cancelled/invalid drop || same bucket => dont remove
             if(!dropResult || dropResult.id === bucketContext.bucket_id) return;
             // remove from old bucket
-            bucketContext.dispatch({ type: "REMOVE", payload: { id: item.id } });
+            // TODO: for now I commented this out:
+            // bucketContext.dispatch({ type: "REMOVE", payload: { id: item.id } });
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging()

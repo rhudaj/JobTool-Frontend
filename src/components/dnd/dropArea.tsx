@@ -13,7 +13,7 @@ export const SingleItemDropArea = forwardRef((
     useImperativeHandle(ref, () => ({ item }));
 
     const [{ isHovered }, dropRef] = useDrop(() => ({
-        accept: ["summary"],
+        accept: Object.keys(BucketTypes),
         drop: (dropItem: Item) => {
             console.log('Item dropped:', item);
             setItem(dropItem)
