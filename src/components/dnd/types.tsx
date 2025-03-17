@@ -8,7 +8,9 @@ const DEFAULT_ITEM_TYPE = "any";
 interface Item<T=any>{
     id: any;
     value: T;		// can't be a JSX element. Anything else is fine.
+    type?: string
 };
+
 
 interface Bucket<T=any> {
     id: any;
@@ -38,16 +40,6 @@ function DynamicComponent({ type, props }) {
     return <Component {...props} />;
 }
 
-const BucketTypeNames = {
-    SUMMARY: "summary",
-    EXPERIENCES: "experiences",
-    PROJECTS: "projects",
-    EXP_POINTS: "exp_points",
-    CL_INFO_PAD: "cl_info_pad",
-    SECTIONS: "sections",
-    CL_PARAGRAPHS: "cl_paragraphs",
-    VERSIONED_ITEMS: "versioned_items",
-};
 
 const BucketTypes: { [key: string]: BucketType } = {
     "any": {
@@ -103,7 +95,6 @@ export {
     BucketType,
     DynamicComponent,
     DEFAULT_ITEM_TYPE,
-    BucketTypeNames,
     BucketTypes,
     InfoPadMap
 };

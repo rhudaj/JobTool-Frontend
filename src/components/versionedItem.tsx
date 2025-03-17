@@ -271,7 +271,6 @@ export function VersionedItemUI(props: {
             </div>
             <StandaloneDragItem item={dnd_item} item_type={props.obj.item_type} >
                 <DynamicComponent
-                    key={state.cur} // force re-render when cur changes
                     type={props.obj.item_type}
                     props={{
                         obj: _cur?.value,

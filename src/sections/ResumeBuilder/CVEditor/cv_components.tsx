@@ -4,7 +4,7 @@ import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
 import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
-import { BucketTypeNames, DynamicComponent } from "../../../components/dnd/types";
+import { DynamicComponent } from "../../../components/dnd/types";
 import { StyleManager } from "./styles";
 import { capitlize } from "../../../util/text";
 
@@ -227,7 +227,7 @@ function ExperienceUI(props: {
 						<ItemBucket
 							id="experience"
 							items={bucketItems}
-							type={BucketTypeNames.EXP_POINTS}
+							type="exp_points"
 							onUpdate={onBucketUpdate}
 							replaceDisabled deleteOnMoveDisabled
 							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}

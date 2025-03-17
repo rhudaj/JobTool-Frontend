@@ -9,7 +9,7 @@ const control_button_style = "border-1 border-black opacity-50 hover:opacity-100
 
 /**
  * This item should only ever be rendered inside a Bucket component.
- * Because it requires the BucketContext to be present.
+ * Because it requires the ctxt to be present.
 */
 export default function BucketItem(props: {
     item: Item,
@@ -18,49 +18,55 @@ export default function BucketItem(props: {
 
     // -------------------- STATE ---------------------
 
-    const bucketContext = useContext(BucketItemContext);
+    const ctxt = useContext(BucketItemContext);
     const { ref, isHovered } = useHoverBuffer(15); // ref' drag handle
 
     // -----------------DRAG FUNCTIONALITY-----------------
 
     const [{isDragging}, drag, preview] = useDrag(() => ({
-        type: bucketContext.item_type,
+        type: ctxt.item_type,
         canDrag: true,
         item: () => {
-            return props.item; 			// sent to the drop target when dropped.
+            return {
+                ...props.item,
+                type: ctxt.item_type
+            }; 			// sent to the drop target when dropped.
         },
         end: (item: Item, monitor) => {
             const dropResult: {id: any} = monitor.getDropResult();  // the bucket we dropped on
             // Cancelled/invalid drop || same bucket => dont remove
-            if(!dropResult || dropResult.id === bucketContext.bucket_id) return;
+            if(!dropResult || dropResult.id === ctxt.bucket_id) return;
             // remove from old bucket
             // TODO: for now I commented this out:
-            // bucketContext.dispatch({ type: "REMOVE", payload: { id: item.id } });
+            // ctxt.dispatch({ type: "REMOVE", payload: { id: item.id } });
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging()
         }),
-        }), [props.item, bucketContext.onHover]
+        }), [props.item, ctxt.onHover]
     );
 
     // -----------------DROP FUNCTIONALITY-----------------
 
     const [{isDropTarget}, drop] = useDrop(
         () => ({
-            accept: bucketContext.item_type,
+            accept: ctxt.item_type,
             canDrop: (dropItem: Item) => {
-                return bucketContext.disableReplace !== true && dropItem.id !== props.item.id;
+                return ctxt.disableReplace !== true && dropItem.id !== props.item.id;
             },
-            drop: () => props.item,
+            drop: () => ({
+                ...props.item,
+                type: ctxt.item_type
+            }),
             hover: (dragItem: Item, monitor) => {
 
-                if ( !bucketContext.onHover || dragItem.id === props.item.id )
+                if ( !ctxt.onHover || dragItem.id === props.item.id )
                     return;
 
                 const rect = ref.current.getBoundingClientRect();
                 const dragPos = monitor.getClientOffset();
 
-                bucketContext.onHover(
+                ctxt.onHover(
                     props.item.id,  // hovered item's ID
                     dragItem.id,
                     (dragPos.y - rect.top) > (rect.bottom - rect.top)/2, 	// is it below?
@@ -71,7 +77,7 @@ export default function BucketItem(props: {
                 isDropTarget: monitor.canDrop() && monitor.isOver()
             }),
         }),
-        [props.item, bucketContext.onHover]
+        [props.item, ctxt.onHover]
     );
 
     // Highlight the ref's border when controls hovered
@@ -89,7 +95,7 @@ export default function BucketItem(props: {
 
     // -----------------RENDER-----------------
 
-    if(!bucketContext) {
+    if(!ctxt) {
         throw new Error("BucketItem must be rendered inside a Bucket component.");
     }
 
@@ -114,22 +120,22 @@ export default function BucketItem(props: {
                 {
                     id: "delete",
                     icon_class: "fa-solid fa-x",
-                    // disabled: !Boolean(bucketContext.onDelete),
-                    onClick: ()=>bucketContext.dispatch({type: "REMOVE", payload: { id: props.item.id }})
+                    // disabled: !Boolean(ctxt.onDelete),
+                    onClick: ()=>ctxt.dispatch({type: "REMOVE", payload: { id: props.item.id }})
                 },
                 {
                     id: "add-above",
                     icon_class: "fa-solid fa-arrow-up",
-                    // disabled: !Boolean(bucketContext.onAddItem),
-                    // onClick: ()=>bucketContext.onAddItem(props.item.id, true)
-                    onClick: ()=>bucketContext.dispatch({type: "ADD_BLANK", payload: { id: props.item.id, below: false }})
+                    // disabled: !Boolean(ctxt.onAddItem),
+                    // onClick: ()=>ctxt.onAddItem(props.item.id, true)
+                    onClick: ()=>ctxt.dispatch({type: "ADD_BLANK", payload: { id: props.item.id, below: false }})
 
                 },
                 {
                     id: "add-below",
                     icon_class: "fa-solid fa-arrow-down",
-                    // disabled: !Boolean(bucketContext.onAddItem),
-                    onClick: ()=>bucketContext.dispatch({type: "ADD_BLANK", payload: { id: props.item.id, below: true }})
+                    // disabled: !Boolean(ctxt.onAddItem),
+                    onClick: ()=>ctxt.dispatch({type: "ADD_BLANK", payload: { id: props.item.id, below: true }})
                 }
             ]}/>}
         </div>
@@ -159,10 +165,6 @@ export function StandaloneDragItem(props: {
         canDrag: true,
         item: () => {
             return props.item; 			// sent to the drop target when dropped.
-        },
-        end: (item: Item, monitor) => {
-            const dropResult = monitor.getDropResult();  // the bucket we dropped on
-            if(!dropResult) return;             // Cancelled/invalid drop
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging()

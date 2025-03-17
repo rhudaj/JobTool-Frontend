@@ -1,6 +1,6 @@
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import React, { useEffect, useReducer, JSX, useMemo } from "react";
-import { Item, DEFAULT_ITEM_TYPE, BucketTypes, BucketTypeNames } from "./types";
+import React, { useEffect, useReducer, JSX } from "react";
+import { Item, DEFAULT_ITEM_TYPE, BucketTypes } from "./types";
 import BucketItem from "./BucketItem";
 import { BucketAction, BucketActions, bucketReducer } from "./useBucket";
 import { arrNullOrEmpty } from "../../util";
@@ -85,17 +85,10 @@ function ItemBucket(props: {
 
     const [{ isHovered }, dropRef] = useDrop(
         () => ({
-            accept: props.type || '*',
+            accept: props.type ?? '*',
             canDrop: () => !props.dropDisabled,
-            hover: () => {
-                console.log('HOVERED!')
-            },
-            drop: (
-                dropItem: Item,
-                monitor: DropTargetMonitor<Item, unknown>
-            ) => {
+            drop: (dropItem: Item, monitor: DropTargetMonitor<Item, unknown>) => {
                 // An item was dropped on the bucket (or a nested drop target).
-
                 console.info(`Item ${dropItem.id} dropped on bucket ${bucket.id}`);
 
                 // If the bucket is empty, just add the item.

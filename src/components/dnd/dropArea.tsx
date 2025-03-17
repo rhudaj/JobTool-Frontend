@@ -8,16 +8,17 @@ export const SingleItemDropArea = forwardRef((
     ref: React.ForwardedRef<any>
 ) => {
 
-    const [item, setItem] = useState<Item>(null);
+    const [state, setState] = useState<Item & { type: string }>(null);
 
-    useImperativeHandle(ref, () => ({ item }));
+    console.log('state.type = ', state?.type);
+
+    useImperativeHandle(ref, () => ({ ...state }));
 
     const [{ isHovered }, dropRef] = useDrop(() => ({
         accept: Object.keys(BucketTypes),
-        drop: (dropItem: Item) => {
-            console.log('Item dropped:', item);
-            setItem(dropItem)
-            // return { id: props.id };
+        drop: (dropItem: Item & { type: string }) => {
+            console.log('Item dropped:', dropItem);
+            setState(dropItem)
         },
         collect: (monitor) => ({
             isHovered: monitor.isOver(),
@@ -27,9 +28,11 @@ export const SingleItemDropArea = forwardRef((
 
     // -----------------RENDER-----------------
 
+
+
     return (
         <div
-            title="bucket-dnd-wrapper"
+            title="drop-area"
             ref={dropRef as any}
             className={isHovered ? "border-dashed border-black" : ""}
         >
@@ -37,9 +40,9 @@ export const SingleItemDropArea = forwardRef((
                 title="bucket-items"
                 className="min-h-10 border-1 border-dashed p-2"
             >
-                { item &&
-                <StandaloneDragItem item={item} item_type={""}>
-                    {JSON.stringify(item.value)}
+                { state &&
+                <StandaloneDragItem item={state} item_type={state.type}>
+                    {BucketTypes[state.type].DisplayItem({obj: state.value })}
                 </StandaloneDragItem>}
             </div>
         </div>
