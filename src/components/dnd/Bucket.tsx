@@ -1,6 +1,6 @@
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import React, { useEffect, useReducer, JSX } from "react";
-import { Item, DEFAULT_ITEM_TYPE, BucketTypes } from "./types";
+import React, { useEffect, useReducer, JSX, useMemo } from "react";
+import { Item, DEFAULT_ITEM_TYPE, BucketTypes, BucketTypeNames } from "./types";
 import BucketItem from "./BucketItem";
 import { BucketAction, BucketActions, bucketReducer } from "./useBucket";
 import { arrNullOrEmpty } from "../../util";
@@ -36,11 +36,11 @@ interface BucketItemContext {
 
 let just_set = false; // TODO: hacky but neccessary
 function ItemBucket(props: {
-    id: string
-    items: Item[]
+    id?: string
+    items?: Item[]
     type?: string                       // by default, same as ID
     onUpdate?: (newVals: any[]) => void
-    children: JSX.Element[]             // the bucket data d.n.n corresponding to the displayed items.
+    children?: JSX.Element[]             // the bucket data d.n.n corresponding to the displayed items.
     isHorizontal?: boolean              // orientation of the bucket
     // TODO: put inside 'disable_options' object
     deleteDisabled?: boolean
@@ -54,14 +54,17 @@ function ItemBucket(props: {
 
     const [bucket, bucketDispatch] = useReducer(bucketReducer, { id: "", items: [] })
 
+    const type = props.type ?? DEFAULT_ITEM_TYPE;
+    const bt = BucketTypes[type]
+
     // parent -> bucket
     useEffect(() => {
         just_set = true
         bucketDispatch({
             type: BucketActions.SET,
             payload: {
-                id: props.id,
-                items: props.items
+                id: props.id ?? "",
+                items: props.items ?? []
             } })
     }, [props.items, props.id])
 
@@ -82,13 +85,18 @@ function ItemBucket(props: {
 
     const [{ isHovered }, dropRef] = useDrop(
         () => ({
-            accept: props.type ?? DEFAULT_ITEM_TYPE,
+            accept: props.type || '*',
             canDrop: () => !props.dropDisabled,
+            hover: () => {
+                console.log('HOVERED!')
+            },
             drop: (
                 dropItem: Item,
                 monitor: DropTargetMonitor<Item, unknown>
             ) => {
                 // An item was dropped on the bucket (or a nested drop target).
+
+                console.info(`Item ${dropItem.id} dropped on bucket ${bucket.id}`);
 
                 // If the bucket is empty, just add the item.
                 if (arrNullOrEmpty(bucket.items)) {
@@ -138,6 +146,8 @@ function ItemBucket(props: {
         isRight: boolean
     ) => {
 
+        console.log('hovering!')
+
         // Wether its "past half" depends on orientation of the bucket
         const isPastHalf = props.isHorizontal ? isRight : isBelow;
 
@@ -162,12 +172,6 @@ function ItemBucket(props: {
 
     // -----------------RENDER-----------------
 
-    if (!bucket?.items || props.children.length !== bucket.items.length) {
-        return <div>No Items to Display!</div>
-    }
-
-    const bt = BucketTypes[props.type ?? bucket.id]
-
     return (
         <div
             title="bucket-dnd-wrapper"
@@ -177,10 +181,10 @@ function ItemBucket(props: {
         >
             <div
                 title="bucket-items"
-                className={bt.layoutClass}
-                style={bt.style}
+                className={bt?.layoutClass}
+                style={bt?.style}
             >
-                {bucket.items.map((I: Item, i: number) => {
+                {bucket.items?.map((I: Item, i: number) => {
                     return (
                         <div key={`bucket-${bucket.id}-item-${i}`}>
                             {i === 0 && (
@@ -189,7 +193,7 @@ function ItemBucket(props: {
                             <BucketItemContext.Provider
                                 value={{
                                     bucket_id: bucket.id,
-                                    item_type: props.type ?? DEFAULT_ITEM_TYPE,
+                                    item_type: type,
                                     disableMove: props.moveItemDisabled,
                                     disableReplace: props.replaceDisabled,
                                     dispatch: bucketDispatch,
@@ -197,7 +201,9 @@ function ItemBucket(props: {
                                 }}
                             >
                                 <BucketItem item={I}>
-                                    {props.children[i]}
+                                    {props.children?.[i] ??
+                                        bt.DisplayItem({obj: bucket.items[i].value})
+                                    }
                                 </BucketItem>
                             </BucketItemContext.Provider>
                             <DropGap isActive={hoveredGap === nextGap(i)} />

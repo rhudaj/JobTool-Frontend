@@ -3,7 +3,7 @@ import { VersionedItemUI } from "../versionedItem";
 import TextEditDiv from "../texteditdiv";
 import { StyleManager } from "../../sections/ResumeBuilder/CVEditor/styles";
 
-const DEFAULT_ITEM_TYPE = "DRAG-ITEM";
+const DEFAULT_ITEM_TYPE = "any";
 
 interface Item<T=any>{
     id: any;
@@ -50,7 +50,12 @@ const BucketTypeNames = {
 };
 
 const BucketTypes: { [key: string]: BucketType } = {
+    "any": {
+        layoutClass: "border-1 border-dashed min-h-10",
+        DisplayItem: props => <div>{props.obj}</div>
+    },
     "summary": {
+        layoutClass: "min-h-10",
         DisplayItem: SummaryUI,
     },
     "experiences": {

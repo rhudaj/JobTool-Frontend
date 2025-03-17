@@ -14,6 +14,7 @@ import SavedCVsUI from "./savedCVs";
 import { ImportForm, SaveForm, FindReplaceForm, StylesForm, SaveFormData, ExportForm, AnnotationForm } from "./forms";
 import { CustomStyles } from "../../styles";
 import BackendAPI from "../../backend_api";
+import { AIEditPane } from "./AIEditPain";
 
 const USE_BACKEND = import.meta.env.VITE_USE_BACKEND === "1";
 const saveAnnotation2Backend = (annotation: {
@@ -207,6 +208,7 @@ function ResumeBuilder() {
                 { popups.import.hook.getTriggerButton({content: popups.import.content}) }
                 <SavedCVsUI />
             </SubSection>
+
             {/* ------------ CUR CV INFO, SAVE/EXPORT BUTTONS ------------ */}
             <div title="display-info" className="flex justify-between p-4 border-3 ">
                 {/* FILE NAME */}
@@ -236,14 +238,23 @@ function ResumeBuilder() {
                     )}
                 </div>
             </div>
-            {/* ------------ CV EDITOR ------------ */}
+
+            {/* ------------ DRAG/DROP ELEMENTS ------------ */}
+
             <DndProvider backend={HTML5Backend}>
-                <SplitView>
-                    <PrintablePage page_id="cv-page">
-                        <CVEditor cv={cur_cv.data} onUpdate={cvsState.update} />
-                    </PrintablePage>
-                    <InfoPad mode="ALL-CVS" info={cvInfoState.cv_info} onUpdate={cvInfoState.set} />
-                </SplitView>
+
+                {/* ------------ AI EDIT - PANE ------------ */}
+
+                <AIEditPane/>
+
+                {/* ------------ CV EDITOR ------------ */}
+                    <SplitView>
+                        <PrintablePage page_id="cv-page">
+                            <CVEditor cv={cur_cv.data} onUpdate={cvsState.update} />
+                        </PrintablePage>
+                        <InfoPad mode="ALL-CVS" info={cvInfoState.cv_info} onUpdate={cvInfoState.set} />
+                    </SplitView>
+
             </DndProvider>
         </Section>
     );

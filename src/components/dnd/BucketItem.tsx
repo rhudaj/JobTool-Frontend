@@ -31,8 +31,9 @@ export default function BucketItem(props: {
         },
         end: (item: Item, monitor) => {
             const dropResult: {id: any} = monitor.getDropResult();  // the bucket we dropped on
-            // Cancelled/invalid drop || same bucket
+            // Cancelled/invalid drop || same bucket => dont remove
             if(!dropResult || dropResult.id === bucketContext.bucket_id) return;
+            // remove from old bucket
             bucketContext.dispatch({ type: "REMOVE", payload: { id: item.id } });
         },
         collect: (monitor) => ({
