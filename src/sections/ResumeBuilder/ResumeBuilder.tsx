@@ -210,34 +210,36 @@ function ResumeBuilder() {
             </SubSection>
 
             {/* ------------ CUR CV INFO, SAVE/EXPORT BUTTONS ------------ */}
-            <div title="display-info" className="flex justify-between p-4 border-3 ">
-                {/* FILE NAME */}
-                <div>
-                    <span>Name:</span>
-                    {cur_cv?.name}
-                    {cvsState.trackMods[cvsState.curIdx] && (
-                        <span className="text-darkgrey ml-2">{"(modified)"}</span>
-                    )}
+            <SubSection id="display-info">
+                <div className="flex justify-between">
+                    {/* FILE NAME */}
+                    <div>
+                        <span>Name:</span>
+                        {cur_cv?.name}
+                        {cvsState.trackMods[cvsState.curIdx] && (
+                            <span className="text-darkgrey ml-2">{"(modified)"}</span>
+                        )}
+                    </div>
+                    {/* TAGS */}
+                    <div>
+                        <span className="descr">Tags:</span>
+                        {cur_cv?.tags?.join(", ")}
+                    </div>
+                    {/* BUTTONS */}
+                    <div title="cv-buttons" className="max-w-33% flex gap-1 flex-wrap">
+                        {Object.values(popups).map(popup =>
+                            // Render a button that will open the popup
+                            popup.hook.getTriggerButton(
+                                { content: popup.content },
+                                {
+                                    disabled: popup.disabled,
+                                    key: `popup-${popup.hook.title}`
+                                }
+                            )
+                        )}
+                    </div>
                 </div>
-                {/* TAGS */}
-                <div>
-                    <span className="descr">Tags:</span>
-                    {cur_cv?.tags?.join(", ")}
-                </div>
-                {/* BUTTONS */}
-                <div title="cv-buttons" className="max-w-33% flex gap-1 flex-wrap">
-                    {Object.values(popups).map(popup =>
-                        // Render a button that will open the popup
-                        popup.hook.getTriggerButton(
-                            { content: popup.content },
-                            {
-                                disabled: popup.disabled,
-                                key: `popup-${popup.hook.title}`
-                            }
-                        )
-                    )}
-                </div>
-            </div>
+            </SubSection>
 
             {/* ------------ DRAG/DROP ELEMENTS ------------ */}
 
@@ -245,15 +247,18 @@ function ResumeBuilder() {
 
                 {/* ------------ AI EDIT - PANE ------------ */}
 
-                <AIEditPane/>
+                <SubSection id="named-cvs">
+                    <AIEditPane/>
+                </SubSection>
 
                 {/* ------------ CV EDITOR ------------ */}
-                    <SplitView>
-                        <PrintablePage page_id="cv-page">
-                            <CVEditor cv={cur_cv.data} onUpdate={cvsState.update} />
-                        </PrintablePage>
-                        <InfoPad mode="ALL-CVS" info={cvInfoState.cv_info} onUpdate={cvInfoState.set} />
-                    </SplitView>
+
+                <SplitView>
+                    <PrintablePage page_id="cv-page">
+                        <CVEditor cv={cur_cv.data} onUpdate={cvsState.update} />
+                    </PrintablePage>
+                    <InfoPad mode="ALL-CVS" info={cvInfoState.cv_info} onUpdate={cvInfoState.set} />
+                </SplitView>
 
             </DndProvider>
         </Section>
