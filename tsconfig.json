@@ -16,6 +16,6 @@
         "noEmit": true,
         "jsx": "react-jsx"
     },
-    "include": ["src", "../JobTool-Backend/src/assistants/test.ts"],
+    "include": ["src", "../JobTool-Backend/src/assistants/editResumeItem.ts"],
     "references": [{ "path": "./tsconfig.node.json" }]
 }

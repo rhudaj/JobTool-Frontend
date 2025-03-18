@@ -4,56 +4,104 @@ import { useRef, useState } from "react";
 import BackendAPI from "../../backend_api";
 import { StandaloneDragItem } from "../../components/dnd/BucketItem";
 import { BucketTypes } from "../../components/dnd/types";
+import { useForm, Controller } from "react-hook-form"
+
+interface AIEditItemParams {
+    item: any,
+    description?: string,
+    job: string,
+}
+
+// const ex_response = {
+//     "summary": "Dynamic software engineer with a strong focus on developing, testing, and deploying high-performance, scalable applications. Committed to leveraging innovative technologies to tackle complex challenges and enhance user experience. Proficient in:<br>",
+//     "languages": [
+//         "Python",
+//         "Java",
+//         "JavaScript",
+//         "Go",
+//         "C++",
+//         "C#",
+//         "HTML",
+//         "CSS"
+//     ],
+//     "technologies": [
+//         "Numpy/Pandas/PyTorch",
+//         "React",
+//         "GCP",
+//         "AWS",
+//         "Git",
+//         "Docker",
+//         "Microsoft Azure",
+//         "SQL Server",
+//         "PostgreSQL"
+//     ]
+// }
 
 export function AIEditPane(props: {}) {
-    const itemRef = useRef(null);
+
+    const { register, control, setValue, handleSubmit, formState } = useForm<AIEditItemParams>();
     const [AIResponse, setAIResponse] = useState(null);
-    const [job, setJob] = useState("");
+    const [type, setType] = useState(null);
+    const [id, setId] = useState(null);
 
-    const onJobDescriptionBlur = (e) => {
-        setJob(e.target.value);
-    };
-
-    const handleSubmit = () => {
-        const cur = itemRef.current;
-        console.log("AI Editing this item: ", cur.value);
+    const onSubmit = (data: AIEditItemParams) => {
+        console.log("AI Editing. Params: ", data);
         BackendAPI.request({
             method: "POST",
             endpoint: "AI/EditItem",
-            body: {
-                item: cur.value,
-                description: `id=${cur.id}, type=${cur.type}`,
-                job: job,
-            },
+            body: data,
         })
-            .then(result => {
-                setAIResponse(result)
-                setJob(null)
-            })
-            .catch(alert);
+        .then(result => {
+            console.log('AI Response: ', result);
+            setAIResponse(result)
+        })
+        .catch(alert);
     };
+
+
 
     return (
         <div className="grid grid-cols-[1fr_1fr]">
-            <div title="drop-area" className="flex flex-col gap-2 border-1 p-2">
-                <SingleItemDropArea ref={itemRef} id="ai-edit-item" />
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex flex-col gap-2 border-1 p-2"
+            >
+                <label>Resume Item:</label>
+                <Controller
+                    name="item"
+                    control={control}
+                    render={({ field }) => (
+                        <SingleItemDropArea id="ai-edit-item" onUpdate={S=>{
+                            field.onChange(S.value)
+                            setValue("description", `itemType=${S.type}, id=${S.id}`)
+                            setType(S.type)
+                            setId(S.id)
+                        }}/>
+                    )}
+                />
+
                 <label>Job Description:</label>
-                <input
-                    type="text"
+                <textarea
+                    {...register("job", { required: true })}
                     className="border-1"
-                    onBlur={onJobDescriptionBlur}
-                ></input>
-                <Button className="mt-4" onClick={handleSubmit}>
+                />
+
+                <Button
+                    className="mt-4"
+                    type="submit"
+                    disabled={!formState.isValid}
+                >
                     Go
                 </Button>
-            </div>
+
+            </form>
             <div title="ai-response" className="border-1 p-2">
-                {AIResponse &&
+                {AIResponse && type && id &&
                 <StandaloneDragItem
-                    item={{ id: `${itemRef.current.id}-tailored`, value: AIResponse }}
-                    item_type={itemRef.current.type}
+                    item={{ id: `${id}-tailored`, value: AIResponse }}
+                    item_type={type}
                 >
-                    {BucketTypes[itemRef.current.type].DisplayItem({obj: AIResponse}) }
+                    {BucketTypes[type]?.DisplayItem({obj: AIResponse}) }
                 </StandaloneDragItem>}
             </div>
         </div>

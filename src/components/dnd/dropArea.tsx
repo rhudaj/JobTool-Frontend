@@ -1,18 +1,19 @@
-import { useState, forwardRef, useImperativeHandle } from "react";
+import { useState, forwardRef, useImperativeHandle, useEffect } from "react";
 import { BucketTypes, DEFAULT_ITEM_TYPE, Item } from "./types";
 import { useDrop } from "react-dnd";
 import { StandaloneDragItem } from "./BucketItem";
 
-export const SingleItemDropArea = forwardRef((
-    props: { id: string },
-    ref: React.ForwardedRef<any>
-) => {
+export function SingleItemDropArea(props: {
+    id: string,
+    onUpdate: (state: Item & { type: string }) => void,
+}){
 
     const [state, setState] = useState<Item & { type: string }>(null);
 
-    console.log('state.type = ', state?.type);
-
-    useImperativeHandle(ref, () => ({ ...state }));
+    useEffect(()=>{
+        if(!state || !state.value || !state.id) return;
+        props.onUpdate(state);
+    }, [state]);
 
     const [{ isHovered }, dropRef] = useDrop(() => ({
         accept: Object.keys(BucketTypes),
@@ -26,9 +27,7 @@ export const SingleItemDropArea = forwardRef((
     }), []);
 
 
-    // -----------------RENDER-----------------
-
-
+    // ----------------- VIEW -----------------
 
     return (
         <div
@@ -47,4 +46,4 @@ export const SingleItemDropArea = forwardRef((
             </div>
         </div>
     );
-});
+};
