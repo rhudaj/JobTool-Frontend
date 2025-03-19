@@ -1,10 +1,11 @@
 import { Button } from "@headlessui/react";
 import { SingleItemDropArea } from "../../components/dnd/dropArea";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BackendAPI from "../../backend_api";
 import { StandaloneDragItem } from "../../components/dnd/BucketItem";
-import { BucketTypes } from "../../components/dnd/types";
+import { BucketTypes, getBucketType } from "../../components/dnd/types";
 import { useForm, Controller } from "react-hook-form"
+import { Experience } from "job-tool-shared-types";
 
 interface AIEditItemParams {
     item: any,
@@ -12,30 +13,46 @@ interface AIEditItemParams {
     job: string,
 }
 
-// const ex_response = {
-//     "summary": "Dynamic software engineer with a strong focus on developing, testing, and deploying high-performance, scalable applications. Committed to leveraging innovative technologies to tackle complex challenges and enhance user experience. Proficient in:<br>",
-//     "languages": [
-//         "Python",
-//         "Java",
-//         "JavaScript",
-//         "Go",
-//         "C++",
-//         "C#",
-//         "HTML",
-//         "CSS"
-//     ],
-//     "technologies": [
-//         "Numpy/Pandas/PyTorch",
-//         "React",
-//         "GCP",
-//         "AWS",
-//         "Git",
-//         "Docker",
-//         "Microsoft Azure",
-//         "SQL Server",
-//         "PostgreSQL"
-//     ]
-// }
+const ex_response = {
+    "summary": "Dynamic software engineer with a strong focus on developing, testing, and deploying high-performance, scalable applications. Committed to leveraging innovative technologies to tackle complex challenges and enhance user experience. Proficient in:<br>",
+    "languages": [
+        "Python",
+        "Java",
+        "JavaScript",
+        "Go",
+        "C++",
+        "C#",
+        "HTML",
+        "CSS"
+    ],
+    "technologies": [
+        "Numpy/Pandas/PyTorch",
+        "React",
+        "GCP",
+        "AWS",
+        "Git",
+        "Docker",
+        "Microsoft Azure",
+        "SQL Server",
+        "PostgreSQL"
+    ]
+}
+
+const test: Experience = {
+    description: [],
+    item_list: [],
+    title: "",
+    date: {
+        start: {
+            month: 0, year: 0
+        },
+        end: {
+            month: 0, year: 0
+        }
+    },
+    location: "",
+    role: ""
+}
 
 export function AIEditPane(props: {}) {
 
@@ -43,6 +60,8 @@ export function AIEditPane(props: {}) {
     const [AIResponse, setAIResponse] = useState(null);
     const [type, setType] = useState(null);
     const [id, setId] = useState(null);
+
+    useEffect(()=>console.log('type = ', type), [type])
 
     const onSubmit = (data: AIEditItemParams) => {
         console.log("AI Editing. Params: ", data);
@@ -58,7 +77,7 @@ export function AIEditPane(props: {}) {
         .catch(alert);
     };
 
-
+    const bt = getBucketType(type);
 
     return (
         <div className="grid grid-cols-[1fr_1fr]">
@@ -96,13 +115,14 @@ export function AIEditPane(props: {}) {
 
             </form>
             <div title="ai-response" className="border-1 p-2">
-                {AIResponse && type && id &&
-                <StandaloneDragItem
-                    item={{ id: `${id}-tailored`, value: AIResponse }}
-                    item_type={type}
-                >
-                    {BucketTypes[type]?.DisplayItem({obj: AIResponse}) }
-                </StandaloneDragItem>}
+                {AIResponse && id && bt &&
+                    <StandaloneDragItem
+                        item={{ id: `${id}-tailored`, value: AIResponse }}
+                        item_type={type}
+                    >
+                        {bt.DisplayItem({obj: AIResponse}) }
+                    </StandaloneDragItem>
+                }
             </div>
         </div>
     );

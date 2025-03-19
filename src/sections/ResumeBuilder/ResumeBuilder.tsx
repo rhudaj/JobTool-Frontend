@@ -25,7 +25,7 @@ const saveAnnotation2Backend = (annotation: {
         console.log('Not saving annotation (backend disabled)')
         return;
     }
-    if(annotation || !annotation.job || !annotation.ncv) {
+    if(!annotation || !annotation.job || !annotation.ncv) {
         console.log("Invalid annotation: ", annotation);
         return;
     }

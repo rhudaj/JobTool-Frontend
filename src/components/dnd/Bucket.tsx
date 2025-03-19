@@ -1,6 +1,6 @@
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import React, { useEffect, useReducer, JSX } from "react";
-import { Item, DEFAULT_ITEM_TYPE, BucketTypes } from "./types";
+import { Item, DEFAULT_ITEM_TYPE, BucketTypes, getBucketType } from "./types";
 import BucketItem from "./BucketItem";
 import { BucketAction, BucketActions, bucketReducer } from "./useBucket";
 import { arrNullOrEmpty } from "../../util";
@@ -55,7 +55,7 @@ function ItemBucket(props: {
     const [bucket, bucketDispatch] = useReducer(bucketReducer, { id: "", items: [] })
 
     const type = props.type ?? DEFAULT_ITEM_TYPE;
-    const bt = BucketTypes[type]
+    const bt = getBucketType(type)
 
     // parent -> bucket
     useEffect(() => {
@@ -138,8 +138,6 @@ function ItemBucket(props: {
         isBelow: boolean,
         isRight: boolean
     ) => {
-
-        console.log('hovering!')
 
         // Wether its "past half" depends on orientation of the bucket
         const isPastHalf = props.isHorizontal ? isRight : isBelow;

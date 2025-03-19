@@ -81,6 +81,11 @@ const BucketTypes: { [key: string]: BucketType } = {
     }
 };
 
+const getBucketType = (name: string) => {
+    if(Object.keys(BucketTypes).indexOf(name) === -1) return;
+    return BucketTypes[name];
+}
+
 const InfoPadMap = {
     "summary":      "summary",
     "projects":     "projects",
@@ -96,5 +101,6 @@ export {
     DynamicComponent,
     DEFAULT_ITEM_TYPE,
     BucketTypes,
+    getBucketType,
     InfoPadMap
 };

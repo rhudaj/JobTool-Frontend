@@ -1,5 +1,5 @@
-import { useState, forwardRef, useImperativeHandle, useEffect } from "react";
-import { BucketTypes, DEFAULT_ITEM_TYPE, Item } from "./types";
+import { useState, useEffect } from "react";
+import { BucketTypes, Item } from "./types";
 import { useDrop } from "react-dnd";
 import { StandaloneDragItem } from "./BucketItem";
 
