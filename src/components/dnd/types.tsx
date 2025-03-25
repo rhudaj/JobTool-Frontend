@@ -1,4 +1,4 @@
-import { ExperienceUI, SectionUI, SummaryUI } from "../../sections/ResumeBuilder/CVEditor/cv_components";
+import { ExperienceUI, SectionUI, SummaryUI } from "../../sections/ResumeBuilder/CVEditor/cvItemComponents";
 import TextEditDiv from "../texteditdiv";
 import { StyleManager } from "../../sections/ResumeBuilder/CVEditor/styles";
 import { JSX } from "react";
@@ -97,8 +97,8 @@ export const InfoPadMap = {
     "paragraphs":   "cl_info_pad",
 }
 
-export const getBucketType = (name: string) => {
-    if(Object.keys(BucketTypes).indexOf(name) === -1) return;
+export const getBucketType = (name: keyof typeof BucketTypes) => {
+    if(Object.keys(BucketTypes).indexOf(name as string) === -1) return;
     return BucketTypes[name];
 }
 
@@ -107,17 +107,17 @@ export const getBucketType = (name: string) => {
  * selects which component to render, in a **stable** way
  * No hooks are conditionally called! The component itself
  * is chosen before rendering, keeping React’s hooks order intact. */
-export function DynamicComponent({ type, props }: {
-    type: keyof typeof BucketTypes,
-    props: DisplayItemProps<unknown>
-}): JSX.Element | null {
-    let Component;
-    try {
-        const bt = BucketTypes[type];
-        Component = bt.DisplayItem;
-    } catch(err) {
-        alert(`ERROR! bucket type "${type}" DNE.`);
-        return null;
-    }
-    return <Component {...props} />;
-}
+// export function DynamicComponent({ type, props }: {
+//     type: keyof typeof BucketTypes,
+//     props: DisplayItemProps<unknown>
+// }): JSX.Element | null {
+//     let Component;
+//     try {
+//         const bt = BucketTypes[type];
+//         Component = bt.DisplayItem;
+//     } catch(err) {
+//         alert(`ERROR! bucket type "${type}" DNE.`);
+//         return null;
+//     }
+//     return <Component {...props} />;
+// }

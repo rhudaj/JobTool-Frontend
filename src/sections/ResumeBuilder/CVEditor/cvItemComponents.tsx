@@ -3,7 +3,6 @@ import { Experience, Link, MonthYear, DateRange, CVSection, Summary } from "job-
 import TextEditDiv from "../../../components/texteditdiv";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
-import * as UI from "./cv_components"
 import { BucketItemComponent, BucketTypes, Item } from "../../../components/dnd/types";
 import { StyleManager } from "./styles";
 import { capitlize } from "../../../util/text";
@@ -110,7 +109,7 @@ const SummaryUI: BucketItemComponent<Summary> = ({ obj, onUpdate }) => {
 					className="flex gap-[.5cqw]"
 				>
 					<span className="font-bold">{capitlize(subSec)}:</span>
-					<UI.DelimitedList
+					<DelimitedList
 						items={obj[subSec]}
 						delimiter=", "
 						onUpdate={val => handleUpdate(subSec, val)}
@@ -314,7 +313,7 @@ function LinkUI(props: Link) {
 	);
 }
 
-/** Helper */
+/** Generic Helper */
 function DelimitedList(props: {
 	items: string[],
 	delimiter: string,
@@ -337,4 +336,4 @@ function DelimitedList(props: {
 	);
 }
 
-export { SectionUI, SummaryUI, ExperienceUI, DateUI, LinkUI, DelimitedList }
+export { SectionUI, SummaryUI, ExperienceUI, LinkUI }

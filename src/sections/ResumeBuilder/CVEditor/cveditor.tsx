@@ -1,6 +1,6 @@
 // import "./cveditor.sass";
 import { CV, CVSection, Link } from "job-tool-shared-types";
-import * as UI from "./cv_components"
+import * as UI from "./cvItemComponents"
 import ItemBucket from "../../../components/dnd/Bucket";
 import { StyleManager } from "./styles";
 
