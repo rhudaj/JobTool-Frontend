@@ -25,12 +25,6 @@ function CLEditor(props: {
         setPgs(newItems.map((I:Item<string>)=>I.value));
     }
 
-    const bt = getBucketType("cl_paragraphs");
-
-    const itemComponents = pgs?.map((p: string, i: number)=>
-        bt.DisplayItem({ key: i, obj: p })
-    )
-
     return (
             <ItemBucket
                 type="cl_paragraphs"
@@ -39,9 +33,7 @@ function CLEditor(props: {
                     id: `cl-paragraph-${i}`,
                     value: p
                 }))}
-            >
-                {...itemComponents}
-            </ItemBucket>
+            />
     );
 }
 

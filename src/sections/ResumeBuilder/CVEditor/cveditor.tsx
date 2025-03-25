@@ -11,9 +11,9 @@ function CVEditor(props: {
 
 	const S = StyleManager.getAll();
 
-	const onSectionUpdate = (idx: number, section: CVSection) => {
+	const onSectionUpdate = (section: CVSection, i: number) => {
 		const new_sections = [...props.cv.sections];
-		new_sections[idx] = section;
+		new_sections[i] = section;
 		props.onUpdate?.({
 			...props.cv,
 			sections: new_sections
@@ -61,7 +61,7 @@ function CVEditor(props: {
 				)}
 			</div>
 			{/* SECTION BUCKET --------------------------------------*/}
-			<ItemBucket
+			<ItemBucket<CVSection>
 				id="sections"
 				items={cv.sections.map((S: CVSection)=>({
 					id: S.name,
@@ -69,16 +69,9 @@ function CVEditor(props: {
 				}))}
 				type="sections"
 				onUpdate={onBucketUpdate}
+				onItemUpdate={onSectionUpdate}
 				addItemDisabled
-			>
-				{cv.sections.map((S: CVSection, i: number) =>
-					<UI.SectionUI
-						key={i}
-						obj={S}
-						onUpdate={newSec => onSectionUpdate(i, newSec)}
-					/>
-				)}
-			</ItemBucket>
+			/>
 		</div>
 	);
 };

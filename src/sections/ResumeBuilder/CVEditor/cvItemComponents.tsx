@@ -43,7 +43,7 @@ const SectionUI: BucketItemComponent<CVSection> = ({ obj, onUpdate }) => {
 
 	const Styles = StyleManager.getAll();
 
-	const onItemUpdate = (i: number, newVal: any) => {
+	const onItemUpdate = (newVal: any, i: number) => {
 		const new_items = [...obj.items];
 		new_items[i] = newVal;
 		onUpdate?.({ ...obj, items: new_items })
@@ -82,9 +82,8 @@ const SectionUI: BucketItemComponent<CVSection> = ({ obj, onUpdate }) => {
 					items={items}
 					type={obj.bucket_type}
 					onUpdate={onBucketUpdate}
-				>
-					{...itemComponents}
-				</ItemBucket>
+					onItemUpdate={onItemUpdate}
+				/>
 			</div>
 		</div>
 	)
@@ -134,7 +133,7 @@ const ExperienceUI: BucketItemComponent<Experience, {
 		});
 	};
 
-	const handleItemChange = (i: number, newVal: any) => {
+	const handleItemChange = (newVal: any, i: number) => {
 		const new_description = [...props.obj.description];
 		new_description[i] = newVal;
 		handleUpdate('description', new_description);
@@ -172,7 +171,7 @@ const ExperienceUI: BucketItemComponent<Experience, {
 			<li key={i} className="list-disc">
 				<TextEditDiv
 					tv={item}
-					onUpdate={newVal=>handleItemChange(i, newVal)}
+					onUpdate={newVal=> handleItemChange(newVal, i)}
 				/>
 			</li>
 		))
@@ -226,11 +225,10 @@ const ExperienceUI: BucketItemComponent<Experience, {
 							items={bucketItems}
 							type="exp_points"
 							onUpdate={onBucketUpdate}
+							onItemUpdate={handleItemChange}
 							replaceDisabled deleteOnMoveDisabled
 							{...(props.disableBucketFeatures ? { addItemDisabled: true, deleteDisabled: true, dropDisabled: true, moveItemDisabled: true } : {})}
-						>
-							{UI_elements.bulletPoints}
-						</ItemBucket>
+						/>
 					)}
 				</ul>
 			</div>

@@ -15,9 +15,9 @@ function DropGap(props: { isActive: boolean }) {
 const prevGap = (itemIndex: number) => itemIndex;
 const nextGap = (itemIndex: number) => itemIndex + 1;
 
-// #####################################################
-//                  BUCKET STATE MANAGEMENT
-// #####################################################
+/* -----------------------------------------------------------------------------
+                            BUCKET STATE MANAGEMENT
+----------------------------------------------------------------------------- */
 
 // Provided to the children of a bucket (<DNDItem>'s)
 interface BucketItemContext {
@@ -34,26 +34,28 @@ interface BucketItemContext {
     ) => void;
 }
 
-let just_set = false; // TODO: hacky but neccessary
+// TODO: `just_set` is hacky but neccessary
+let just_set = false;
+
 function ItemBucket<T>(props: {
-    id?: string
-    items?: Item<T>[]
-    type?: string                       // by default, same as ID
-    onUpdate?: (newVals: any[]) => void
-    children?: JSX.Element[]             // the bucket data d.n.n corresponding to the displayed items.
-    isHorizontal?: boolean              // orientation of the bucket
+    id?: string,
+    items?: Item<T>[],
+    onUpdate?: (newVals: any[]) => void,
+    onItemUpdate?: (newObj: T, i: number) => void,
+    type?: string,
+    isHorizontal?: boolean,              // orientation of the bucket
     // TODO: put inside 'disable_options' object
-    deleteDisabled?: boolean
-    replaceDisabled?: boolean
-    dropDisabled?: boolean
-    deleteOnMoveDisabled?: boolean
-    addItemDisabled?: boolean
-    moveItemDisabled?: boolean
+    deleteDisabled?: boolean,
+    replaceDisabled?: boolean,
+    dropDisabled?: boolean,
+    deleteOnMoveDisabled?: boolean,
+    addItemDisabled?: boolean,
+    moveItemDisabled?: boolean,
 }) {
+
     // ----------------- STATE -----------------
 
     const [bucket, bucketDispatch] = useReducer(bucketReducer, { id: "", items: [] })
-
     const [hoveredGap, setHoveredGap] = React.useState<number>(undefined);
 
     // parent -> bucket
@@ -77,8 +79,9 @@ function ItemBucket<T>(props: {
     }, [bucket.items])
 
 
+
     const type = props.type ?? DEFAULT_ITEM_TYPE;
-    const bt = getBucketType(type)
+    const bt = getBucketType(type);
     const getIdx = (id: any) => bucket.items.findIndex(I => I.id === id);
 
     // ----------------- DND RELATED -----------------
@@ -192,9 +195,14 @@ function ItemBucket<T>(props: {
                                 }}
                             >
                                 <BucketItem item={I}>
-                                    {props.children?.[i] ??
-                                        bt.DisplayItem({obj: bucket.items[i].value})
-                                    }
+                                    <bt.DisplayItem
+                                        key={I.id}
+                                        obj={bucket.items[i].value}
+                                        onUpdate={(newObj: T) => {
+                                            console.log(`item # ${i} updated!`)
+                                            props.onItemUpdate?.(newObj, i);
+                                        }}
+                                    />
                                 </BucketItem>
                             </BucketItemContext.Provider>
                             <DropGap isActive={hoveredGap === nextGap(i)} />
