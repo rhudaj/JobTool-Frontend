@@ -4,7 +4,7 @@ import TextEditDiv from "../../../components/texteditdiv";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
-import { BucketItemComponent, BucketTypes, DynamicComponent, Item } from "../../../components/dnd/types";
+import { BucketItemComponent, BucketTypes, Item } from "../../../components/dnd/types";
 import { StyleManager } from "./styles";
 import { capitlize } from "../../../util/text";
 import { JSX, useMemo } from "react";
@@ -17,7 +17,7 @@ const SectionUI: BucketItemComponent<CVSection> = ({ obj, onUpdate }) => {
 
 	// Infer the Bucket Type from the object
 	const bt = useMemo(
-		()=>BucketTypes[obj.bucket_type],
+		() => BucketTypes[obj.bucket_type],
 		[obj.bucket_type]
 	);
 
@@ -91,13 +91,10 @@ const SectionUI: BucketItemComponent<CVSection> = ({ obj, onUpdate }) => {
 	)
 }
 
-const SummaryUI: BucketItemComponent<CVSection> = (props) => {
+const SummaryUI: BucketItemComponent<Summary> = ({ obj, onUpdate }) => {
 
 	const handleUpdate = (key: string, newVal: any) => {
-		props.onUpdate?.({
-			...props.obj,
-			[key]: newVal
-		});
+		onUpdate?.({ ...obj, [key]: newVal });
 	};
 
 	return (
@@ -105,7 +102,7 @@ const SummaryUI: BucketItemComponent<CVSection> = (props) => {
 			title="summary"
 			className="flex flex-col gap-[.5cqh]"
 		>
-			<TextEditDiv tv={props.obj["summary"]} onUpdate={val => handleUpdate("summary", val)}/>
+			<TextEditDiv tv={obj.summary} onUpdate={val => handleUpdate("summary", val)}/>
 			{['languages', 'technologies'].map(subSec =>
 				<div
 					title="sub-section"
@@ -114,7 +111,7 @@ const SummaryUI: BucketItemComponent<CVSection> = (props) => {
 				>
 					<span className="font-bold">{capitlize(subSec)}:</span>
 					<UI.DelimitedList
-						items={props.obj[subSec]}
+						items={obj[subSec]}
 						delimiter=", "
 						onUpdate={val => handleUpdate(subSec, val)}
 					/>

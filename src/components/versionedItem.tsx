@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DynamicComponent, Item } from "./dnd/types";
+import { useEffect, useMemo, useState } from "react";
+import { BucketTypes, Item } from "./dnd/types";
 import { StandaloneDragItem } from './dnd/BucketItem';
 import TextEditDiv from './texteditdiv';
 import { usePopup } from '../hooks/popup';
@@ -24,6 +24,11 @@ function EditNewItem(props: {
     onSave: (newItem: Item<any>) => void;
 }) {
 
+    const bt = useMemo(
+        () => BucketTypes[props.item_type],
+        [props.item_type]
+    );
+
     const [id, setId] = useState(null);
     const [value, setValue] = useState(null);
 
@@ -45,16 +50,13 @@ function EditNewItem(props: {
             </div>
             <div className='content-edit'>
                 <h3>Content:</h3>
-                <DynamicComponent
-                    type={props.item_type}
-                    props={{
-                        obj: value,
-                        onUpdate: (newObj: any) => {
-                            console.log('Changes have been made');
-                            setValue(newObj);
-                        }
-                    }}
-                />
+                {bt.DisplayItem({
+                    obj: value,
+                    onUpdate: (newObj: any) => {
+                        console.log('Changes have been made');
+                        setValue(newObj);
+                    }
+                })}
             </div>
             <button onClick={()=>props.onSave({id: id, value: value})}>Save</button>
         </div>
@@ -67,6 +69,11 @@ function EditExistingItem<T>(props: {
     onSaveChanges: (modItem: Item<T>) => void;
     onDeleteItem: () => void;
 }) {
+
+    const bt = useMemo(
+        () => BucketTypes[props.item_type],
+        [props.item_type]
+    );
 
     const [item, setItem] = useImmer<Item<T>>(null);
     const [changesMade, setChangesMade] = useState(false);
@@ -106,13 +113,10 @@ function EditExistingItem<T>(props: {
             </div>
             <div className='content-edit'>
                 <h3>Content:</h3>
-                <DynamicComponent
-                    type={props.item_type}
-                    props={{
-                        obj: item.value,
-                        onUpdate: onValueUpdate
-                    }}
-                />
+                {bt.DisplayItem({
+                    obj: item.value,
+                    onUpdate: onValueUpdate
+                })}
             </div>
             <div id='edit-controls'>
                 {/* DISABLE THE SAVE BUTTON IF NO CHANGES MADE */}
@@ -181,15 +185,20 @@ const useVersionStore = () =>
  * corresponding to that ID.
  */
 export function VersionedItemUI<T>(props: {
-    obj: VersionedItem,
+    obj: VersionedItem<T>,
     onUpdate?: (newObj: VersionedItem<T>) => void,
     className?: string,
 }) {
 
+    const bt = useMemo(
+        () => BucketTypes[props.obj.item_type],
+        [props.obj.item_type]
+    );
+
     // ----------------- STATE -----------------
 
-    const useStore = useMemo(useVersionStore, []); // Creates once, persists across renders
-    const state = useStore();  // Uses the same instance every render
+    const useStore = useMemo(useVersionStore, []);  // Creates once, persists across renders
+    const state = useStore();                       // Uses the same instance every render
     const _cur = useStore(s => s.versions[s.cur]);
 
     // Sync with parent only when props change
@@ -270,13 +279,10 @@ export function VersionedItemUI<T>(props: {
                 <p>{version_str}</p>
             </div>
             <StandaloneDragItem item={dnd_item} item_type={props.obj.item_type} >
-                <DynamicComponent
-                    type={props.obj.item_type}
-                    props={{
-                        obj: _cur?.value,
-                        // disableBucketFeatures: true     // applies to any item with a Bucket component
-                    }}
-                />
+                {bt.DisplayItem({
+                    obj: _cur?.value,
+                    disableBucketFeatures: true     // applies to any Item within a <BucketItems/>
+                })}
             </StandaloneDragItem>
         </div>
     )
