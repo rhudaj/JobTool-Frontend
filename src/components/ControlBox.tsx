@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css"; // icons
 import { joinClassNames } from "../util/joinClassNames";
 
-interface IconControl {
+export interface IconControl {
     id?: string;
     icon_class?: string;
     title?: string;

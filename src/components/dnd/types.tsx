@@ -1,10 +1,7 @@
 import { ExperienceUI, SectionUI, SummaryUI } from "../../sections/ResumeBuilder/CVEditor/cvItemComponents";
 import TextEditDiv from "../texteditdiv";
 import { StyleManager } from "../../sections/ResumeBuilder/CVEditor/styles";
-import { JSX } from "react";
 import { CVSection, Experience, Summary } from "job-tool-shared-types";
-
-export const DEFAULT_ITEM_TYPE = "text";
 
 export interface Item<T>{
     id: any,
@@ -32,16 +29,16 @@ type DisplayItemProps<T> = {
  * Type of a React component which uses `DisplayItemProps` \
  * An object of type `OtherProps` may be supplied depending on the use case.
 */
-export type BucketItemComponent<T,OtherProps=any> =
+export type BucketItemComponent<T,OtherProps={}> =
     (props: DisplayItemProps<T> & OtherProps) => React.ReactNode;
 
-export interface BucketType<T> {
+interface BucketType<T> {
     layoutClass?: string,
     style?: React.CSSProperties,    // for dynamic css properties (if any)
     DisplayItem?: BucketItemComponent<T>
 };
 
-export const BucketTypes: { [key: string]: BucketType<unknown> } = {
+const BucketTypes: { [key: string]: BucketType<unknown> } = {
     "text": {
         layoutClass: "border-1 border-dashed min-h-10",
         DisplayItem: (props: DisplayItemProps<string>) =>
@@ -89,35 +86,17 @@ export const BucketTypes: { [key: string]: BucketType<unknown> } = {
     }
 };
 
-export const InfoPadMap = {
-    "summary":      "summary",
-    "projects":     "projects",
-    "experience":   "experiences",
-    "education":    "experiences",
-    "paragraphs":   "cl_info_pad",
-}
-
 export const getBucketType = (name: keyof typeof BucketTypes) => {
-    if(Object.keys(BucketTypes).indexOf(name as string) === -1) return;
+
+    if(!name) {
+        // use the default: "text"
+        name = "text"
+    }
+
+    if(Object.keys(BucketTypes).indexOf(name as string) === -1) {
+        return null;
+    }
     return BucketTypes[name];
 }
 
-/**
- * The DynamicComponent function dynamically
- * selects which component to render, in a **stable** way
- * No hooks are conditionally called! The component itself
- * is chosen before rendering, keeping React’s hooks order intact. */
-// export function DynamicComponent({ type, props }: {
-//     type: keyof typeof BucketTypes,
-//     props: DisplayItemProps<unknown>
-// }): JSX.Element | null {
-//     let Component;
-//     try {
-//         const bt = BucketTypes[type];
-//         Component = bt.DisplayItem;
-//     } catch(err) {
-//         alert(`ERROR! bucket type "${type}" DNE.`);
-//         return null;
-//     }
-//     return <Component {...props} />;
-// }
+export const allBucketTypeNames = Object.keys(BucketTypes);

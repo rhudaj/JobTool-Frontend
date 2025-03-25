@@ -1,9 +1,9 @@
 import { Button } from "@headlessui/react";
 import { SingleItemDropArea } from "../../components/dnd/dropArea";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import BackendAPI from "../../backend_api";
 import { StandaloneDragItem } from "../../components/dnd/BucketItem";
-import { BucketTypes, getBucketType } from "../../components/dnd/types";
+import { getBucketType } from "../../components/dnd/types";
 import { useForm, Controller } from "react-hook-form"
 import { Experience } from "job-tool-shared-types";
 
@@ -36,22 +36,6 @@ const ex_response = {
         "SQL Server",
         "PostgreSQL"
     ]
-}
-
-const test: Experience = {
-    description: [],
-    item_list: [],
-    title: "",
-    date: {
-        start: {
-            month: 0, year: 0
-        },
-        end: {
-            month: 0, year: 0
-        }
-    },
-    location: "",
-    role: ""
 }
 
 export function AIEditPane(props: {}) {

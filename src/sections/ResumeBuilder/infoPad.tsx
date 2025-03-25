@@ -1,10 +1,7 @@
-import React, { useCallback } from "react";
-import { InfoPadMap } from '../../components/dnd/types';
+import React from "react";
 import { Item } from '../../components/dnd/types';
 import { VersionedItemUI, VersionedItem } from "../../components/versionedItem"
 import { useImmer } from 'use-immer';
-import { isEqual } from 'lodash';
-import { useCvInfoStore } from './useCVInfo';
 import { useCvsStore } from './useCVs';
 import { arrNullOrEmpty } from "../../util";
 
@@ -25,6 +22,17 @@ interface SectionOfVersionedItems {
 // -----------------------------------------------------------------------
 //                  FORMAT/CONVERT IN/OUT DATA
 // -----------------------------------------------------------------------
+
+/**
+ * Map `CVInfo` sections to `BucketTypes` keys
+ */
+const InfoPadMap = {
+    "summary":      "summary",
+    "projects":     "projects",
+    "experience":   "experiences",
+    "education":    "experiences",
+    "paragraphs":   "cl_info_pad",
+}
 
 const Info2Sections = (info: CVInfo): SectionOfVersionedItems[] => (
     Object.entries(info)

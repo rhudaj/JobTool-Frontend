@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BucketTypes, Item } from "./dnd/types";
+import { getBucketType, Item } from "./dnd/types";
 import { StandaloneDragItem } from './dnd/BucketItem';
 import TextEditDiv from './texteditdiv';
 import { usePopup } from '../hooks/popup';
@@ -25,7 +25,7 @@ function EditNewItem(props: {
 }) {
 
     const bt = useMemo(
-        () => BucketTypes[props.item_type],
+        () => getBucketType(props.item_type),
         [props.item_type]
     );
 
@@ -71,7 +71,7 @@ function EditExistingItem<T>(props: {
 }) {
 
     const bt = useMemo(
-        () => BucketTypes[props.item_type],
+        () => getBucketType(props.item_type),
         [props.item_type]
     );
 
@@ -191,7 +191,7 @@ export function VersionedItemUI<T>(props: {
 }) {
 
     const bt = useMemo(
-        () => BucketTypes[props.obj.item_type],
+        () => getBucketType(props.obj.item_type),
         [props.obj.item_type]
     );
 

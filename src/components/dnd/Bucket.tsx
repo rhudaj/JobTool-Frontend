@@ -1,14 +1,19 @@
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import React, { useEffect, useReducer, JSX } from "react";
-import { Item, DEFAULT_ITEM_TYPE, getBucketType } from "./types";
-import BucketItem from "./BucketItem";
+import React, { useEffect, useReducer } from "react";
+import { Item, getBucketType } from "./types";
+import { DragItem } from "./BucketItem";
 import { BucketAction, BucketActions, bucketReducer } from "./useBucket";
 import { arrNullOrEmpty } from "../../util";
+import { ControlsBox } from "../ControlBox";
 
 // Shows a gap between items when dragging over the bucket.
 function DropGap(props: { isActive: boolean }) {
-    return <div className="border-2 border-solid border-red-500"
-    hidden={!props.isActive} />;
+    return (
+        <div
+            className="border-2 border-solid border-red-500"
+            hidden={!props.isActive}
+        />
+    );
 }
 
 // Helpers to get the get the gap index from the item index
@@ -38,138 +43,217 @@ interface BucketItemContext {
 let just_set = false;
 
 function ItemBucket<T>(props: {
-    id?: string,
-    items?: Item<T>[],
-    onUpdate?: (newVals: any[]) => void,
-    onItemUpdate?: (newObj: T, i: number) => void,
-    type?: string,
-    isHorizontal?: boolean,              // orientation of the bucket
+    id?: string;
+    items?: Item<T>[];
+    onUpdate?: (newVals: any[]) => void;
+    onItemUpdate?: (newObj: T, i: number) => void;
+    type?: string;
+    isHorizontal?: boolean; // orientation of the bucket
     // TODO: put inside 'disable_options' object
-    deleteDisabled?: boolean,
-    replaceDisabled?: boolean,
-    dropDisabled?: boolean,
-    deleteOnMoveDisabled?: boolean,
-    addItemDisabled?: boolean,
-    moveItemDisabled?: boolean,
+    deleteDisabled?: boolean;
+    replaceDisabled?: boolean;
+    dropDisabled?: boolean;
+    deleteOnMoveDisabled?: boolean;
+    addItemDisabled?: boolean;
+    moveItemDisabled?: boolean;
 }) {
-
     // ----------------- STATE -----------------
 
-    const [bucket, bucketDispatch] = useReducer(bucketReducer, { id: "", items: [] })
-    const [hoveredGap, setHoveredGap] = React.useState<number>(undefined);
+    const [bucket, bucketDispatch] = useReducer(bucketReducer, {
+        id: "",
+        items: [],
+    });
+    const [hoveredGap, setHoveredGap] = React.useState<number | undefined>(
+        undefined
+    );
+    const bt = getBucketType(props.type); // will return default if !props.type
 
     // parent -> bucket
     useEffect(() => {
-        just_set = true
+        just_set = true;
         bucketDispatch({
             type: BucketActions.SET,
             payload: {
                 id: props.id ?? "",
-                items: props.items ?? []
-            } })
-    }, [props.items, props.id])
+                items: props.items ?? [],
+            },
+        });
+    }, [props.items, props.id]);
 
     // bucket -> parent
-    useEffect(()=>{
-        if(just_set) {
-            just_set = false
-            return
+    useEffect(() => {
+        if (just_set) {
+            just_set = false;
+            return;
         }
-        props.onUpdate?.(bucket.items.map(I=>I.value))
-    }, [bucket.items])
+        props.onUpdate?.(bucket.items.map((I) => I.value));
+    }, [bucket.items]);
 
-
-
-    const type = props.type ?? DEFAULT_ITEM_TYPE;
-    const bt = getBucketType(type);
-    const getIdx = (id: any) => bucket.items.findIndex(I => I.id === id);
+    const getIdx = React.useCallback(
+        (id: string) => bucket.items.findIndex((I) => I.id === id),
+        [bucket.items]
+    );
 
     // ----------------- DND RELATED -----------------
 
+
+
+    // Drop functionality
     const [{ isHovered }, dropRef] = useDrop(
         () => ({
-            accept: props.type ?? '*',
+            accept: props.type ?? "*",
             canDrop: () => !props.dropDisabled,
-            drop: (dropItem: Item<T>, monitor: DropTargetMonitor<Item<T>, unknown>) => {
-                // An item was dropped on the bucket (or a nested drop target).
-                console.info(`Item ${dropItem.id} dropped on bucket ${bucket.id}`);
+            drop: (
+                dropItem: Item<T>,
+                monitor: DropTargetMonitor<Item<T>, unknown>
+            ) => {
+                console.info(
+                    `Item ${dropItem.id} dropped on bucket ${bucket.id}`
+                );
 
-                // If the bucket is empty, just add the item.
+                // If the bucket is empty, just add the item
                 if (arrNullOrEmpty(bucket.items)) {
-                    bucketDispatch({ type: BucketActions.ADD, payload: { atIndex: 0, item: dropItem } });
+                    bucketDispatch({
+                        type: BucketActions.ADD,
+                        payload: { atIndex: 0, item: dropItem },
+                    });
                     return;
                 }
 
-                // drop was ON TOP of a nested item?
+                // Check if drop was on a nested item
                 const nestedDropTarget: any = monitor.getDropResult();
 
-                // bucket ALREADY holds it?
+                // Check if item is already in the bucket
                 const itemIndex = bucket.items.findIndex(
                     (item) => item.id === dropItem.id
                 );
                 const notInBucket = itemIndex === -1;
 
                 if (nestedDropTarget?.id !== undefined) {
-                    // nested item got the drop
-                    bucketDispatch({ type: BucketActions.CHANGE, payload: { id: nestedDropTarget.id, newValue: dropItem.value } });
+                    // Nested item got the drop
+                    bucketDispatch({
+                        type: BucketActions.CHANGE,
+                        payload: {
+                            id: nestedDropTarget.id,
+                            newValue: dropItem.value,
+                        },
+                    });
                 } else if (notInBucket) {
-                    // Not in the bucket yet, so add it.
-                    bucketDispatch({ type: BucketActions.ADD, payload: { atIndex: hoveredGap, item: dropItem } });
+                    // Not in the bucket yet, so add it
+                    bucketDispatch({
+                        type: BucketActions.ADD,
+                        payload: { atIndex: hoveredGap, item: dropItem },
+                    });
                 } else if (!props.moveItemDisabled) {
                     // Its in the bucket already. Re-order.
-                    // CLAMP index between 0 and props.items.length-1
-                    let newIndex = Math.max( 0, Math.min( hoveredGap, bucket.items.length - 1 ) );
-                    bucketDispatch({ type: BucketActions.MOVE, payload: { indexBefore: itemIndex, indexAfter: newIndex } });
+                    let newIndex = Math.max(
+                        0,
+                        Math.min(hoveredGap ?? 0, bucket.items.length - 1)
+                    );
+                    bucketDispatch({
+                        type: BucketActions.MOVE,
+                        payload: {
+                            indexBefore: itemIndex,
+                            indexAfter: newIndex,
+                        },
+                    });
                 }
-                // after drop, no need to display the gap
+
+                // After drop, no need to display the gap
                 if (hoveredGap !== undefined) setHoveredGap(undefined);
 
-                // (optional) returned item will be the 'dropResult' and available in 'endDrag'
+                // Return bucket ID as drop result
                 return { id: bucket.id };
             },
             collect: (monitor) => ({
                 isHovered: !props.dropDisabled && monitor.isOver(),
             }),
         }),
-        // dependency array - if any of these values change, the above object will be recreated.
         [bucket?.items, hoveredGap]
     );
 
-    const onItemHover = (
-        hoverId: string,
-        dragId: string,
-        isBelow: boolean,
-        isRight: boolean
-    ) => {
+    // Hover handler
+    const onItemHover = React.useCallback(
+        (
+            hoverId: string,
+            dragId: string,
+            isBelow: boolean,
+            isRight: boolean
+        ) => {
+            // Whether it's "past half" depends on bucket orientation
+            const isPastHalf = props.isHorizontal ? isRight : isBelow;
 
-        // Wether its "past half" depends on orientation of the bucket
-        const isPastHalf = props.isHorizontal ? isRight : isBelow;
+            // Find the index of the item being hovered over
+            const hoveredIndex = getIdx(hoverId);
+            const dragIndex = getIdx(dragId);
 
-        // Find the index of the item being hovered over:
-        const hoveredIndex = getIdx(hoverId);
-        const dragIndex = getIdx(dragId);
+            // Find the corresponding gap
+            let gapIndex = isPastHalf
+                ? nextGap(hoveredIndex)
+                : prevGap(hoveredIndex);
 
-        // Find the corresponding gap:
-        let gapIndex = isPastHalf
-            ? nextGap(hoveredIndex)
-            : prevGap(hoveredIndex);
+            const diff = dragIndex - gapIndex;
 
-        const diff = dragIndex - gapIndex;
+            // Is the gap around the current drag item?
+            if (diff === 0 || diff === -1) {
+                gapIndex = undefined;
+            }
 
-        // Is the gap is around the current dragItem ?
-        if (diff === 0 || diff === -1) {
-            gapIndex = undefined;
-        }
+            setHoveredGap(gapIndex);
+        },
+        [getIdx, props.isHorizontal]
+    );
 
-        setHoveredGap(gapIndex); // Only sets the new value if they differ (by VALUE)
-    };
+    // Render controls for each item
+    const renderControls = React.useCallback((item_id: Item<T>) => {
+        const controls = [
+            {
+                id: "move",
+                icon_class: "fa-solid fa-grip",
+                disabled: props.moveItemDisabled,
+            },
+            {
+                id: "delete",
+                disabled: props.deleteDisabled,
+                icon_class: "fa-solid fa-x",
+                onClick: () =>
+                    bucketDispatch({
+                        type: BucketActions.REMOVE,
+                        payload: { id: item_id},
+                    }),
+            },
+            {
+                id: "add-above",
+                icon_class: "fa-solid fa-arrow-up",
+                disabled: props.addItemDisabled,
+                onClick: () =>
+                    bucketDispatch({
+                        type: BucketActions.ADD_BLANK,
+                        payload: { id: item_id, below: false },
+                    }),
+            },
+            {
+                id: "add-below",
+                icon_class: "fa-solid fa-arrow-down",
+                disabled: props.addItemDisabled,
+                onClick: () =>
+                    bucketDispatch({
+                        type: BucketActions.ADD_BLANK,
+                        payload: { id: item_id, below: true },
+                    }),
+            },
+        ]
+
+        return <ControlsBox placement="top" controls={controls} />;
+
+    }, [ props.moveItemDisabled, props.deleteDisabled, props.addItemDisabled ]);
 
     // -----------------RENDER-----------------
 
     return (
         <div
-            title="bucket-dnd-wrapper"
             ref={dropRef as any}
+            title="bucket-dnd-wrapper"
             className={isHovered ? "border-dashed border-black" : ""}
             onMouseLeave={() => setHoveredGap(undefined)}
         >
@@ -178,37 +262,28 @@ function ItemBucket<T>(props: {
                 className={bt?.layoutClass}
                 style={bt?.style}
             >
-                {bucket.items?.map((I: Item<T>, i: number) => {
-                    return (
-                        <div key={`bucket-${bucket.id}-item-${i}`}>
-                            {i === 0 && (
-                                <DropGap isActive={i === 0 && hoveredGap === prevGap(i)} />
-                            )}
-                            <BucketItemContext.Provider
-                                value={{
-                                    bucket_id: bucket.id,
-                                    item_type: type,
-                                    disableMove: props.moveItemDisabled,
-                                    disableReplace: props.replaceDisabled,
-                                    dispatch: bucketDispatch,
-                                    onHover: !props.dropDisabled && onItemHover,
-                                }}
-                            >
-                                <BucketItem item={I}>
-                                    <bt.DisplayItem
-                                        key={I.id}
-                                        obj={bucket.items[i].value}
-                                        onUpdate={(newObj: T) => {
-                                            console.log(`item # ${i} updated!`)
-                                            props.onItemUpdate?.(newObj, i);
-                                        }}
-                                    />
-                                </BucketItem>
-                            </BucketItemContext.Provider>
-                            <DropGap isActive={hoveredGap === nextGap(i)} />
-                        </div>
-                    );
-                })}
+                {bucket.items?.map((item, index) => (
+                    <div key={`bucket-${bucket.id}-item-${index}`}>
+                        <DropGap isActive={ index === 0 && hoveredGap === prevGap(index) } />
+                        <DragItem
+                            item={item}
+                            dragProps={{
+                                type: props.type,
+                                canDrag: !props.moveItemDisabled,
+                            }}
+                            onHover={onItemHover}
+                        >
+                            {renderControls(item)}
+                            <bt.DisplayItem
+                                obj={item.value}
+                                onUpdate={(newObj: T) =>
+                                    props.onItemUpdate?.(newObj, index)
+                                }
+                            />
+                        </DragItem>
+                        <DropGap isActive={hoveredGap === nextGap(index)} />
+                    </div>
+                ))}
             </div>
         </div>
     );

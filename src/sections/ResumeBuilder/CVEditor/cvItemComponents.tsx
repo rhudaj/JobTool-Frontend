@@ -3,7 +3,7 @@ import { Experience, Link, MonthYear, DateRange, CVSection, Summary } from "job-
 import TextEditDiv from "../../../components/texteditdiv";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
-import { BucketItemComponent, BucketTypes, Item } from "../../../components/dnd/types";
+import { BucketItemComponent, getBucketType, Item } from "../../../components/dnd/types";
 import { StyleManager } from "./styles";
 import { capitlize } from "../../../util/text";
 import { JSX, useMemo } from "react";
@@ -16,7 +16,7 @@ const SectionUI: BucketItemComponent<CVSection> = ({ obj, onUpdate }) => {
 
 	// Infer the Bucket Type from the object
 	const bt = useMemo(
-		() => BucketTypes[obj.bucket_type],
+		() => getBucketType(obj.bucket_type),
 		[obj.bucket_type]
 	);
 
