@@ -11,8 +11,8 @@ const control_button_style = "border-1 border-black opacity-50 hover:opacity-100
  * This item should only ever be rendered inside a Bucket component.
  * Because it requires the ctxt to be present.
 */
-export default function BucketItem(props: {
-    item: Item,
+export default function BucketItem<T>(props: {
+    item: Item<T>,
     children: React.ReactNode
 }) {
 
@@ -32,7 +32,7 @@ export default function BucketItem(props: {
                 type: ctxt.item_type
             }; 			// sent to the drop target when dropped.
         },
-        end: (item: Item, monitor) => {
+        end: (item: Item<T>, monitor) => {
             const dropResult: {id: any} = monitor.getDropResult();  // the bucket we dropped on
             // Cancelled/invalid drop || same bucket => dont remove
             if(!dropResult || dropResult.id === ctxt.bucket_id) return;
@@ -51,14 +51,14 @@ export default function BucketItem(props: {
     const [{isDropTarget}, drop] = useDrop(
         () => ({
             accept: ctxt.item_type,
-            canDrop: (dropItem: Item) => {
+            canDrop: (dropItem: Item<T>) => {
                 return ctxt.disableReplace !== true && dropItem.id !== props.item.id;
             },
             drop: () => ({
                 ...props.item,
                 type: ctxt.item_type
             }),
-            hover: (dragItem: Item, monitor) => {
+            hover: (dragItem: Item<T>, monitor) => {
 
                 if ( !ctxt.onHover || dragItem.id === props.item.id )
                     return;
@@ -148,8 +148,8 @@ export default function BucketItem(props: {
  * A standalone drag item that can be used outside of a bucket.
  * It has no drop functionality, only drag.
 */
-export function StandaloneDragItem(props: {
-    item: Item,
+export function StandaloneDragItem<T>(props: {
+    item: Item<T>,
     item_type: string,
     children: React.ReactNode,
 }) {

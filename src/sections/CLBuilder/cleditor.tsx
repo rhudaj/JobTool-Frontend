@@ -21,8 +21,8 @@ function CLEditor(props: {
         ]);
     }, [props.paragraphs]);
 
-    const handleBucketUpdate = (newItems: Item[]) => {
-        setPgs(newItems.map((I:Item)=>I.value));
+    const handleBucketUpdate = (newItems: Item<string>[]) => {
+        setPgs(newItems.map((I:Item<string>)=>I.value));
     }
 
     return (

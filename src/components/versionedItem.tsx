@@ -49,9 +49,9 @@ function EditNewItem(props: {
                     type={props.item_type}
                     props={{
                         obj: value,
-                        onUpdate: (newVal: any) => {
+                        onUpdate: (newObj: any) => {
                             console.log('Changes have been made');
-                            setValue(newVal);
+                            setValue(newObj);
                         }
                     }}
                 />
@@ -61,14 +61,14 @@ function EditNewItem(props: {
     );
 };
 
-function EditExistingItem(props: {
-    item: Item;
+function EditExistingItem<T>(props: {
+    item: Item<T>;
     item_type: string;
-    onSaveChanges: (modItem: Item<any>) => void;
+    onSaveChanges: (modItem: Item<T>) => void;
     onDeleteItem: () => void;
 }) {
 
-    const [item, setItem] = useImmer<Item>(null);
+    const [item, setItem] = useImmer<Item<T>>(null);
     const [changesMade, setChangesMade] = useState(false);
 
     // parent --> this
@@ -90,10 +90,10 @@ function EditExistingItem(props: {
         })
     };
 
-    const onValueUpdate = (newVal: any) => {
+    const onValueUpdate = (newObj: any) => {
         console.log('Changes have been made');
         setItem(draft=>{
-            draft.value = newVal;
+            draft.value = newObj;
         })
     };
 
@@ -180,9 +180,9 @@ const useVersionStore = () =>
  * up to the dropped component to extract the value
  * corresponding to that ID.
  */
-export function VersionedItemUI(props: {
+export function VersionedItemUI<T>(props: {
     obj: VersionedItem,
-    onUpdate?: (newObj: VersionedItem<any>) => void,
+    onUpdate?: (newObj: VersionedItem<T>) => void,
     className?: string,
 }) {
 
@@ -214,7 +214,7 @@ export function VersionedItemUI(props: {
             <EditNewItem
                 startingItem={copy}
                 item_type={props.obj.item_type}
-                onSave={(newItem: Item) => {
+                onSave={(newItem: Item<T>) => {
                     state.addNew(newItem)
                     editNewItemPopup.close()
                 }}
@@ -227,7 +227,7 @@ export function VersionedItemUI(props: {
             <EditExistingItem
                 item={state.versions[state.cur]}
                 item_type={props.obj.item_type}
-                onSaveChanges={(modifiedItem: Item) => {
+                onSaveChanges={(modifiedItem: Item<T>) => {
                     state.editCur(modifiedItem);
                     editNewItemPopup.close();
                 }}
@@ -274,7 +274,7 @@ export function VersionedItemUI(props: {
                     type={props.obj.item_type}
                     props={{
                         obj: _cur?.value,
-                        disableBucketFeatures: true     // applies to any item with a Bucket component
+                        // disableBucketFeatures: true     // applies to any item with a Bucket component
                     }}
                 />
             </StandaloneDragItem>

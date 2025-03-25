@@ -66,7 +66,6 @@ class BackendAPI {
             return Promise.reject("TEST MODE: POST/PUT/DELETE requests are disabled");
         }
 
-
         const resp: Response<OUT> = await this.__request__<OUT>(req.method, req.endpoint, req.body);
         if(resp.status) return resp.data;
         else return Promise.reject(resp.msg);

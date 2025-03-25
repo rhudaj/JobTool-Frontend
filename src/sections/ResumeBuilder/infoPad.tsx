@@ -36,7 +36,7 @@ const Info2Sections = (info: CVInfo): SectionOfVersionedItems[] => (
             versions: Object.entries(groupItems).map(([id, value])=>({
                 id: id,
                 value: value
-            } as Item))
+            } as Item<unknown>))
         } as VersionedItem))
     }))
 );
@@ -165,7 +165,7 @@ export function InfoPad(props: {
                                 className="border-2 p-3 rounded-md"
                                 key={i}
                                 obj={vi}
-                                onUpdate={(newVI)=>onVersionedItemUpdate(newVI, sec_idx, i)}
+                                onUpdate={(newVI: VersionedItem<unknown>)=>onVersionedItemUpdate(newVI, sec_idx, i)}
                             />
                         )}
                     </div>

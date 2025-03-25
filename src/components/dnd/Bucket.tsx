@@ -1,6 +1,6 @@
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import React, { useEffect, useReducer, JSX } from "react";
-import { Item, DEFAULT_ITEM_TYPE, BucketTypes, getBucketType } from "./types";
+import { Item, DEFAULT_ITEM_TYPE, getBucketType } from "./types";
 import BucketItem from "./BucketItem";
 import { BucketAction, BucketActions, bucketReducer } from "./useBucket";
 import { arrNullOrEmpty } from "../../util";
@@ -35,9 +35,9 @@ interface BucketItemContext {
 }
 
 let just_set = false; // TODO: hacky but neccessary
-function ItemBucket(props: {
+function ItemBucket<T>(props: {
     id?: string
-    items?: Item[]
+    items?: Item<T>[]
     type?: string                       // by default, same as ID
     onUpdate?: (newVals: any[]) => void
     children?: JSX.Element[]             // the bucket data d.n.n corresponding to the displayed items.
@@ -54,8 +54,7 @@ function ItemBucket(props: {
 
     const [bucket, bucketDispatch] = useReducer(bucketReducer, { id: "", items: [] })
 
-    const type = props.type ?? DEFAULT_ITEM_TYPE;
-    const bt = getBucketType(type)
+    const [hoveredGap, setHoveredGap] = React.useState<number>(undefined);
 
     // parent -> bucket
     useEffect(() => {
@@ -77,17 +76,18 @@ function ItemBucket(props: {
         props.onUpdate?.(bucket.items.map(I=>I.value))
     }, [bucket.items])
 
-    const [hoveredGap, setHoveredGap] = React.useState<number>(undefined);
+
+    const type = props.type ?? DEFAULT_ITEM_TYPE;
+    const bt = getBucketType(type)
+    const getIdx = (id: any) => bucket.items.findIndex(I => I.id === id);
 
     // ----------------- DND RELATED -----------------
-
-    const getIdx = (id: any) => bucket.items.findIndex(I => I.id === id);
 
     const [{ isHovered }, dropRef] = useDrop(
         () => ({
             accept: props.type ?? '*',
             canDrop: () => !props.dropDisabled,
-            drop: (dropItem: Item, monitor: DropTargetMonitor<Item, unknown>) => {
+            drop: (dropItem: Item<T>, monitor: DropTargetMonitor<Item<T>, unknown>) => {
                 // An item was dropped on the bucket (or a nested drop target).
                 console.info(`Item ${dropItem.id} dropped on bucket ${bucket.id}`);
 
@@ -175,7 +175,7 @@ function ItemBucket(props: {
                 className={bt?.layoutClass}
                 style={bt?.style}
             >
-                {bucket.items?.map((I: Item, i: number) => {
+                {bucket.items?.map((I: Item<T>, i: number) => {
                     return (
                         <div key={`bucket-${bucket.id}-item-${i}`}>
                             {i === 0 && (

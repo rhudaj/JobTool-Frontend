@@ -3,12 +3,12 @@ import { BucketTypes, Item } from "./types";
 import { useDrop } from "react-dnd";
 import { StandaloneDragItem } from "./BucketItem";
 
-export function SingleItemDropArea(props: {
+export function SingleItemDropArea<T>(props: {
     id: string,
-    onUpdate: (state: Item & { type: string }) => void,
+    onUpdate: (state: Item<T> & { type: string }) => void,
 }){
 
-    const [state, setState] = useState<Item & { type: string }>(null);
+    const [state, setState] = useState<Item<T> & { type: string }>(null);
 
     useEffect(()=>{
         if(!state || !state.value || !state.id) return;
@@ -17,7 +17,7 @@ export function SingleItemDropArea(props: {
 
     const [{ isHovered }, dropRef] = useDrop(() => ({
         accept: Object.keys(BucketTypes),
-        drop: (dropItem: Item & { type: string }) => {
+        drop: (dropItem: Item<T> & { type: string }) => {
             console.log('Item dropped:', dropItem);
             setState(dropItem)
         },

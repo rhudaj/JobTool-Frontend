@@ -1,16 +1,15 @@
-import { Experience, Link, MonthYear, DateRange, CVSection } from "job-tool-shared-types";
+import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
+import { Experience, Link, MonthYear, DateRange, CVSection, Summary } from "job-tool-shared-types";
 import TextEditDiv from "../../../components/texteditdiv";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
-import "@fortawesome/fontawesome-free/css/all.min.css";     // icons
-import { DynamicComponent } from "../../../components/dnd/types";
+import { BucketItemComponent, DynamicComponent } from "../../../components/dnd/types";
 import { StyleManager } from "./styles";
 import { capitlize } from "../../../util/text";
 
-function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
+const SectionUI: BucketItemComponent<CVSection> = (props) => {
 
-	// const Styles = useStyleStore().getComputedStyles();
 	const Styles = StyleManager.getAll();
 
 	const onItemUpdate = (i: number, newVal: any) => {
@@ -76,7 +75,7 @@ function SectionUI(props: { obj: CVSection, onUpdate?: (newObj: any)=>void }) {
 	)
 }
 
-function SummaryUI(props: { obj: any, onUpdate?: (newObj: any)=>void }) {
+const SummaryUI: BucketItemComponent<CVSection> = (props) => {
 
 	const handleUpdate = (key: string, newVal: any) => {
 		props.onUpdate?.({
@@ -109,24 +108,10 @@ function SummaryUI(props: { obj: any, onUpdate?: (newObj: any)=>void }) {
 	)
 }
 
-/** Helper for ExperienceUI */
-const Divided = ({children}) => {
-	return (
-		<div className="flex gap-[1cqw]">
-			{children[0]}
-			{children[1] && <span className="italic">|</span>}
-			{children[1]}
-		</div>
-	)
-};
-
-// Note: we can make changes to this and it be local.
-function ExperienceUI(props: {
-	obj: Experience
+const ExperienceUI: BucketItemComponent<Experience, {
 	type: 'experience' | 'project'
-	onUpdate?: (newObj: any)=>void
 	disableBucketFeatures?: boolean
-}) {
+}> = (props) => {
 
 	const Styles = StyleManager.getAll();
 
@@ -241,6 +226,22 @@ function ExperienceUI(props: {
 	);
 }
 
+/* ------------------------------------------------------------
+					REUSABLE-SUB-COMPONENTS
+------------------------------------------------------------ */
+
+/** Helper for ExperienceUI */
+const Divided = ({children}) => {
+	return (
+		<div className="flex gap-[1cqw]">
+			{children[0]}
+			{children[1] && <span className="italic">|</span>}
+			{children[1]}
+		</div>
+	)
+};
+
+/** Helper for ExperienceUI */
 function DateUI(props: { obj: DateRange, onUpdate?: any }) {
 
 	const DELIM = " - ";
@@ -283,6 +284,7 @@ function DateUI(props: { obj: DateRange, onUpdate?: any }) {
 	)
 }
 
+/** Helper for ExpeienceUI */
 function LinkUI(props: Link) {
 	// const Styles = useStyleStore().getComputedStyles();
 	const Styles = StyleManager.getAll();
@@ -299,6 +301,7 @@ function LinkUI(props: Link) {
 	);
 }
 
+/** Helper */
 function DelimitedList(props: {
 	items: string[],
 	delimiter: string,

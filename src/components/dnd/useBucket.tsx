@@ -35,10 +35,10 @@ const ActionTypes = {
 } as const;
 
 type ActionMap = {
-    [K in keyof typeof ActionTypes]: (D: Draft<Bucket>, payload?: any) => void;
+    [K in keyof typeof ActionTypes]: (D: Draft<Bucket<any>>, payload?: any) => void;
 };
 
-const getIdx = (id: any, items: Item[]) => items.findIndex((I) => I.id === id);
+const getIdx = (id: any, items: Item<any>[]) => items.findIndex((I) => I.id === id);
 
 const actionHandlers: ActionMap = {
     SET: (D, payload) => {
@@ -71,9 +71,9 @@ const actionHandlers: ActionMap = {
 }
 
 // Reducer function
-export const bucketReducer = (state: Bucket, action: BucketAction) =>
+export const bucketReducer = (state: Bucket<any>, action: BucketAction) =>
     produce(state, (D) => actionHandlers[action.type]?.(D, action.payload));
 
-const BucketContext = createContext<[Bucket, React.Dispatch<BucketAction>]>(null);
+const BucketContext = createContext<[Bucket<any>, React.Dispatch<BucketAction>]>(null);
 
 export { BucketContext, ActionTypes as BucketActions };
