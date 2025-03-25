@@ -4,71 +4,87 @@ import TextEditDiv from "../../../components/texteditdiv";
 import ItemBucket from "../../../components/dnd/Bucket";
 import { format, parse } from "date-fns"
 import * as UI from "./cv_components"
-import { BucketItemComponent, DynamicComponent } from "../../../components/dnd/types";
+import { BucketItemComponent, BucketTypes, DynamicComponent, Item } from "../../../components/dnd/types";
 import { StyleManager } from "./styles";
 import { capitlize } from "../../../util/text";
+import { JSX, useMemo } from "react";
 
-const SectionUI: BucketItemComponent<CVSection> = (props) => {
+/* ------------------------------------------------------------
+					CV-ITEM-COMPONENTS
+------------------------------------------------------------ */
+
+const SectionUI: BucketItemComponent<CVSection> = ({ obj, onUpdate }) => {
+
+	// Infer the Bucket Type from the object
+	const bt = useMemo(
+		()=>BucketTypes[obj.bucket_type],
+		[obj.bucket_type]
+	);
+
+	// Create the items from the data
+	const items: Item<unknown>[] = useMemo(() =>
+		obj.items?.map((item: unknown, i: number)=>({
+			id:    `${obj.name}-${i}`,
+			value: item
+		})),
+		[obj.items]
+	);
+
+	// Determine the components from the data & type
+	const itemComponents: JSX.Element[] = useMemo(() =>
+		obj.items?.map((item: unknown, i: number) =>
+			bt.DisplayItem({
+				obj: item,
+				onUpdate: (newObj: any) => onItemUpdate(i, newObj),
+				key: `${i}-${i}`
+			})
+		),
+		[bt, obj.items]
+	);
 
 	const Styles = StyleManager.getAll();
 
 	const onItemUpdate = (i: number, newVal: any) => {
-		const new_items = [...props.obj.items];
+		const new_items = [...obj.items];
 		new_items[i] = newVal;
-		props.onUpdate?.({
-			...props.obj,
-			items: new_items
-		})
+		onUpdate?.({ ...obj, items: new_items })
 	}
 
 	const onBucketUpdate = (newVals: any[]) => {
-		props.onUpdate?.({
-			...props.obj,
-			items: newVals
-		})
+		onUpdate?.({ ...obj, items: newVals })
 	}
 
-	const data = props.obj;
 
-	if(!data) return null;
+	if(!obj || !items || !itemComponents) return null;
 
 	const sectionStyle = {
 		rowGap: Styles.sec_row_gap,
 		fontSize: Styles.p_font,
-		lineHeight: Styles.text_line_height // NOTE: before it was on .section > *
+		lineHeight: Styles.text_line_height
 	}
 
-	const bucketItems = data.items?.map((item: any, i: number)=>({
-		id:    `${data.name}-${i}`,
-		value: item
-	}))
+	const hrStyle = {
+		height: Styles.sec_head_line_height,
+		borderBottomWidth: Styles.hr_line_width
+	}
 
 	return (
 		<div title="section" className="flex flex-col" style={sectionStyle}>
 			<div title="sec-head" className="grid grid-cols-[min-content_1fr] gap-[1cqw] font-bold">
-				<p>{data.name.toUpperCase()}</p>
-				<hr
-					className="border-0 border-b border-black self-center"
-					style={{height: Styles.sec_head_line_height, borderBottomWidth: Styles.hr_line_width}}
-				/>
+				<p>{obj.name.toUpperCase()}</p>
+				<hr className="border-0 border-b border-black self-center" style={hrStyle}/>
 			</div>
 			<div
-				title={`sec-${data.name}-content`}
+				title={`sec-${obj.name}-content`}
 				style={{gap: Styles.sec_head_line_gap}}
 			>
 				<ItemBucket
-					id={data.name}
-					items={bucketItems}
-					type={data.bucket_type}
+					id={obj.name}
+					items={items}
+					type={obj.bucket_type}
 					onUpdate={onBucketUpdate}
 				>
-					{data.items?.map((item: any, i: number) =>
-						<DynamicComponent
-							key={`${i}-${i}`}
-							type={data.bucket_type}
-							props={{ obj: item, onUpdate: (newVal: any) => onItemUpdate(i, newVal) }}
-						/>
-					)}
+					{...itemComponents}
 				</ItemBucket>
 			</div>
 		</div>
