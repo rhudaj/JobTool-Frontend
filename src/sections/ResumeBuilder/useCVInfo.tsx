@@ -3,7 +3,7 @@ import { CVInfo } from "./infoPad";
 import { create } from "zustand";
 
 const USE_BACKEND = import.meta.env.VITE_USE_BACKEND === "1";
-const SAMPLES_PATH = import.meta.env.BASE_URL + "/samples/";
+const SAMPLES_PATH = "samples";
 
 // ------------------------------------------------------
 //                          STATE
@@ -65,7 +65,7 @@ const fetchFromBackend = async (): Promise<CVInfo> =>
             endpoint: "cv_info",
         })
     ) : (
-        fetch(SAMPLES_PATH + "cv_info.json").then(r => r.json())
+        fetch(`${SAMPLES_PATH}/cv_info.json`).then(r => r.json())
     )
 
 export { useCvInfoStore };

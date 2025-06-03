@@ -5,7 +5,7 @@ import { produce } from 'immer' // simplify changing nested state
 import { isEqual } from "lodash";
 
 const USE_BACKEND = import.meta.env.VITE_USE_BACKEND === "1";
-const SAMPLES_PATH = import.meta.env.BASE_URL + "/samples/";
+const SAMPLES_PATH = "samples";
 const CVS_PATH = `${SAMPLES_PATH}/CVs`;
 
 interface State {
